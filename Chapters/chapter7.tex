@@ -1,0 +1,119 @@
+%!TEX root = ../template.tex
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% chapter4.tex
+%% NOVA thesis document file
+%%
+%% Chapter with lots of dummy text
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\typeout{NT FILE chapter4.tex}%
+
+\chapter{Proposal}
+\label{cha:proposal}
+
+The versions of service API are written in standard specification language such as OpenAPI;
+
+The service API is converted to a native specification language that is agnostic from the way data is transmitted (Http, Event stream, etc..)
+As a result, the system is loosely coupled to the transmission method, and if a new transmission methodology is widely adopted, the system does not need to be remade,
+but only extended to support the extraction and injection of parameters in the new methodology.
+
+The versions of service API are collected in a service registry;
+
+When a new version is submitted for deployment the registry is consulted in order to obtain the set of all active versions of the same service;
+
+For each pair of versions (new, old) a compatibility specification file is produced;
+
+//TODO figure with compatibility specification
+
+In this file all functions and parameters are associated with a key;
+
+Records are expanded/exploded and each of its parameters is associated with a key, the record itself is also associated with a key;
+
+This file contains the associations between the old version function/parameter keys, and the new version parameters keys (eg. old:k0 -> new:k1; old:k1->new:k5);
+
+This file is audited by a programmer before being used for the generation of the adapter proxy code
+In case of incorrect mapping between parameter types the programmer can fix manually.
+
+Some ambiguous evolutions can only be solved with human intervention and knowledge of the domain;
+The system notifies the programmer if such a case occurs and request intervention for its resolution.
+
+Examples:
+renaming two fields of the same type;
+inserting a new field and removing another of the same type, is indistinguishable from renaming a field;
+
+Default values can also be supplied inside compatibility specification in order to de-clutter service API or implementations;
+
+More complex signature changes (such as the change of parameter unit from celsius to fahrenheit, the change of date format, the partition of name parameter into surname and first name)
+can be accommodated in the combinability specification with the use of functions (eg. extractFirstName(old:k0) -> new:k1  extractSurname(old:k0) -> new:k1)
+
+This functions can be made available through static libraries, or more interestingly, the programmer could write their implementation in the compatibility specification file
+and afterwards they would be integrated in adapter proxy coded before compilation;
+
+
+\section{Adaptation Methodology} % (fold)
+\label{sec:adaptation_methodology}
+
+The adaptation methodology inputs two communicating BPEL processes, C
+and S, whose interaction may lock, and it builds (if possible) a BPEL process
+adapter A, which allows the two processes to successfully interoperate. The four
+adaptation phases are: (1.) Service Translation. This phase is in charge of
+translating the BPEL descriptions of C and S into corresponding YAWL work-
+flows [7]. (2.) Adapter Generation. This phase builds the YAWL workflow of
+A from the workflows of C and S. It first generates the Service Execution Trees
+(SETs) of C with respect to S (SET (CS)), as well as of S with respect to C
+(SET (SC)), followed by the generation of the SETs of their duals (SET (CS)
+and SET (SC)). Informally, when a service X outputs a message m, a dual of
+X is a service that inputs m, and vice-versa. Next, SET (A) is obtained by
+suitably merging SET (CS) and SET (SC). Finally, the YAWL workflow of A
+is derived from SET (A). (3.) Lock Analysis. This phase verifies whether the
+YAWL-based aggregation [4,6] of C, A, and S locks. If it does, we consider that
+the adaptation has failed. Otherwise, we consider that the adaptation is suc-
+cessful. (4.) Adapter Deployment. If the adaptation is successful, this phase
+deploys the YAWL workflow of A as a BPEL process, which can be used as a
+service-in-the-middle between C and S.
+
+Service Translation
+In [7] we present a methodology for translating BPEL processes into YAWL
+workflows. Its main strengths are that (1) it defines YAWL patterns for all
+BPEL activities, (2) it provides a compositional approach to construct structured
+patterns from suitably interconnecting other patterns, and (3) it handles events,
+faults and (explicit) compensation.
+On the one hand, the pattern of each BPEL basic activity (with the excep-
+tion of assign and compensate) is obtained by suitably instantiating the Basic
+Pattern Template (BPT). The BPT is a template of YAWL tasks, which serves
+both for identifying the translated activity (through an Activity Specific Task,
+or AST for short), as well as the control-logic of executing or skipping the activ-
+ity. On the other hand, the pattern of each BPEL structured activity (together
+with assign, compensate, and process) is obtained from the Structured Pattern
+Template (SPT) template. The SPT consists of a Begin (logically marking the
+initiation of the structured activity) and of an End pattern (logically marking
+the termination of the structured activity), as well as a pattern template (BPT
+or SPT) for each child activity. Furthermore, the Scope and Process patterns add
+SPTs for handling exceptional behaviour. Each pattern inputs and outputs at
+most three types of control-flow links, called green, blue, and red lines. The green
+lines serve for translating the structural dependencies among BPEL activities.
+The blue lines are used for translating the BPEL synchronisation links, and the
+red lines are necessary for implementing the fault handling mechanism. As space
+limitations do not allow us to go into further details, please see [7] for more
+(in-depth) details on the BPEL2YAWL translator.
+The YAWL workflows of the CC and ME services of our example can be
+seen in Figure 1.2 In the workflow of ME, Begin(Process) and End(Process),
+logically mark the initiation and the termination, respectively, of the BPEL pro-
+cess. The process activity, a sequence leads to generating the Begin(Sequence) as
+well as the End(Sequence) tasks. The first activity in the sequence is a receive,
+which gives the Receive task. Furthermore, the rest of the activities are trans-
+lated correspondingly. (The numbers inside some of the task labels are used for
+disambiguation purposes only.) Note however the translation of the BPEL pick.
+The Begin(Pick) task contains the branch selection logic (basically a deferred
+choice construct [13]), and it outputs two tokens3. One leads to executing the
+chosen branch, while the second leads to skipping the other branch (so as to
+achieve the dead-path-elimination).
+The workflow of CC is built in a similar manner. However, the compos-
+ite tasks representing the invoke ValidateLocation and invoke Explore activities
+output either green tokens, if the invocations succeed, or red tokens, if the in-
+vocations fail (i.e., faults are being raised). In the former case, the execution of
+the workflow continues normally, and the green output of End(Sequence) leads
+to skipping the tasks inside the Begin(FaultHandler) → End(FaultHandler) zone
+(so as to achieve the dead-path-elimination). In the latter case, the execution of
+the faulty invocation is (immediately) followed by the execution of the tasks in
+the fault handling zone.

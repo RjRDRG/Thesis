@@ -1,0 +1,70 @@
+%!TEX root = ../template.tex
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% chapter4.tex
+%% NOVA thesis document file
+%%
+%% Chapter with lots of dummy text
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\typeout{NT FILE chapter4.tex}%
+
+\chapter{Related Work}
+\label{cha:related_work}
+
+\section{Schema Evolution In Serialization Frameworks} % (fold)
+\label{sec:schema_evolution_in_serialization_frameworks}
+
+Serialization is the process of encoding system state into a standardized format so that it can be delivered across a network or stored with durability.
+For serialization, each language usually provides a corresponding library, such as Java serialization.
+In the setting of microservices, serialization libraries supplied by programming languages cannot be used to encode messages between services,
+because each service may be written in a different language. As a result, data consumers will be unable to comprehend data producers.
+Cross-language serialization libraries, such as JSON, can solve this problem.
+However, formats such as JSON lack a strictly defined structure,
+making data consumption more difficult due to poor type-safety guarantees, and the ability for fields to be unilaterally added or withdrawn at any moment without the consumers' knowledge.
+What's missing is a "schema" for data exchange between producers and consumers, akin to an API contract.
+
+There have been a few cross-language serialization libraries that require the data structure to be properly described via schemas.
+Avro, Thrift, and Protocol Buffers are among these libraries.
+The benefit of having a schema is that it explicitly defines the data's structure, type, and meaning (through documentation).
+Such libraries allow for schema evolution [24, 25], but only to a limited extent and without robust type-safety.
+
+For instance, in Protobuf and Thrift new fields can be added.
+However, these fields must be optional to ensure newer service versions can read data written by older
+service versions. In Avro it is only possible to add or remove fields with a default value.
+
+In avro
+Because fields are matched by name, changing the name of a field is tricky. You need to first update allReadersOf the data to use the new field name, while keeping the old name as an alias (since the name matching uses aliases from the reader's schema ). then you can update the writer's schema to use the new field name.
+
+These frameworks only tackle part of the problem of API evolution in microservices,
+because they can only accommodate changes in the schema of parameters. They don't manage changes in a signature of a REST endpoint.
+To eliminate potential mismatches and reduce the complexity of the evolution process, we believe it is critical to manage both sorts of evolution's in a single integrated approach.
+
+\section{Service Integration Adapters} % (fold)
+\label{sec:service_integration_adapters}
+
+In the context of service-oriented architectures (SOA) there has been extensive
+research on the adaptability of services [3, 4, 6, 7, 14, 27]. There are similarities
+between SOA and microservices, as both follow a separation of concerns approach
+based on services. These two architectures diverge on some relevant features, in
+particular on the fact the SOA services are tightly-coupled while microservices are
+loosely-coupled. As a consequence, adaptability in SOA is not focused on evolution
+but on the integration of microservices. These works [3, 4, 7, 14, 27] on SOA address
+and develop adapters for behavioural mismatches among business processes. The
+concern is mainly on adapting workflows and most assume that data adaptation is
+already defined by developers. Standard service binding technologies (cf. SOAP) use
+description languages like WSDL [1] to specify contracts, allowing them to check for
+compatibility of services on every remote call, and issue runtime exceptions when some
+mismatch happens. Schema registries and service brokers are also used to centralize
+10:27
+Robust Contract Evolution in a TypeSafe MicroService Architectures
+and authorise changes in the service architecture. Schemas can then be checked based
+on version identifiers and compatibility relations just like in our case [22].
+
+\section{Chain Adapter} % (fold)
+\label{sec:chain_adapter}
+
+\section{Deployment Strategies} % (fold)
+\label{sec:deployment_strategies}
+
+\section{Service Registry} % (fold)
+\label{sec:service_registry}
