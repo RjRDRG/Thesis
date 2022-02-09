@@ -60,14 +60,19 @@ particularly in agile workflows and the early phases of development, where contr
 \section{Problem Statement} % (fold)
 \label{sec:problem_statement}
 
-The advantages of employing microservices-based architectures are frequently outweighed by the lack mechanisms for assessing the safety of service contract updates
-as well an increased risk of many uncontrolled failure points.
+The advantages of employing microservices-based architectures are frequently outweighed by the lack of mechanisms for assessing the safety of service contract updates.
+
+In a monolithic application, interactions between different system components are conducted through function calls.
+In a distributed system, however, each individual component has to communicate with other components across the network.
+In a regular program, refactoring a function definition can be done rapidly with the aid of an IDE.
+Distributed systems do not have equivalent tools to detect mismatches between endpoints and their consumers.
+Developers are left with the burden of tracking down manually system's dependencies and refactor them in all consumers and producers.
 
 With a rising number of separate services and their interactions, contract administration and service integration become progressively more challenging.
 Software engineering guidelines assume a scenario of frequent service implementation changes and few interface or contract modifications;
 in the context of iterative approaches to software development, such as agile, contracts are typically modified as frequently as implementation details.
 
-Maintaining the integrity of microservice architectures is a daunting task that only the most disciplined development teams can handle.
+Maintaining the integrity of microservice architectures is a daunting task that only the most diligent teams can handle.
 
 \subsection{The ramifications of changing a contract are discovered after the fact}
 Syntactic or semantic changes in service contracts are usually silent because services evolve independently and contracts are rarely formally specified or even documented.
@@ -75,8 +80,7 @@ Without explicit contract verification at deployment time, the only symptoms tha
 It is paramount to have contract management methods and a common contract specification in place, as this allows the safety of service-based architectures to be checked a priori.
 
 \subsection{The safety of a deployment operation is unknown}
-Established platforms such as Kubernetes, the Eureka system, and the OutSystems Platform component service center
-cannot ensure the safety of deployment operations since they rely primarily on service level meta-information (such as version IDs) to manage deployments.
+Established platforms such as Kubernetes cannot ensure the safety of deployment operations since they rely primarily on service level meta-information (such as version IDs) to manage deployments.
 To assure the safety of deployment tasks, a new model for such environments is required,
 one that uses generic meta-information from previously deployed services, adopts expanded type-based contracts and employs a compatibility relation on service contracts.
 
@@ -91,7 +95,7 @@ instead, one service should be able to be replaced while the remainder of the sy
 
 We present a microservice management system that aims to solve the problems stated above.
 
-The first and second problems will be tackled by defining and adopting an API specification language, as well as implementing a service
+The first and second problems will be tackled by defining and adopting an API specification language, as well as implementing a schema
 registry that offers a pre-flight safety check procedure that verifies whether two service contracts are compatible before
 deployment. The compatibility mechanism, is akin to typechecking procedures in compiled languages, and is applied upon a
 pair of service contracts, which are typically two distinct versions of the same service. The aforementioned mechanism preserves
@@ -102,7 +106,7 @@ To solve the third problem the evolution of interfaces is supported at runtime b
 adapt data exchanged between services to match the services contracts.
 We allow for addition, removal, and renaming of data fields of a producer module without breaking or upgrading consumer services.
 We also support more complex signature changes, such as altering the format of a date field, through the use of user-defined adaption functions.
-The mappings between two compatible contracts can be audited and modified by a programmer before they are employed in a proxy adapter.
+The translation process between two compatible contracts can be audited and modified by a programmer before it employed in an adapter.
 The proxy adapter is capable intercepting and evaluating all the outgoing and incoming TCP requests to determine whether
 they should be left unchanged or how they should be transformed using an adaptation protocol that extends the compatibility mechanism discussed above.
 
