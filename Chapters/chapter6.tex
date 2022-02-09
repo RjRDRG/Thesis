@@ -16,7 +16,7 @@
 
 Serialization is the process of encoding system state into a standardized format so that it can be delivered across a network or stored with durability.
 For serialization, each language usually provides a corresponding library, such as Java serialization.
-In the setting of microservices, serialization libraries supplied by programming languages cannot be used to encode messages between services,
+In the setting of service oriented architectures, serialization libraries supplied by programming languages are typically not used to encode messages between services,
 because each service may be written in a different language. As a result, data consumers will be unable to comprehend data producers.
 Cross-language serialization libraries, such as JSON, can solve this problem.
 However, formats such as JSON lack a strictly defined structure,
@@ -24,19 +24,51 @@ making data consumption more difficult due to poor type-safety guarantees, and t
 What's missing is a "schema" for data exchange between producers and consumers, akin to an API contract.
 
 There have been a few cross-language serialization libraries that require the data structure to be properly described via schemas.
-Avro, Thrift, and Protocol Buffers are among these libraries.
+XML, Avro, Thrift, and Protocol Buffers are among these libraries.
 The benefit of having a schema is that it explicitly defines the data's structure, type, and meaning (through documentation).
-Such libraries allow for schema evolution [24, 25], but only to a limited extent and without robust type-safety.
 
-For instance, in Protobuf and Thrift new fields can be added.
-However, these fields must be optional to ensure newer service versions can read data written by older
-service versions. In Avro it is only possible to add or remove fields with a default value.
+Such libraries allow for schema evolution (adding fields, deleting fields, and renaming fields) [24, 25], but only to a limited extent:
+\begin{itemize}
+    \item To ensure backwards compatibility, added fields must be optional.
+    \item The only fields that can be removed to maintain forward compatibility are optional fields.
+    \item To provide both forward and backward compatibility, removed and new fields must be optional.
+\end{itemize}
+Backward comparability refers to a consumer using schema X to process data produced by schema X-1,
+whereas forward compatibility refers to data produced by schema X being read by consumers using schema X-1.
+These limitations are problematic because, in order to enforce required fields, validation logic would need to be written repeatedly by programmers (in the same layer as the business logic).
+The scale of the validation logic is proportional to the complexity of messages being validated;
+for messages with more properties, particularly those with nested objects, the validation footprint can rise dramatically in terms of both line-count and logical complexity.
 
-In avro
-Because fields are matched by name, changing the name of a field is tricky. You need to first update allReadersOf the data to use the new field name, while keeping the old name as an alias (since the name matching uses aliases from the reader's schema ). then you can update the writer's schema to use the new field name.
+In Avro there are also additional limitations in the ability to rename fields due to the way data is encoded and translated across schemas.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=1.5in]{avro}
+    \caption{Imagem em formato \emph{bitmap} (JPG)}
+    \label{fig:Figuras_Tree_silhouettes-bitmap}
+\end{figure}
+
+On the left-hand side, you can see a Avro schema for the type “Animal” with the three fields “name”, “legs” and “hasTail”, respectively. On the right hand side, you can see a record which was serialized with that schema. We easily find that the animal in question is named “Lucy”, has four legs and a tail. You don’t have to understand every detail of the binary output, just know that the tags (marked in orange) tell the deserializer which bytes correspond to which field. This is important because the fields in the byte sequence are not in the same order as they were defined in the schema.
+
+Instead, in the serialized byte sequence, all fields are appended back to back.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=1.5in]{avro-side}
+    \caption{Imagem em formato \emph{bitmap} (JPG)}
+    \label{fig:Figuras_Tree_silhouettes-bitmap}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=1.5in]{protobuf}
+    \caption{Imagem em formato \emph{bitmap} (JPG)}
+    \label{fig:Figuras_Tree_silhouettes-bitmap}
+\end{figure}
 
 These frameworks only tackle part of the problem of API evolution in microservices,
-because they can only accommodate changes in the schema of parameters. They don't manage changes in a signature of a REST endpoint.
+because they can only accommodate changes in the schema of parameters.
+They can not manage changes in the API's signature, such as the method of a REST endpoint.
 To eliminate potential mismatches and reduce the complexity of the evolution process, we believe it is critical to manage both sorts of evolution's in a single integrated approach.
 
 \section{Service Integration Adapters} % (fold)
@@ -66,5 +98,5 @@ on version identifiers and compatibility relations just like in our case [22].
 \section{Deployment Strategies} % (fold)
 \label{sec:deployment_strategies}
 
-\section{Service Registry} % (fold)
-\label{sec:service_registry}
+\section{Schema Registry} % (fold)
+\label{sec:schema_registry}
