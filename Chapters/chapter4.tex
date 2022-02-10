@@ -74,17 +74,20 @@ in the context of iterative approaches to software development, such as agile, c
 
 Maintaining the integrity of microservice architectures is a daunting task that only the most diligent teams can handle.
 
-\subsection{The ramifications of changing a contract are discovered after the fact}
+\paragraph{The ramifications of changing a contract are discovered after the fact.}
+
 Syntactic or semantic changes in service contracts are usually silent because services evolve independently and contracts are rarely formally specified or even documented.
 Without explicit contract verification at deployment time, the only symptoms that the system is broken are runtime errors or unexpected behaviors.
 It is paramount to have contract management methods and a common contract specification in place, as this allows the safety of service-based architectures to be checked a priori.
 
-\subsection{The safety of a deployment operation is unknown}
+\paragraph{The safety of a deployment operation is unknown.}
+
 Established platforms such as Kubernetes cannot ensure the safety of deployment operations since they rely primarily on service level meta-information (such as version IDs) to manage deployments.
 To assure the safety of deployment tasks, a new model for such environments is required,
 one that uses generic meta-information from previously deployed services, adopts expanded type-based contracts and employs a compatibility relation on service contracts.
 
-\subsection{A contract change, entails the redeployment/downtime of its consumers }
+\paragraph{A contract change, entails the redeployment/downtime of its consumers.}
+
 Modifications to type definitions in a producer module have immediate
 impact on the whole system by requiring downtime on all consumer modules.
 Deployments of “compatible” modules should not disrupt the system soundness by imposing the redeployment of services;
