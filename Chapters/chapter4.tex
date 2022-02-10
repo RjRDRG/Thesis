@@ -114,11 +114,9 @@ The translation specification between two compatible contracts can be audited an
 Our work will make the following contributions: (details will be presented on chapter 4)
 
 \begin{itemize}
-    \item Definition of an API specification language that is agnostic to the transmission method, by capturing service contract as a set of functions.
-    \item A utility that converts OpenAPI specifications to the native API specification language.
     \item A compatibility relation on service contracts that determines whether or not messages may be exchanged without data loss.
-    \item Implementation of a robust type-directed adaptation protocol, the adapter proxy.
-    \item Definition of a core language for the specification of contract compatibility corrections, the target of the adaptation protocol.
+    \item Implementation of a robust type-directed adaptation protocol for REST APIs.
+    \item Definition of a core language for the specification of contract compatibility corrections.
     \item Implementation of a service registry tasked with holding service contracts, tracking consumers of service versions,
     and providing a lightweight preflight safety check procedure for deployment/un-deployment operations.
     \item Implementation of a benchmark platform to compare the solution to existing ones.

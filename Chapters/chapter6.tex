@@ -11,6 +11,11 @@
 \chapter{Related Work}
 \label{cha:related_work}
 
+As mentioned in Section 1, this work will encompass the development of
+mechanisms for evaluating and managing the soundness of updates in service contracts.
+We now summarize the most significant pieces of work from the literature
+that relate to the evolution of microservices and their APIs.
+
 \section{Serialization Frameworks} % (fold)
 \label{sec:serialization_frameworks}
 
@@ -81,10 +86,38 @@ transfer of serialized Java classes and distributed garbage-collection.
 \section{Chain of adapters} % (fold)
 \label{sec:chain_of_adapters}
 
-The chain of adapters is a design technique for solving the problem of simultaneously deploying
-multiple versions of a web service in the face of independently
-developed unsupervised clients while maintaining strict backwards compatibility.
+The chain of adapters is a design strategy for providing a web service in the face of independently developed unsupervised clients while preserving strict backwards compatibility.
+This approach decomposes long update/rollback transactions into smaller, independent transactions.
+This technique is discussed in depth in the work [A Design for Adaptive Web Service Evolution]. The key concepts of the approach are presented below.
 
+When a new service API is published, the old API is not decommissioned;
+instead, it is made available in a different namespace;
+in a RESTful system, this often entails supporting operations in different versions.
+Endpoints belonging to the API in v1.0 can be made accessible via the path http://example.system/v1,
+whereas endpoints belonging to the API in v2.0 are accessible via the path http://example.system/v2.
+
+The previous API implementations are replaced by adapters that redirect all calls to the next API version implementation and also translate data structures as necessary.
+
+Updating a service's API in this manner requires the programmer to do two additional steps:
+\begin{itemize}
+    \item Duplicate all modified endpoints in service contract into a different namespace.
+    \item Implement an adapter that translates the endpoints in version vi->vi+1.
+\end{itemize}
+
+The same web service that supports the revised service endpoints also supports the older endpoints that require adapters.
+It is not necessary to deploy the web service in several versions.
+
+When a consumer is using version v1, and the producer is using version v4, the endpoints that provide the service in version v1 use the adapters v1->v2, v2->v3, and v3->v4 to translate the operation before forwarding it to the endpoint in the current version.
+
+The service's backwards compatibility is ensured by the composition of adapters in a chain, as seen in figure \ref{fig:chain}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=1.5in]{chain}
+    \caption{Chain of Adapters structure
+    after n versions have been published }
+    \label{fig:chain}
+\end{figure}
 
 \section{Service Integration Adapters} % (fold)
 \label{sec:service_integration_adapters}
