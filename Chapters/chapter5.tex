@@ -14,88 +14,22 @@
 \section{Microservices} % (fold)
 \label{sec:microservices}
 
+
+\section{Agile Development} % (fold)
+\label{sec:agile_development}
+
+Plan-driven engineering requires us to create a predictive plan before beginning development.
+The plan outlines the project's people, resources, and timelines.
+Software design is likewise done ahead of time, with implementation anticipated to follow design.
+
+Agile plans serve as a foundation for managing change.
+Agile teams plan just as meticulously as conventional teams, but their plans are regularly revised to reflect what they learn during development.
+
 \section{API Specification Languages} % (fold)
 \label{sec:api_specification_languages}
 
-Contracts are behavioral descriptions of Web services.
-We devise a theory of contracts that
-formalizes the compatibility of a client to a service, and the safe replacement of a service with
-another service. The use of contracts statically ensures the successful completion of every possible
-interaction between compatible clients and services.
-
-Definition of an API
-To the best of our knowledge, the term application programming interface appeared for the first
-time in 1968 within the context of providing a remotely accessed, interactive computer graphics
-system [32]. APIs are varied and can encompass different concepts. For example, when the concept
-of information hiding was first coined by Parnas [127] in 1972, it was based on interfaces among
-modules, which today would be called APIs.
-Prior work has defined APIs as “the interface to a reusable software entity used by mul-
-tiple clients outside the developing organization, and that can be distributed separately from
-environment code” [145]. Although the term “API” can be used as a general term for an in-
-terface between software components, there exists nomenclature to refer to certain types of
-APIs. For example, software libraries [13, 20, 39, 40, 54, 57, 65, 77, 110, 115, 190, 195], software
-frameworks [33, 40, 42, 43, 70, 107, 117, 159, 183, 184, 188, 194], and Web services either REST-
-ful [100, 137, 160, 161] or SOAP [160] have all been interchangeably been referred to as APIs,
-because they all allow pieces of software to communicate, albeit in different ways. However, API
-terminology can sometimes be nuanced. For example, object-oriented languages, such as Java and
-C#, have specific keyword concepts to define interfaces [111, 126]. According to the definition of
-an API presented by prior research [145], these interfaces may only be considered APIs if they
-are used by multiple external clients. In this article, we use this API definition but also consider
-interfaces that may be used by multiple clients within a developing organization as APIs.
-
-API Evolution
-Prior studies have shown that APIs evolve for various reasons, such as increasing complexity [103],
-and continuous change [41, 89]. However, due to their nature as a connection point between soft-
-ware modules, API evolution is not without side effects. Many studies have shown the effects of
-API changes not only on the API itself [41], but also on its clients [104]. APIs may therefore change
-differently from traditional software artifacts. For example, Sun Microsystems preferred introduc-
-ing the new interface java.awt.LayoutManager2 rather than change the java.awt.LayoutManager,
-because changing the latter would have broken existing code [162].
-The evolution of APIs induces a variety of problems and challenges for API users and API de-
-velopers alike [86]. On the one hand, as predicted by Lehman, continuing change [89] means that
-API developers must determine ways to keep their APIs useful, cutting edge, and competitive with
-other pieces of software [85] and API users must adapt to these API changes and new API releases.
-On the other hand, conservation of familiarity [89], or existing API usages, constrain the evolu-
-tion of an API to avoid breaking changes while improving the API (i.e., security or performance
-improvements). The evolution of APIs therefore involves a balancing act of constant improve-
-ment and maintaining existing functionality. Maintaining existing functionality requires in-depth
-knowledge of use cases and architectural foresight and flexibility, while keeping up with rapid
-release cycles requires modifications to user applications as well as learning about new APIs and
-ACM Computing Surveys, Vol. 54, No. 8, Article 171. Publication date: October 2021.
-171:4
-M. Lamothe et al.
-changes to existing APIs. Therefore, when gathering literature for our systematic review, we not
-only concentrate on work that directly studies APIs and their evolution, but we also consider prior
-work that focuses on finding solutions to problems that are caused by API evolution.
-
-Recent software advances have led to an expansion of the development and usage of application programming interfaces (APIs).
-Like any software artifact, software APIs evolve and suffer from this evolution. There are many challenges to the development, usage, and evolution of APIs.
-The main open challenges related to APIs evolution are:
-(1) Automatically identifying and leveraging factors that drive API changes
-(2) Creating and using uniform benchmarks for research evaluation
-(3) Understanding the impact of API evolution
-
-APIs are by definition interfaces to be used as entry points to reusable software entities [145].
-They are not independent software entities; they are instead packaged with the software li-
-braries [40], frameworks [70], or Web services [161], that offer them.
-The ease with which APIs can be discovered and used increased with the advent of Software-
-as-a-service [85] and the growth of open-source software repositories, e.g., GitHub. For example,
-JUnit, a popular unit-testing framework, has been used by over 20,000 applications in a 42,000
-application sample [155] and is often adopted by users when migrating away from other testing
-frameworks, e.g., TestNG [37].
-APIs are inherently software artifacts and are, thus, not immune to Lehman’s laws [89]. To
-remain useful and competitive, APIs must evolve. They evolve to offer new functionalities, fix se-
-curity issues, retire unsafe/no longer necessary functionalities, and, more generally, to increase
-the ease with which developers can use them. For example, JUnit was introduced in 2002 and its
-latest version released in September 2020. It grew from version 1.0 to version 5.7.0, from offering
-“plain old Java objects” (POJO, classes really) and using reflection to an annotation-based frame-
-work with filters, recorders, loggers, conditional testing, and so on. However, API evolution can
-cause various issues for both their users and their developers [85, 103, 121, 147].
-Due to their omnipresence and evolution, APIs greatly impact software development.
-Understanding, mitigating, and leveraging the impact of APIs and API evolution on soft-
-ware development is necessary to design and use software APIs [148].
-In the past few decades, interest in APIs and API evolution has grown rapidly in the software-
-engineering research community.
-
 \section{Typed System} % (fold)
 \label{sec:typed_languages}
+
+\section{Deployment Strategies} % (fold)
+\label{sec:deployment_strategies}

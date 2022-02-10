@@ -16,7 +16,7 @@
 
 Serialization is the process of encoding system state into a standardized format so that it can be delivered across a network or stored with durability.
 For serialization, each language usually provides a corresponding library, such as Java serialization.
-In the setting of service oriented architectures, serialization libraries supplied by programming languages are typically not used to encode messages between services,
+In the setting of service oriented computing, serialization libraries supplied by programming languages are typically not used to encode messages between services,
 because each service may be written in a different language. As a result, data consumers will be unable to comprehend data producers.
 Cross-language serialization libraries, such as JSON, can solve this problem.
 However, formats such as JSON lack a strictly defined structure,
@@ -50,32 +50,76 @@ because they can only accommodate changes in the schema of records.
 They can not manage changes in the API's signature, such as the method of a REST endpoint.
 To eliminate potential mismatches and reduce the complexity of the evolution process, we believe it is critical to manage both sorts of evolution's in a single integrated approach.
 
+\section{Schema Registry} % (fold)
+\label{sec:schema_registry}
+
+A schema registry, as the name implies, is a repository for schemas.
+It stores a versioned history of schemas and provides an interface for retrieving, registering, as well as checking the compliance of schemas.
+It is essentially a CRUD application with a RESTful API and persistent storage for schema definitions, where each schema is given a unique ID.
+
+Schema registries are commonly used in situations where data consumers need to know the structure of the data written by producers at runtime.
+A producer could send its schema to consumers along with the response to a request;
+however, this is usually a bad idea because it would result in duplicating functionality across all services, making the system more difficult to maintain.
+
+One framework that makes use of this system is Avro, a data serialization framework developed within Apache's Hadoop project.
+The serialized byte sequence of each record in Avro does not include field metadata such as the field name or a tag, but merely the field value, allowing for a more compact serialization method.
+All field values are appended back to back, in the same order as they appear in the schema \ref{fig:avro}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=1.5in]{avro}
+    \caption{A Avro schema and its associated serialized record }
+    \label{fig:avro}
+\end{figure}
+
+The deserializer knows which bytes belong to which field by comparing both the reader and writer schemas and by matching fields by their names.
+
+There are other systems that make use of registry's such a Java RMI that uses schema registry's
+to perform remote method invocation, the object-oriented equivalent of remote procedure calls, with support for direct
+transfer of serialized Java classes and distributed garbage-collection.
+
+\section{Chain of adapters} % (fold)
+\label{sec:chain_of_adapters}
+
+The chain of adapters is a design technique for solving the problem of simultaneously deploying
+multiple versions of a web service in the face of independently
+developed unsupervised clients while maintaining strict backwards compatibility.
+
+
 \section{Service Integration Adapters} % (fold)
 \label{sec:service_integration_adapters}
 
-In the context of service-oriented architectures (SOA) there has been extensive
-research on the adaptability of services [3, 4, 6, 7, 14, 27]. There are similarities
-between SOA and microservices, as both follow a separation of concerns approach
-based on services. These two architectures diverge on some relevant features, in
-particular on the fact the SOA services are tightly-coupled while microservices are
-loosely-coupled. As a consequence, adaptability in SOA is not focused on evolution
-but on the integration of microservices. These works [3, 4, 7, 14, 27] on SOA address
-and develop adapters for behavioural mismatches among business processes. The
-concern is mainly on adapting workflows and most assume that data adaptation is
-already defined by developers. Standard service binding technologies (cf. SOAP) use
-description languages like WSDL [1] to specify contracts, allowing them to check for
-compatibility of services on every remote call, and issue runtime exceptions when some
-mismatch happens. Schema registries and service brokers are also used to centralize
-10:27
-Robust Contract Evolution in a TypeSafe MicroService Architectures
-and authorise changes in the service architecture. Schemas can then be checked based
-on version identifiers and compatibility relations just like in our case [22].
+There has been substantial investigation on the adaptability of services in the context of service-oriented architectures.
+Although SOA and microservices are similar in that they both use a separation approach based on services,
+these two designs differ in several important ways, most notably in that microservices are loosely coupled whereas SOA services are tightly tied due to common data storage between services.
+As a result, adaptability in SOA is focused on service integration and replaceability rather than evolution.
 
-\section{Chain Adapter} % (fold)
-\label{sec:chain_adapter}
+In the setting of SOA, adaptors are used to wrap the various services which are in general heterogeneous,
+(communicate with different protocols and support different data formats) so that they can appear as homogeneous and therefore easier to be integrated.
 
-\section{Deployment Strategies} % (fold)
-\label{sec:deployment_strategies}
+These adaptors presume that data adaptation has already been established by developers at an upper layer,
+their primary concern is merging services with different communication protocols and mismatches between operations that have the
+same functionality but differ in operation name, number, order or type of operation input/output parameters.
 
-\section{Schema Registry} % (fold)
-\label{sec:schema_registry}
+[Developing Adapters for Web Services Integration] presents a taxonomy of all conceivable mismatches as well as remedies to each type in the context of SOA.
+Some of the mismatches defined remain important in the context of microservice evolution:
+\begin{itemize}
+    \item Message Split Mismatch
+
+    This type of differences occurs when the protocol P requires a single message to achieve certain functionality, while in protocol PR the same behavior is achieved by receiving several messages.
+    \item Message Merge Mismatch
+
+    This type of differences occurs when protocol P needs to receive several messages for achieving certain
+    functionality while protocol PR requires one message to achieve the same functionality.
+    \item Differences at the Operation Level
+
+    This type of mismatch occurs when the operation O of S imposes constraints on input parameters,
+    which are less restrictive than those of OR input parameters in SR (e.g., differences in value ranges).
+\end{itemize}
+
+The two first types of mismatches can be handled in the context of microservice evolution without the use of adaptors.
+Essentially, the old endpoints are kept operational but marked as deprecated until there are no more consumers using them, and the new endpoints are provided in parallel.
+
+The latter form of mismatch has an impact on microservice evolution only if service contracts allow refined types.
+In other words, when constraints in input parameter are validated in a layer above the application layer.
+If validation is conducted in a lower layer, the mismatch can be easily resolved by modifying the application's implementation while keeping the service contract untouched.
