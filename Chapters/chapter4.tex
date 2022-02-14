@@ -11,35 +11,35 @@
 \chapter{Introduction}
 \label{cha:introduction}
 
-Architecture is the most important factor that influences the capabilities and constraints of a system's evolution throughout its production.
+Architecture is the most important factor that influences the capabilities and constraints of a system's evolution throughout its production \cite{1}.
 In software engineering, architecture is concerned with the conciliation of various architectural elements with the objective of satisfying functional and non-functional requirements of a system.
 
-That is, a software architecture can be seen as a set of architectural elements that are divided into three classes: processing elements, data elements, and connecting elements [Perry and Wolf 1992].
+That is, a software architecture can be seen as a set of architectural elements that are divided into three classes: processing elements, data elements, and connecting elements \cite{2}.
 The processing elements are those that perform transformations on the data elements;
 The data elements are those that contain the information that is used and transformed;
 The connecting elements (which at times may be either processing or data elements, or both) are the glue that holds the different pieces of the architecture together.
 (eg. procedure calls, shared data, messages \ldots)
-It is the connecting elements that are frequently used differentiate one architecture from another,
-because among the other elements, they have the greatest impact on non-functional requirements, such as the system's ability to evolve, security, scalability and so on.
+The connecting elements are frequently used to differentiate one architecture from another,
+because among the other elements, they have the greatest impact on non-functional requirements, such as the system's ability to evolve, security, scalability, and so on.
 
 The field of software architecture dates back to the 1960s and 1970s, but a solid foundation on the topic was only established in 1992 by Perry and Wolf.
 Since then, it has generated a large community of researchers studying the notion and its practical applications,
 allowing the concepts to be widely adopted by both industry and academia.
-Bosch's work [Jan Bosch. Software architecture: The next step. In Software architecture] provides a good overview of the current research in software engineering and architecture.
+Bosch's work \cite{3, 4} provides a good overview of the research in software engineering and architecture.
 
 Over the past several decades, software architecture has been thoroughly studied, and as a result software engineers have come up with different ways
 to compose systems that provide broad functionality and satisfy a wide range of requirements.
 
-A typical example of a monolithic architectural design pattern is the Model-View-controller (MVC).
+A typical example of a monolithic architectural design pattern is the Model-View-controller (MVC) \cite{5}.
 Although the MVC pattern encourages separate layers, which can improve software maintainability,
 such structures are notorious for their lack of agility and scalability due to their monolithic nature.
 Creating instances of massive monoliths is time-consuming and inefficient;
 even minor system updates require the complete redeployment of the application, severely limiting a system's ability to evolve.
 
-Service-Oriented Computing (SOC) is an emerging paradigm for distributed computing.
+Service-Oriented Computing (SOC) is a paradigm for distributed computing \cite{6}.
 In SOC, a program known as a service provides functionality to other components via network message passing.
 Messages are exchanged using service interfaces, which are implementation-independent.
-The first generation of service-oriented architectures (SOA) set imposing and ambiguous criteria for services, which hampered its adoption.
+The first generation of service-oriented architectures (SOA) \cite{7} set imposing and ambiguous criteria for services, which hampered its adoption.
 Microservices are the second iteration of the SOC idea;
 their aim was to reduce superfluous levels of complexity so that developers can focus on building simple services that efficiently fulfill a specific task.
 
@@ -52,7 +52,7 @@ Some advantages of service orientation over monoliths are as follows:
 
 These advantages boost the system's ability to evolve by allowing it to be disassembled into subsystems composed primarily of loosely coupled services.
 
-Subsystems can fully evolve independently of one another, as long they don't share services/components.
+Subsystems can fully evolve independently of one another, as long they don't share services or components.
 Because services are tied to one another via their interfaces, they can only evolve separately if their contracts remain consolidated.
 It is often advantageous to have the capacity to evolve services contracts independently,
 particularly in agile workflows and the early phases of development, where contracts are prone to frequent changes.
@@ -74,24 +74,24 @@ in the context of iterative approaches to software development, such as agile, c
 
 Maintaining the integrity of microservice architectures is a daunting task that only the most diligent teams can handle.
 
-\paragraph{The ramifications of changing a contract are discovered after the fact.}
+\paragraph{The ramifications of changing a contract are discovered after the fact:}
 
 Syntactic or semantic changes in service contracts are usually silent because services evolve independently and contracts are rarely formally specified or even documented.
 Without explicit contract verification at deployment time, the only symptoms that the system is broken are runtime errors or unexpected behaviors.
 It is paramount to have contract management methods and a common contract specification in place, as this allows the safety of service-based architectures to be checked a priori.
 
-\paragraph{The safety of a deployment operation is unknown.}
+\paragraph{The safety of a deployment operation is unknown:}
 
 Established platforms such as Kubernetes cannot ensure the safety of deployment operations since they rely primarily on service level meta-information (such as version IDs) to manage deployments.
 To assure the safety of deployment tasks, a new model for such environments is required,
 one that uses generic meta-information from previously deployed services, adopts expanded type-based contracts and employs a compatibility relation on service contracts.
 
-\paragraph{A contract change, entails the redeployment/downtime of its consumers.}
+\paragraph{A contract change, entails the redeployment and downtime of its consumers:}
 
 Modifications to type definitions in a producer module have immediate
 impact on the whole system by requiring downtime on all consumer modules.
-Deployments of “compatible” modules should not disrupt the system soundness by imposing the redeployment of services;
-instead, one service should be able to be replaced while the remainder of the system remains operational.
+Deployments of “compatible” modules should not disrupt the system soundness by imposing the redeployment of services.
+Instead, one service should be able to be replaced while the remainder of the system remains operational.
 
 \section{Contributions} % (fold)
 \label{sec:contributions}
