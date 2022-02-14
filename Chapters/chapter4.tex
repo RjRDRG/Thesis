@@ -18,7 +18,7 @@ That is, a software architecture can be seen as a set of architectural elements 
 The processing elements are those that perform transformations on the data elements;
 The data elements are those that contain the information that is used and transformed;
 The connecting elements (which at times may be either processing or data elements, or both) are the glue that holds the different pieces of the architecture together.
-(eg. procedure calls, shared data, messages \ldots)
+(eg. procedure calls, shared data, messages)
 The connecting elements are frequently used to differentiate one architecture from another,
 because among the other elements, they have the greatest impact on non-functional requirements, such as the system's ability to evolve, security, scalability, and so on.
 
@@ -98,15 +98,15 @@ Instead, one service should be able to be replaced while the remainder of the sy
 
 We present a microservice management system that aims to solve the problems stated above.
 
-The first and second problems will be tackled by defining and adopting an API specification language, as well as implementing a schema
+The challenge of insuring the safety of contract evolutions will be handled by defining and adopting an API specification language, as well as implementing a schema
 registry that offers a pre-flight safety check procedure that verifies whether two service contracts are compatible before
 deployment. The compatibility mechanism, is akin to typechecking procedures in compiled languages, and is applied upon a
 pair of service contracts, which are typically two distinct versions of the same service. The aforementioned mechanism preserves
 a distributed system's correct behavior by rejecting additions or modifications that would threaten it and by informing the programmer
 of all the repercussions of the deployment, such as consumer services that are outdated.
 
-To solve the third problem the evolution of interfaces is supported at runtime by generated proxy components that dynamically
-adapt data exchanged between services to match the services contracts.
+To ensure that changes in producers contracts do not require the consumers upgrade and redeployment, contract evolution
+will be supported at runtime by a generated proxy component that dynamically adapts the data exchanged between services.
 The proxy adapter is capable intercepting and evaluating all the outgoing and incoming TCP requests to determine whether
 they should be left unchanged or how they should be transformed using an adaptation protocol that extends the compatibility mechanism discussed above.
 We allow for addition, removal, renaming and type migration of data fields of a producer module without breaking or upgrading consumer services.
@@ -114,12 +114,12 @@ More complex changes in data fields, such as altering the format of a date, will
 We also support the modifications on the signatures of APIs, such as changing a path parameter in a REST endpoint to a query parameter.
 The translation specification between two compatible contracts can be audited and modified by a programmer before it is employed by an adapter.
 
-Our work will make the following contributions: (details will be presented on chapter 4)
+Our work will make the following contributions, details will be presented on chapter 4:
 
 \begin{itemize}
     \item A compatibility relation on service contracts that determines whether or not messages may be exchanged without data loss.
-    \item Implementation of a robust type-directed adaptation protocol for REST APIs.
     \item Definition of a core language for the specification of contract compatibility corrections.
+    \item Implementation of a robust type-directed adaptation protocol for service contracts.
     \item Implementation of a service registry tasked with holding service contracts, tracking consumers of service versions,
     and providing a lightweight preflight safety check procedure for deployment/un-deployment operations.
     \item Implementation of a benchmark platform to compare the solution to existing ones.
