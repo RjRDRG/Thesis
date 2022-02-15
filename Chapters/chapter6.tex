@@ -372,10 +372,34 @@ and is natively supported by Kubernetes, the microservice orchestration tool tha
 \section{API Management Tools} % (fold)
 \label{sec:api_management_tools}
 
-Microsoft Azure's API Management platform (AAMP) includes a set of tools for describing, testing, analyzing, and managing APIs in general.
+API management is the process of overseeing API functions like API creation, description, testing, analysis, publication, securing, and monitoring.
+All of these API management requirements can only be met with the assistance of tools, this is where API management tools enter the picture.
 
-Its functionality is similar to that of our solution in that it allows programmers to manually define transformations that should be performed on all responses from a microservice[].
-The primary distinction is that Azure API Management transformations are intended to be specified by the programmer in policy statements, whereas our transformations can be applied automatically without the intervention of developers.
+\paragraph{}
+
+Microsoft Azure's API Management platform (AAMP) is a tool that provides some of the above functionalities in a manner that is similar to that of our solution.
+In this platform, programmers are allowed to manually define transformations that should be performed on all responses from a microservice [].
+The primary distinction is that Azure API Management transformations are intended to be specified by the programmer in policy statements,
+whereas our transformations can be applied automatically without the intervention of developers.
 
 The main use case of these transformations in AAMP is the integration of legacy backends by modernizing their APIs and making them accessible from cloud services, without the risk of migration.
 
+\paragraph{}
+
+In AAMP all requests from client applications are routed through the API gateway, which then forwards them to the appropriate backend services.
+The API gateway, like our adapter proxy, acts as a facade to the backend services,
+allowing API providers to abstract API implementations and evolve backend architecture without impacting API consumers.
+The AAMP's responsibilities and functionalities include:
+
+\begin{itemize}
+    \item Accepting API calls and routing them to configured backends;
+    \item Verifying API keys, JWT tokens, certificates, and other credentials;
+    \item Enforcing usage quotas and rate limits;
+    \item Transforming requests and responses as specified in policy statements;
+    \item Caching responses to improve response latency and minimize the load on backend services;
+    \item Emitting traces for monitoring, reporting, and troubleshooting;
+    \item Collecting API usage metrics
+\end{itemize}
+
+
+We aim to include some of the aforementioned features in our service registry implementation, particularly the collection of usage metrics.
