@@ -14,6 +14,8 @@
 Architecture is the most important factor that influences the capabilities and constraints of a system's evolution throughout its production \cite{1}.
 In software engineering, architecture is concerned with the conciliation of various architectural elements with the objective of satisfying functional and non-functional requirements of a system.
 
+\paragraph{}
+
 That is, a software architecture can be seen as a set of architectural elements that are divided into three classes: processing elements, data elements, and connecting elements \cite{2}.
 The processing elements are those that perform transformations on the data elements;
 The data elements are those that contain the information that is used and transformed;
@@ -22,10 +24,14 @@ The connecting elements (which at times may be either processing or data element
 The connecting elements are frequently used to differentiate one architecture from another,
 because among the other elements, they have the greatest impact on non-functional requirements, such as the system's ability to evolve, security, scalability, and so on.
 
+\paragraph{}
+
 The field of software architecture dates back to the 1960s and 1970s, but a solid foundation on the topic was only established in 1992 by Perry and Wolf.
 Since then, it has generated a large community of researchers studying the notion and its practical applications,
 allowing the concepts to be widely adopted by both industry and academia.
 Bosch's work \cite{3, 4} provides a good overview of the research in software engineering and architecture.
+
+\paragraph{}
 
 Over the past several decades, software architecture has been thoroughly studied, and as a result software engineers have come up with different ways
 to compose systems that provide broad functionality and satisfy a wide range of requirements.
@@ -36,12 +42,16 @@ such structures are notorious for their lack of agility and scalability due to t
 Creating instances of massive monoliths is time-consuming and inefficient;
 even minor system updates require the complete redeployment of the application, severely limiting a system's ability to evolve.
 
+\paragraph{}
+
 Service-Oriented Computing (SOC) is a paradigm for distributed computing \cite{6}.
 In SOC, a program known as a service provides functionality to other components via network message passing.
 Messages are exchanged using service interfaces, which are implementation-independent.
 The first generation of service-oriented architectures (SOA) \cite{7} set imposing and ambiguous criteria for services, which hampered its adoption.
 Microservices are the second iteration of the SOC idea;
 their aim was to reduce superfluous levels of complexity so that developers can focus on building simple services that efficiently fulfill a specific task.
+
+\paragraph{}
 
 Some advantages of service orientation over monoliths are as follows:
 \begin{itemize}
@@ -51,6 +61,8 @@ Some advantages of service orientation over monoliths are as follows:
 \end{itemize}
 
 These advantages boost the system's ability to evolve by allowing it to be disassembled into subsystems composed primarily of loosely coupled services.
+
+\paragraph{}
 
 Subsystems can fully evolve independently of one another, as long they don't share services or components.
 Because services are tied to one another via their interfaces, they can only evolve separately if their contracts remain consolidated.
@@ -62,11 +74,16 @@ particularly in agile workflows and the early phases of development, where contr
 
 The advantages of employing microservices-based architectures are frequently outweighed by the lack of mechanisms for assessing the safety of service contract updates.
 
+\paragraph{}
+
 In a monolithic application, interactions between different system components are conducted through function calls.
 In a distributed system, however, each individual component has to communicate with other components across the network.
+
 In a regular program, refactoring a function definition can be done rapidly with the aid of an IDE.
 Distributed systems do not have equivalent tools to detect mismatches between endpoints and their consumers.
 Developers are left with the burden of tracking down manually system's dependencies and refactor them in all consumers and producers.
+
+\paragraph{}
 
 With a rising number of separate services and their interactions, contract administration and service integration become progressively more challenging.
 Software engineering guidelines assume a scenario of frequent service implementation changes and few interface or contract modifications;
@@ -98,23 +115,34 @@ Instead, one service should be able to be replaced while the remainder of the sy
 
 We present a microservice management system that aims to solve the problems stated above.
 
-The challenge of insuring the safety of contract evolutions will be handled by defining and adopting an API specification language, as well as implementing a schema
+\paragraph{}
+
+The challenge of insuring the safety of contract evolutions will be handled by defining and adopting an API description language, as well as implementing a schema
 registry that offers a pre-flight safety check procedure that verifies whether two service contracts are compatible before
-deployment. The compatibility mechanism, is akin to typechecking procedures in compiled languages, and is applied upon a
+deployment.
+
+The compatibility mechanism, is akin to typechecking procedures in compiled languages, and is applied upon a
 pair of service contracts, which are typically two distinct versions of the same service. The aforementioned mechanism preserves
 a distributed system's correct behavior by rejecting additions or modifications that would threaten it and by informing the programmer
 of all the repercussions of the deployment, such as consumer services that are outdated.
 
+\paragraph{}
+
 To ensure that changes in producers contracts do not require the consumers upgrade and redeployment, contract evolution
 will be supported at runtime by a generated proxy component that dynamically adapts the data exchanged between services.
+
 The proxy adapter is capable intercepting and evaluating all the outgoing and incoming TCP requests to determine whether
 they should be left unchanged or how they should be transformed using an adaptation protocol that extends the compatibility mechanism discussed above.
+
 We allow for addition, removal, renaming and type migration of data fields of a producer module without breaking or upgrading consumer services.
 More complex changes in data fields, such as altering the format of a date, will be permitted through the use of user-defined adaption functions.
+
 We also support the modifications on the signatures of APIs, such as changing a path parameter in a REST endpoint to a query parameter.
 The translation specification between two compatible contracts can be audited and modified by a programmer before it is employed by an adapter.
 
-Our work will make the following contributions, details will be presented on chapter 4:
+\paragraph{}
+
+Our work will make the following contributions, which will be discussed in depth in Chapter 4:
 
 \begin{itemize}
     \item A compatibility relation on service contracts that determines whether or not messages may be exchanged without data loss.
@@ -127,3 +155,9 @@ Our work will make the following contributions, details will be presented on cha
 
 \section{Document Scructure} % (fold)
 \label{sec:document_structure}
+
+The following sections on the document start with a review of the main the concepts,
+techniques and applications behind our approach (Section 2).
+Sequent sections, first introduce a summary of the key related work (Section 3), next a more detailed descrip-
+tion of the proposed approach to the problem stated (Section 4) and conclude with the
+expected phases of the work plan (Section 5).
