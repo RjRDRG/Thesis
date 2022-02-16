@@ -74,15 +74,12 @@ as well for the implementation of the adaptation protocol, which alters messages
 The OpenAPI specification is the most widely adopted WADL for RESTfull services and already supports refinement types, instead of designing yet another WADL,
 we aim to extend the OpenAPI specification to incorporate support for Pre- and Post-conditions and other needs of our approach.
 
-\section{Serialization Frameworks} % (fold)
-\label{sec:serialization_frameworks}
+\section{Platform Independent Schema Representations} % (fold)
+\label{sec:platform_independent_schema_representations}
 
-Serialization is the process of encoding system state into a standardized format so that it can be delivered across a network or stored with durability.
-
-\paragraph{}
-
+Schema representations are need when delivering serialized messages across the network or storing data with durability.
 For serialization, each language usually provides a corresponding library, such as Java serialization.
-In the setting of service oriented computing, serialization libraries supplied by programming languages are typically not used to encode messages between services,
+In the setting of microservices, serialization libraries supplied by programming languages are typically not used to encode messages between services,
 because each service may be written in a different language. As a result, data consumers will be unable to comprehend data producers.
 
 Cross-language serialization libraries, such as JSON, can solve this problem.
@@ -93,7 +90,7 @@ What's missing is a schema for data exchange between producers and consumers, ak
 \paragraph{}
 
 The benefit of having a schema is that it explicitly defines the data's structure, type, and meaning.
-There have been a few cross-language serialization frameworks that require the data structure to be properly described via schemas.
+There have been a few cross-language frameworks that require the data structure to be properly described via schemas.
 XML, Avro, Thrift, and Protocol Buffers \cite{8,9,10} are among them.
 
 Because the schema of the messages exchanged between services can already be described using the OpenAPI description language,

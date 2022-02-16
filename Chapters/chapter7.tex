@@ -17,6 +17,18 @@
 \section{Service Registry} % (fold)
 \label{sec:service_registry}
 
+Microservice teams tend to prefer to use protocols that the world wide web supports (HTTP),
+because most application require a web presence and maintaining multiple communication channels is challenging.
+
+One disadvantage of this approach is that contracts cannot be easily modified, because they contain routing data and aren't agnostic to the transmission protocol.
+For instance, in HTTP a contract includes the HTTP method, the path, the schema of the parameters, and the location of parameters (path, query, header).
+
+Services typically communicate using publish/subscribe protocols like Kafka.
+With this approach contracts are simplified because producers (publishers) and consumers (subscribers) do not need to be aware of one another to communicate.
+For instance, in Kafka a contract includes only the schema of messages.
+Since the contracts are simplified there are already multiple tools that support the evolution of schemas in this context,
+and it is possible with some limitations to evolve service contracts independently.
+
 The service contracts are written in standard specification language such as OpenAPI;
 
 Each operation's signature in every contract can be expressed as a function.
