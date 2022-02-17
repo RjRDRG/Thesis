@@ -17,11 +17,7 @@ application system will be described using the underlying design principles.
 \section{Microservices} % (fold)
 \label{sec:microservices}
 
-[Hassan et al. 2017]
-[Aderaldo et al. 2017]
-https://martinfowler.com/articles/microservices.html
-
-Microservices are an architectural style in which software is developed using self-contained components that
+Microservices \cite{microservices, microservices2017tenets, microservicesTomorrow} are an architectural style in which software is developed using self-contained components that
 communicate with one another via standardized interfaces and lightweight mechanisms.
 These services segregate fine-grained business functionalities and can be independently deployed, scaled, and tested by fully automated machinery.
 There is a bare minimum of centralized management, and each service may be written in a different programming language and use different data storage technologies.
@@ -29,7 +25,7 @@ There is a bare minimum of centralized management, and each service may be writt
 \paragraph{}
 
 To understand the microservice style it's useful to compare it to the monolithic style:
-A monolithic application is built often using the Model-View-Controller (MVC) pattern, which is divided in three main parts:
+A monolithic application is built often using the Model-View-Controller (MVC) pattern \cite{mvc}, which is divided in three main parts:
 The view, a client-side user interface, consisting of HTML pages and javascript running in a browser on the user's machine.
 The model, a relational database management system,
 The controller, a server-side application that handles requests, execute domain logic, retrieve and update data from the database, and selects and populates the views to be sent to the browser.
@@ -72,12 +68,12 @@ Decentralizing the responsibility for data across different services has implica
 The common approach for dealing with this problem in database systems is to use transactions to guarantee consistency when updating multiple resources.
 Building and maintaining applications that use transactions in a distributed setting is notoriously difficult,
 as a result, microservice architectures emphasize transaction-less coordination between services,
-with explicit recognition that consistency may only be eventual consistency and problems are dealt with by compensating operations.
+with explicit recognition that consistency may only be eventual consistency and that problems are dealt with by compensating operations.
 
 
 \paragraph{Inter-process Communication Strategies}
 
-Martin Fowler, a well-known author in the context of microservices, advocates what he calls "smart endpoints and dumb pipes" for microservices communication.
+\citeauthor{microservices}, a well-known author in the context of microservices, advocates what he calls "smart endpoints and dumb pipes" for microservices communication.
 Enterprise Service Buses (ESB) were previously frequently used in service-oriented architecture (SOA) systems,
 and it was common to incorporate orchestration and transformation logic into the communication infrastructure,
 making the pipe "smart." There were multiple problems with this approach:
@@ -177,6 +173,83 @@ In comparison to Swarm, Kubernetes is more difficult to deploy and manage, howev
 \section{TypeSafe Contract Evolution in MicroService Architectures} % (fold)
 \label{sec:typesafe_contract_evolution_in_microservice_architectures}
 
+The evolution of a microservice contracts while ensuring their soundness and
+avoiding heavy adaptation processes due to service redeploying is demonstrated to be possible by \citeauthor{seco2020robust} \cite{seco2020robust}.
+The proposed approach to microservice contract evolution \cite{seco2020robust} makes use of a global deployment manager component that is responsible for managing module references,
+as well as dynamically generated proxies that are capable of adapting messages exchanged between modules when contracts mismatch.
+The following example demonstrates the mechanism:
+
+\paragraph{}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=5in]{adapter_example}
+    \caption{Evolution of modules Catalog, Marketing, Backoffice}
+    \label{fig:evolution_of_modules}
+\end{figure}
+
+Consider a marketing system (Figure ~\ref{fig:evolution_of_modules}) that comprises three distinct modules: Catalog, Marketing, and BackOffice.
+These three simple modules combined, form a triangle of dependencies, complex enough to demonstrate the proposed mechanism.
+Please note that the Catalog module is a producer, whereas the Marketing module is a producer and a consumer.
+
+Each module has a unique name, a collection of type and function definitions, and a set of type and function references.
+If a producer module exposes definitions, they can be used by other consumer modules via an explicit reference.
+Each programming element is accompanied by an immutable and unique key; for instance – the key of type "Product" is k1.
+These keys enable elements to be identified even after they have been renamed or reinstated.
+
+Initially, we have a system composed of a collection of services,
+each of which hosts an instance of one of the deployed modules (in grey Figure ~\ref{fig:evolution_of_modules}).
+The reference definitions indicate their interactions.
+
+\paragraph{}
+
+In a second phase, we develop version 2 of the Catalog and Marketing modules independently (~\ref{fig:evolution_of_modules}).
+In module Catalog, we rename the element "Amount" to "Price" and add the attribute "Desc", while in module Marketing, we rename "Promote" to "Enhance".
+The module BackOffice has not been modified at this point and will become out of sync with the other modules.
+In Figure ~\ref{fig:evolution_of_modules}, the newly added and modified elements are highlighted in red and blue, respectively.
+
+\paragraph{}
+
+In a third phase, Catalog version 3 is created, with the attribute "Discount" of the element "Product" removed.  (Figure ~\ref{fig:evolution_of_modules}).
+
+This version cannot be deployed in conjunction with version 2 of Marketing, as the attribute is used by the function "Enhance".
+
+We can deploy both modules together if we modify the definition of "Enhance" to remove the use of the attribute "Discount", resulting in version 3 of Marketing.
+
+Additionally, we could deploy version 3 of Marketing first and then version 3 of Catalog, but not vice versa.
+
+Besides this, in the reference to catalog we are permitted to retain the attribute "Discount" in the definition of the type "Product".
+As long as the attribute is not used, correctness is guaranteed.
+In Figure ~\ref{fig:evolution_of_modules}, the elements that have been removed are highlighted in yellow.
+
+As illustrated by the multiple versions of the modules,
+the proposed system is capable of overcoming differences in contract definitions by utilizing a communication protocol
+that adapts automatically to the following types of changes:
+
+\begin{itemize}
+    \item \textbf{Adding new attributes to a record type} The "Desc" attribute was added to Catalog, and thus the data returned by this module will contain values for this attribute.
+    Other modules will retain this data (as unknown attributes) in order to ensure that no data is lost when crossing services boundaries.
+    \item \textbf{Renaming functions} The "Promote" function in module Marketing has been renamed to "Enhance", which will have an effect on the endpoints exposed by the service.
+    At runtime, the proxy is dynamically generated to use the actual endpoint name when issuing calls, avoiding the need to update and redeploy the service Backoffice.
+    \item \textbf{Removing unused attributes or functions.} Unused elements do not require explicit adaptation.
+\end{itemize}
+
+Traditional approaches, such as HTTP, are insufficiently robust to handle these types of changes, effectively rendering them breaking changes.
+
+For instance, renaming functions results in the modification of remote URIs, and changing the name of an attribute may result in data loss.
+By contrast, with the presented approach, such changes are permitted without compromising module compatibility.
+
+This adaptive approach enables gradual module deployment of the referenced modifications without halting the entire system, avoiding data loss and misinterpretations.
+
+Experimental data \cite{seco2020robust} indicates that this approach would be effective in an average of 57\% of deployments that would require adaptation and recompilation.
+
+We define the scope of automatic adaptations by a universal compatibility relation
+on types, presented in definition 1. Changes that cannot be adapted automatically,
+and would result in inconsistent system states, are detected and prevented before any
+deployment action is taken. That is the case when removing functions or attributes
+from a module that are still being referred by other modules. The decision on how to
+adapt to this kind of change cannot be made automatically. The verification procedure
+introduced in this paper, represented by a type system, is able to detect such situations
 
 Our framework is inspired by the programming model of the OutSystems Platform,
 a low-code platform based on visual languages, for the development of enterprise-
@@ -198,30 +271,6 @@ remote calls between services, deployment and undeployment of services;
 A type based structuring discipline for microservices, and a corresponding lightweight
 preflight check procedure for deployment operations. The type soundness result
 (theorem 1) certifies the safety of the deployment operations.
-
-
-We present a microservice management system that statically verifies service interface signatures against
-their references and supports the seamless evolution of compatible interfaces.
-
-We define a compatibility relation on types that captures real evolution patterns and embodies known good practices on the evolution of
-interfaces.
-
-Namely, we allow for addition, removal, and renaming of data fields of a producer module without
-breaking or needing to upgrade consumer services.
-
-The evolution of interfaces is supported by runtime generated proxy components that dynamically adapt data exchanged between services to match with the statically
-checked service code.
-
-The model proposed in this paper is instantiated in a core programming language whose semantics is
-defined by a labelled transition system and a type system that prevents breaking changes from being deployed.
-
-Standard soundness results for the core language entail the existence of adapters, and hence ensure the
-absence of adaptation errors and the correctness of the management model.
-
-This adaptive approach allows for gradual deployment of modules, without halting the whole system and avoiding losing or misinterpreting
-data exchanged between system nodes.
-
-Experimental data shows that an average of 57\% of deployments that would require adaptation and recompilation are safe under our approach.
 
 
 Our research is motivated by data from real, large-scale, applications created with
