@@ -73,8 +73,8 @@ with explicit recognition that consistency may only be eventual consistency and 
 
 \paragraph{Inter-process Communication Strategies}
 
-\citeauthor{microservices}, a well-known author in the context of microservices, advocates what he calls "smart endpoints and dumb pipes" for microservices communication.
-Enterprise Service Buses (ESB) were previously frequently used in service-oriented architecture (SOA) systems,
+\citeauthor{microservices}, a well-known author in the context of microservices, advocates what he calls ''smart endpoints and dumb pipes'' for microservices communication.
+Enterprise Service Buses (ESB) \cite{esb} were previously frequently used in service-oriented architecture (SOA) systems,
 and it was common to incorporate orchestration and transformation logic into the communication infrastructure,
 making the pipe "smart." There were multiple problems with this approach:
 the tooling was complex and expensive, and it was difficult to troubleshoot when problems occurred in production environments.
@@ -97,12 +97,12 @@ The main disadvantage of this strategy is that consistency is not guaranteed whe
 
 \paragraph{Evolutionary Design}
 When decomposing a software system into components, we must decide how to divide the pieces.
-The concept of independent replacement and upgrade-ability are critical properties when designing component.
+The concept of independent replacement and upgrade-ability are critical properties when designing a component.
 The disadvantage of incorporating components into services is that we must be concerned about changes to one service breaking its consumers.
 The traditional integration approach is to attempt to resolve this issue through the use of versioning.
 In the context of microservices, versioning entails the maintenance of multiple deployments of the same service in distinct versions.
 We can minimize the use of versioning by designing services in such a way that they are as tolerant as possible to supplier changes,
-utilizing techniques such as Domain-Driven Design (DDD).
+utilizing techniques such as Domain-Driven Design (DDD) \cite{ddd}.
 DDD is a software design approach that decomposes a complex system into multiple autonomous bounded contexts,
 where all the structure and language of software (class names, class methods, class variables) match the business domain.
 
@@ -119,7 +119,7 @@ The isolation of services is accomplished through resource virtualization in one
 Containers provide the most efficient approach because unlike VMs, containers share the host system’s kernel with other containers.
 VMs virtualize an entire machine down to the hardware layers, while containers only virtualize software layers above the operating system level.
 
-Docker is the most popular container technology. It is built on top of the following technologies: Kernel namespaces, Cgroups, Copy-on-write File system.
+Docker \cite{docker} is the most popular container technology. It is built on top of the following technologies: Kernel namespaces, Cgroups, Copy-on-write File system.
 \begin{itemize}
     \item Namespaces: Isolate the kernel resources (processes, filesystem, users, network stacks, \ldots) used by each container.
     \item Cgroups: Isolate the hardware resources used by each container.
@@ -133,9 +133,9 @@ A container image is a lightweight, standalone executable package of software th
 
 The management of services can be accomplished with the use container orchestration technologies.
 Container orchestration eliminates many of the manual processes involved in the management of distributed systems.
-Some popular options used for the lifecycle management of services are Docker Swarm and Kubernetes.
+Some popular options used for the lifecycle management of services are Docker Swarm \cite{docker2016swarm} and Kubernetes \cite{kubernetes}.
 
-Kubernetes is an open-source container orchestration system that evolved from Google's Borg and Omega projects.
+Kubernetes \cite{kubernetes} is an open-source container orchestration system that evolved from Google's Borg and Omega projects \cite{burns2016borg}.
 Kubernetes is an ambitious platform. It manages the deployment, management, scaling, and networking of containers of distributed systems across a wide range of environments
 and cloud providers.
 
@@ -170,8 +170,8 @@ Kubernetes is a more sophisticated container management system than Docker Swarm
 Docker Swarm is only compatible with Docker, whereas Kubernetes is compatible with other container services.
 In comparison to Swarm, Kubernetes is more difficult to deploy and manage, however is said to be more scalable.
 
-\section{TypeSafe Contract Evolution in MicroService Architectures} % (fold)
-\label{sec:typesafe_contract_evolution_in_microservice_architectures}
+\section{Contract Evolution in MicroService Architectures} % (fold)
+\label{sec:contract_evolution_in_microservice_architectures}
 
 The evolution of a microservice contracts while ensuring their soundness and
 avoiding heavy adaptation processes due to service redeploying is demonstrated to be possible by \citeauthor{seco2020robust} \cite{seco2020robust}.
@@ -203,7 +203,7 @@ The reference definitions indicate their interactions.
 
 \paragraph{}
 
-In a second phase, we develop version 2 of the Catalog and Marketing modules independently (~\ref{fig:evolution_of_modules}).
+In a second phase, we develop version 2 of the Catalog and Marketing modules independently (Figure ~\ref{fig:evolution_of_modules}).
 In module Catalog, we rename the element "Amount" to "Price" and add the attribute "Desc", while in module Marketing, we rename "Promote" to "Enhance".
 The module BackOffice has not been modified at this point and will become out of sync with the other modules.
 In Figure ~\ref{fig:evolution_of_modules}, the newly added and modified elements are highlighted in red and blue, respectively.
@@ -211,13 +211,10 @@ In Figure ~\ref{fig:evolution_of_modules}, the newly added and modified elements
 \paragraph{}
 
 In a third phase, Catalog version 3 is created, with the attribute "Discount" of the element "Product" removed.  (Figure ~\ref{fig:evolution_of_modules}).
-
 This version cannot be deployed in conjunction with version 2 of Marketing, as the attribute is used by the function "Enhance".
 
 We can deploy both modules together if we modify the definition of "Enhance" to remove the use of the attribute "Discount", resulting in version 3 of Marketing.
-
 Additionally, we could deploy version 3 of Marketing first and then version 3 of Catalog, but not vice versa.
-
 Besides this, in the reference to catalog we are permitted to retain the attribute "Discount" in the definition of the type "Product".
 As long as the attribute is not used, correctness is guaranteed.
 In Figure ~\ref{fig:evolution_of_modules}, the elements that have been removed are highlighted in yellow.
@@ -241,61 +238,6 @@ By contrast, with the presented approach, such changes are permitted without com
 
 This adaptive approach enables gradual module deployment of the referenced modifications without halting the entire system, avoiding data loss and misinterpretations.
 
-Experimental data \cite{seco2020robust} indicates that this approach would be effective in an average of 57\% of deployments that would require adaptation and recompilation.
-
-We define the scope of automatic adaptations by a universal compatibility relation
-on types, presented in definition 1. Changes that cannot be adapted automatically,
-and would result in inconsistent system states, are detected and prevented before any
-deployment action is taken. That is the case when removing functions or attributes
-from a module that are still being referred by other modules. The decision on how to
-adapt to this kind of change cannot be made automatically. The verification procedure
-introduced in this paper, represented by a type system, is able to detect such situations
-
-Our framework is inspired by the programming model of the OutSystems Platform,
-a low-code platform based on visual languages, for the development of enterprise-
-grade mobile and web applications that abstracts and manages most of the technical
-details of deploying and maintaining cloud-based data-centric applications. The results
-of this paper lay the ground for future versions of the platform that automatically
-and seamlessly will distribute programming modules using microservices instead of
-heavyweight web containers.
-In summary, the contributions of this paper are the following:
-A model for an integrated lifecycle management system targeting a microservices
-infrastructure;
-A compatibility relation on service contracts, based on real traces of evolution, that
-ensures that it is always possible to generate adapter code for values of compatible
-types;
-An adaptation protocol flexible enough to transfer data between different (but
-compatible) versions of services without losing data (lemma 6);
-A semantics for a microservice management system whose operations include
-remote calls between services, deployment and undeployment of services;
-A type based structuring discipline for microservices, and a corresponding lightweight
-preflight check procedure for deployment operations. The type soundness result
-(theorem 1) certifies the safety of the deployment operations.
-
-
-Our research is motivated by data from real, large-scale, applications created with
-the OutSystems platform. The evaluation of our model presented in this section is
-twofold. In a first assessment, we gather data from real applications and analyse the
-traces of past deployments (5 years) under our evolution model to measure its impact.
-In a second phase, we compare the actual evolution of an OutSystems application
-before and after the adoption of our compatibility model between module references.
-
-We have defined a principled evolution mechanism that accounts for deployments
-that correspond to what should be compatible interface evolutions and nevertheless
-usually force the redeploy (and corresponding downtime) of consumer modules.
-We address the problem of service interface evolution in a loosely-coupled setting,
-targeting increased deployment flexibility. We present a language-based lifecycle
-management model for microservice-based systems that statically checks new service
-versions, preventing breaking deployments, and certifying the capability of the system
-to adapt to compatible changes. Also, the system’s compatibility algorithm supports
-several common changes as compatible: adding, reordering and renaming fields.
-These compatibility scenarios are supported by a runtime adaptation protocol that
-generates specialised proxies for each producer, ensuring that no communication
-errors or data loss ever occurs. The flexibility introduced by the referred compatibility
-relation is framed by the automatic proxy generation. We guaranty that adaptation
-code is always defined for all pairs of compatible types. The soundness of the type
-system implies that well defined deployments don’t break the system (theorem 1). Our
-experimental evaluation (section 9) shows significant improvements on the number
-of independent deployments in real applications that do not require intervention in
-consumer modules, corresponding to at least 57 % of all deployments with interface
-changes.
+Experimental data \cite{seco2020robust} collected over a five-year development period on the evolution of three large software factories each containing over 1000 modules
+(a raw dataset containing 8889 production deployments with a total of 23986 signature changes)
+indicates that this approach would be effective in an average of 57\% of deployments that would require adaptation and recompilation.

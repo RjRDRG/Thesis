@@ -11,12 +11,11 @@
 \chapter{Introduction}
 \label{cha:introduction}
 
-Architecture is the most important factor that influences the capabilities and constraints of a system's evolution throughout its production \cite{Breivold2012}.
-In software engineering, architecture is concerned with the conciliation of various architectural elements with the objective of satisfying functional and non-functional requirements of a system.
+Architecture is the most important factor that influences the capabilities and constraints of a system's evolution throughout its lifecycle \cite{Breivold2012}.
+In software engineering, the subject of architecture is the conciliation of various architectural systems or components
+with the objective of satisfying a system's functional and non-functional requirements.
 
-\paragraph{}
-
-That is, a software architecture can be seen as a set of architectural elements that are divided into three classes: processing elements, data elements, and connecting elements \cite{2}.
+That is, a software architecture can be seen as a set of architectural elements that are divided into three classes: processing elements, data elements, and connecting elements \cite{architecture}.
 The processing elements are those that perform transformations on the data elements;
 The data elements are those that contain the information that is used and transformed;
 The connecting elements (which at times may be either processing or data elements, or both) are the glue that holds the different pieces of the architecture together.
@@ -26,7 +25,7 @@ because among the other elements, they have the greatest impact on non-functiona
 
 \paragraph{}
 
-The field of software architecture dates back to the 1960s and 1970s, but a solid foundation on the topic was only established in 1992 by Perry and Wolf.
+The field of software architecture dates back to the 1960s and 1970s, but a solid foundation on the topic was only established in 1992 by \citeauthor{architecture} \cite{architecture}.
 Since then, it has generated a large community of researchers studying the notion and its practical applications,
 allowing the concepts to be widely adopted by both industry and academia.
 Bosch's work \cite{3, 4} provides a good overview of the research in software engineering and architecture.
@@ -36,7 +35,7 @@ Bosch's work \cite{3, 4} provides a good overview of the research in software en
 Over the past several decades, software architecture has been thoroughly studied, and as a result software engineers have come up with different ways
 to compose systems that provide broad functionality and satisfy a wide range of requirements.
 
-A typical example of a monolithic architectural design pattern is the Model-View-controller (MVC) \cite{5}.
+A typical example of a monolithic architectural design pattern is the Model-View-controller (MVC) \cite{mvc, microservices}.
 Although the MVC pattern encourages separate layers, which can improve software maintainability,
 such structures are notorious for their lack of agility and scalability due to their monolithic nature.
 Creating instances of massive monoliths is time-consuming and inefficient;
@@ -48,14 +47,14 @@ Service-Oriented Computing (SOC) \cite{6} is a paradigm for distributed computin
 In SOC, a program known as a service provides functionality to other components via network message passing.
 Messages are exchanged using service interfaces, which are implementation-independent.
 The first generation of service-oriented architectures (SOA) \cite{7} set imposing and ambiguous criteria for services, which hampered its adoption.
-Microservices \cite{microservices} are the second iteration of the SOC idea;
-their aim was to reduce superfluous levels of complexity so that developers can focus on building simple services that efficiently fulfill a specific task.
+Microservices \cite{microservices} are a modern iteration of the SOC idea;
+their aim is to reduce superfluous levels of complexity so that developers can focus on building simple services that efficiently fulfill a specific task.
 
 \paragraph{}
 
 Some advantages of service orientation over monoliths are as follows:
 \begin{itemize}
-    \item Functional independence - Each service is operationally independent to others, the only way they communicate is through their published interfaces.
+    \item Functional independence - Each service is operationally independent, the only way services communicate is through their published interfaces.
     \item Component Scalability - When a single component becomes overloaded, additional instances of the component can be deployed separately.
     \item Distributed development - By agreeing on the interfaces of the distributed system, distinct teams can develop partitions of the system in parallel.
 \end{itemize}
@@ -64,24 +63,26 @@ These advantages boost the system's ability to evolve by allowing it to be disas
 
 \paragraph{}
 
-Subsystems can fully evolve independently of one another, as long they don't share services or components.
-Because services are tied to one another via their interfaces, they can only evolve separately if their contracts remain consolidated.
-It is often advantageous to have the capacity to evolve services contracts independently,
+In a microservice architecture, subsystems can fully evolve independently of one another, as long they don't share services or components.
+Because services are tied to one another via their interfaces, they can only evolve separately if their contracts remain consistent.
+It is often advantageous to have the capacity to change service contracts independently,
 particularly in agile workflows and the early phases of development, where contracts are prone to frequent changes.
 
 \section{Problem Statement} % (fold)
 \label{sec:problem_statement}
 
-The advantages of employing microservices-based architectures are frequently outweighed by the lack of mechanisms for assessing the safety of service contract updates.
+The main challenge in developing applications based on microservices-based architectures is the lack of mechanisms for evaluating the safety of service contract updates.
 
 \paragraph{}
 
 In a monolithic application, interactions between different system components are conducted through function calls.
-In a distributed system, however, each individual component has to communicate with other components across the network.
+In a distributed system, however, each individual component has to communicate with other components across the network,
+without the same guarantees.
 
-In a regular program, refactoring a function definition can be done rapidly with the aid of an IDE.
+In a regular program, refactoring a function definition can be done quickly with the aid of an IDE.
 Distributed systems do not have equivalent tools to detect mismatches between endpoints and their consumers.
-Developers are left with the burden of tracking down manually system's dependencies and refactor them in all consumers and producers.
+Developers are left with the burden of manually tracking down and refactoring the system's dependencies across all consumers and producers;
+there is a lack of tools that alleviate this problem.
 
 \paragraph{}
 
@@ -125,8 +126,6 @@ The compatibility mechanism, is akin to typechecking procedures in compiled lang
 pair of service contracts, which are typically two distinct versions of the same service. The aforementioned mechanism preserves
 a distributed system's correct behavior by rejecting additions or modifications that would threaten it and by informing the programmer
 of all the repercussions of the deployment, such as consumer services that are outdated.
-
-\paragraph{}
 
 To ensure that changes in producers contracts do not require the consumers upgrade and redeployment, contract evolution
 will be supported at runtime by a generated proxy component that dynamically adapts the data exchanged between services.
