@@ -119,13 +119,12 @@ All field values are appended back to back, in the same order as they appear in 
 
 The deserializer knows which bytes belong to which field by comparing both the consumer and producer schemas and by matching fields by their names.
 
-Another system that makes use of schema registries, is the Java RMI \cite{12}, a Java API that supports remote method invocation,
-the object-oriented equivalent of remote procedure calls (RPC), with support for direct
-transfer of serialized Java classes and distributed garbage-collection.
+Another system that makes use of schema registries, is the Java RMI \cite{12},
+a Java API that supports remote procedure calls (RPC) with distributed garbage-collection.
 
-The Java RMI makes use of a schema registry for allowing clients to get a reference (a stub) to a remote object.
-In general, an RMI registry is used only to locate the first remote object a client needs to use.
-Then, typically, that first object would in turn provide application-specific support for finding references to other objects.
+The Java RMI makes use of a schema registry to enable clients to obtain a references (stubs) to a remote objects.
+The RMI registry is only used for locating the first object that a client needs, each reply from the registry provides
+support for finding other objects.
 
 \paragraph{}
 
