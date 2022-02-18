@@ -74,14 +74,14 @@ that consistency will be only eventual and that divergence must be addressed wit
 
 \paragraph{Inter-process Communication Strategies}
 
-\citeauthor{microservices}, a well-known author in the context of microservices, advocates what he calls ''smart endpoints and dumb pipes'' for microservices communication.
-Enterprise Service Buses (ESB) \cite{esb} were previously frequently used in service-oriented architecture (SOA) systems,
+\citeauthor{microservices}, a well-known author in the context of microservices, promotes the use of ''smart endpoints'' and ''dumb pipes'' for microservices communication.
+Enterprise Service Buses (ESB) \cite{esb} were previously commonly used in service-oriented architecture (SOA) systems,
 and it was common to incorporate orchestration and transformation logic into the communication infrastructure,
-making the pipe ''smart''. There were multiple problems with this approach:
-the tooling was complex and expensive, and it was difficult to troubleshoot when problems occurred in production environments.
+making the ''pipe smart''.
+This approach had several flaws, it was difficult to solve problems in production environments, and the tooling was complex and expensive.
 
 The reverse approach has been adopted with microservices,
-where services own their domain-centric logic ''smart endpoints'' and use ''dumb pipes'' as a transport method.
+where services own their domain-centric logic "smart endpoints" and transport messages via "dumb pipes".
 The majority of communication between microservices is done via request/response-based communication or event-driven messaging.
 Because these two methods have such dissimilar properties, it's important to weigh their strengths, and the scenarios that call for each.
 
