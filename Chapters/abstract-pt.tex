@@ -8,36 +8,24 @@
 
 \typeout{NT FILE abstrac-pt.tex}%
 
-Independentemente da língua em que a dissertação esteja redigida, é necessário um resumo na mesma língua do texto principal e outro resumo noutra língua. Pressupõe-se que as duas línguas em questão sejam o português e o inglês.
+Em contraste com sistemas tradicionais, as arquiteturas de microsserviços permitem grande
+escalabilidade, disponibilidade e entrega separando os elementos de um grande projeto em entidades independentes ligadas através de uma rede (serviços), porém não oferecem
+mecanismos de segurança para evolução e descontinuação de funcionalidades fornecidas pelos serviços.
 
-Os resumos devem aparecer primeiro na língua do texto principal e depois na outra língua. Por exemplo, se a dissertação for redigida em português, o resumo em português aparecerá primeiro, seguido do resumo em inglês (\emph{abstract}), seguido do texto principal em português. Se a dissertação for redigida em inglês, o resumo em inglês (\emph{abstract} aparecerá primeiro, seguido do resumo em português, seguido do texto principal em inglês.
+Alterar a definição de um elemento em um programa convencional pode ser feito rapidamente com o auxílio de ferramentas automatizadas.
+Os sistemas distribuídos não possuem ferramentas comparáveis às utilizadas em sistemas centralizados.
+Na ausência de ferramentas que amenizem este problema,
+os desenvolvedores tem que rastrear e resolver manualmente os problemas causados por atualizações não controladas.
 
-Na versão \LaTeX\, o template NOVAthesis irá ordenar automaticamente os dois resumos tendo em consideração a língua do texto principal. É possível alterar este comportamento adicionando
-\begin{verbatim}
-    \abstractorder(<MAIN_LANG>):={<LANG_1>,...,<LANG_N>}
-\end{verbatim}
-\noindent à zona de customização no preâmbulo do documento, e.g.,
-\begin{verbatim}
-    \abstractorder(de):={de,en,it}
-\end{verbatim}
+Enquanto que as abordagens tradicionais garantem que os microsserviços obcedem a sua especificação, atráves da validação do seu comportamento por meio de testes empíricos,
+a nossa proposta procura complementar a abordagem convencional fornecendo mecanismos que suportam a validação das operações de deployment e a evolução das interfaces de microsserviços.
 
-Os resumos não devem ultrapassar uma página e, de forma genérica, devem responder às seguintes questões (é essencial adaptá-los às práticas habituais da sua área científica):
+Apresentamos um sistema de administração de microsserviços que verifica a segurança de modificações nas interfaces de serviços
+e permite a evolução de interfaces compatíveis por meio de componentes proxy gerados em tempo de execução
+que adaptam dinamicamente os dados trocados entre serviços ao formato esperado pelo código de serviço estático,
+aliviando assim o developer da necessidade de adaptar manualmente serviços novos ou existentes.
 
-\begin{enumerate}
-  \item Qual é o problema?
-  \item Porque é que é um problema interessante/desafiante?
-  \item Qual é a proposta de abordagem/solução?
-  \item Quais são as consequências/resultados da solução proposta?
-\end{enumerate}
-
-% E agora vamos fazer um teste com uma quebra de linha no hífen a ver se a \LaTeX\ duplica o hífen na linha seguinte se usarmos \verb+"-+… em vez de \verb+-+.
-%
-% zzzz zzz zzzz zzz zzzz zzz zzzz zzz zzzz zzz zzzz zzz zzzz zzz zzzz zzz zzzz comentar"-lhe zzz zzzz zzz zzzz
-%
-% Sim!  Funciona! :)
-
-% Palavras-chave do resumo em Português
 \begin{keywords}
-Palavra-chave 1, Palavra-chave 2, Palavra-chave 3, Palavra-chave 4
+    microsserviços, evolução de software, compatibilidade de serviços
 \end{keywords}
 % to add an extra black line

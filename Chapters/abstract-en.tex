@@ -8,53 +8,23 @@
 
 \typeout{NT FILE abstrac-en.tex}%
 
-In a distributed system, reasoning about the impact of modifying one of its compo-
-nents is non-trivial and may require a large bookkeeping effort to manually guarantee
-that the assumptions of its consumers are not broken — in fact, for the extreme case of
-a system where every component depends on all others, the bookkeeping effort grows
-quadratically in the number of system components.
-As microservice-based architectures become evermore widely adopted, finding ways
-to manage their evolution also becomes more important. Depending on how critical a
-microservice is in a system, a single erroneous change leading to it failing may cause
-a cascade of failures across other microservices. Because of this, there is a need for
-ways to reliably ascertain the impact that a change to a component may have on the
-system as a whole. Whereas typical approaches to ensure that microservices are behaving
-“properly” try to verify this via empirical test-based validation, our approach attempts to
-ensure this via a type-based relation between specifications (descriptions of microservices’
-interfaces).
-In this dissertation we present Regent, a distributed tool that uses the aforementioned
-relation to preserve the “proper” behaviour of a distributed system by rejecting addi-
-tions or modifications that would threaten it. In some cases, Regent may detect that a
-microservice is not directly compatible with the rest of the system but could be made so
-if slightly modified. When this happens, Regent uses its knowledge of the microservice’s
-interface to create a lightweight proxy capable of automatically adapting its interface
-at runtime, which frees up the programmer from having to manually adapt either the
-existing microservices or the new one.
+In contrast to traditional system designs, microservice architectures allow great
+scalability, availability, and delivery by separating the elements of a large project into independent entities linked through a network (services), however they offer no
+safety mechanisms for evolving and discontinuing functionalities provided by services.
 
+Changing the definition of an element in a regular program can be accomplished quickly with the aid of automated tools.
+Distributed systems do not have tools that are comparable to those used in centralized systems.
+In the absence of tools that alleviate this problem,
+developers are left with the burden of manually tracking down and resolving problems caused by uncontrolled updates.
 
-Regardless of the language in which the dissertation is written, a summary is required in the same language as the main text and another summary in another language. It is assumed that the two languages in question are Portuguese and English.
+Whereas traditional approaches ensure that microservices are properly behaving by validating their behavior through empirical tests,
+our solution seeks to supplement the conventional approach by providing mechanisms that support the validation of deployment operations and the evolution of microservice interfaces.
 
-The abstracts should appear first in the language of the main text and then in the other language. For example, if the dissertation is written in Portuguese the abstract in Portuguese will appear first, then the abstract in English, followed by the main text in Portuguese. If the dissertation is written in English, the abstract in English will appear first, then the abstract in Portuguese, followed by the main text in English. 
-
-In the \LaTeX\ version, the NOVAthesis template will automatically order the two abstracts taking into account the language of the main text. You may change this behaviour by adding
-\begin{verbatim}
-    \abstractorder(<MAIN_LANG>):={<LANG_1>,...,<LANG_N>}
-\end{verbatim}
-\noindent to the customization area in the document preamble, e.g.,
-\begin{verbatim}
-    \abstractorder(de):={de,en,it}
-\end{verbatim}
-
-The abstracts should not exceed one page and, in a generic way, should answer the following questions (it is essential to adapt to the usual practices of your scientific area):
-
-\begin{enumerate}
-  \item What is the problem?
-  \item Why is this problem interesting/challenging?
-  \item What is the proposed approach/solution?
-  \item What results (implications/consequences) from the solution?
-\end{enumerate}
+We present a microservice management system that verifies the safety of modifications to service interfaces
+and allows for interface evolution using runtime-generated proxies that dynamically convert data sent between services to the format anticipated by static service code,
+thereby relieving the developer of the need to manually adapt either new or existing services.
 
 % Palavras-chave do resumo em Inglês
 \begin{keywords}
-Keyword 1, Keyword 2, Keyword 3, Keyword 4, Keyword 5, Keyword 6, Keyword 7, Keyword 8, Keyword 9
+    microservices, software evolution, service compatibility
 \end{keywords} 

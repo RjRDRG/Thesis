@@ -12,7 +12,7 @@
 \label{cha:related_work}
 
 As mentioned in Section 1, this work will encompass the development of
-mechanisms for evaluating and managing the soundness of updates in RESTfull service contracts.
+mechanisms for evaluating and managing the soundness of updates in RESTfull \cite{feng2009rest} service contracts.
 We now summarize the most important works of literature relating to the evolution of microservices and their APIs.
 
 \section{Web API Description Languages} % (fold)
@@ -37,7 +37,7 @@ client code generation in different programming languages, load test scripts, an
 \paragraph{}
 
 The OpenAPI Specification (OAS) \cite{openAPI} is the most widely adopted Restful API Description Language;
-it defines a standard, language-agnostic interface that allows both humans and computers to discover and
+it defines a standard language-agnostic interface that allows both humans and computers to discover and
 understand the capabilities of a service without access to source code, documentation, or network traffic inspection.
 When properly defined, a consumer can understand and interact with the remote service with a minimal amount of implementation logic.
 
@@ -54,7 +54,7 @@ Two ideas are embodied in the proposed language:
 \paragraph{Refinement Types} \cite{freeman1991refinement} can be used to express the properties of data exchanged.
 A refinement type x can be defined as:
 \[ x:T \rightarrow e \]
-Where x is an object of the primitive type T, and e is a predicate which returns true or false depending on whether the value conforms to the boolean expression (eg. x > 10).
+Where x is an object of the primitive type T, and e is a predicate which returns true or false depending on whether the value conforms to the boolean expression (e.g.\ x > 10).
 
 \paragraph{Pre- and post-conditions} can be used to express relationships between data sent in
 requests, and the data returned in responses. These conditions can be expressed as a collection of Hoare triple assertions
@@ -190,7 +190,7 @@ The need for optional fields in the above cases is due to a lack of information 
 In order to support required fields with backwards-forwards compatibility, the system should enforce required fields when the consumer and producer agree on the schema,
 and only use default values when the consumer and producer disagree on the schema.
 
-These limitations are problematic because, in order to enforce required fields in former case,
+These limitations are problematic because, in order to enforce required fields in the former case,
 validation logic would need to be written repeatedly by programmers (in the same layer as the business logic).
 This validation should be in a layer above because, the scale of the validation logic is proportional to the complexity of messages being validated;
 for messages with more properties, particularly those with nested objects, the validation footprint can rise dramatically in terms of both line-count and logical complexity.
@@ -199,7 +199,7 @@ for messages with more properties, particularly those with nested objects, the v
 
 The aforementioned frameworks include built-in support for event-driven and RPC communication methods,
 however, if a RESTful communication approach is adopted, these frameworks will be unable to manage changes in the signature of endpoints
-(eg. changing the method of REST endpoint's from GET to POST); only changes in record schemas will be managed in this case.
+(e.g.\ changing the method of REST endpoint's from GET to POST); only changes in record schemas will be managed in this case.
 To decrease the complexity of the evolution adaptation process, we believe it is necessary to handle both the evolution of records schemas, and the evolution of API signatures in a single integrated approach.
 
 \subsection{Chain of adapters} % (fold)
@@ -215,8 +215,8 @@ This technique is discussed in depth in the work \cite{13}. The key concepts of 
 When a new service API is published, the old API is not decommissioned;
 instead, it is made available in a different namespace.
 In a RESTful system, this often entails supporting operations in different versions;
-Endpoints belonging to the API in v1.0 can be made accessible via the path http://example.system/v1,
-whereas endpoints belonging to the API in v2.0 are accessible via the path http://example.system/v2.
+Endpoints belonging to the API in v1.0 can be made accessible via the path \texttt{http://example.system/v1},
+whereas endpoints belonging to the API in v2.0 are accessible via the path \texttt{http://example.system/v2}.
 
 The previous API implementations are replaced by adapters that redirect all calls to the next API version implementation and also translate data structures as necessary.
 
@@ -288,7 +288,7 @@ their existing service implementations will continue to function correctly even 
 \label{sec:service_integration_adapters}
 
 There has been substantial investigation on the adaptability of services in the context of service-oriented architectures.
-Although SOA \cite{7} and Microservices \cite{14} are similar in that they both use a separation approach based on services,
+Although SOA \cite{7} and Microservices \cite{microservices} are similar in that they both use a separation approach based on services,
 these two designs differ in several important ways, most notably in that microservices are loosely coupled whereas SOA services are tightly tied due to common data storage between services.
 As a result, adaptability in SOA is focused on service integration and replaceability rather than evolution.
 
