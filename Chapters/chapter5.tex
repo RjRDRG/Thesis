@@ -100,12 +100,12 @@ The main disadvantage of this strategy is that consistency is not guaranteed whe
 When decomposing a software system into components, we must decide how to divide the pieces.
 The concept of independent replacement and upgrade-ability are critical properties when designing a component.
 The disadvantage of incorporating components into services is that we must be concerned about changes to one service breaking its consumers.
-The traditional integration approach is to attempt to resolve this issue through the use of versioning.
+The conventional approach is to resolve this issue through the use of versioning.
 In the context of microservices, versioning entails the maintenance of multiple deployments of the same service in distinct versions.
 We can minimize the use of versioning by designing services in such a way that they are as tolerant as possible to supplier changes,
 utilizing techniques such as Domain-Driven Design (DDD) \cite{ddd}.
 DDD is a software design approach that decomposes a complex system into multiple autonomous bounded contexts,
-where all the structure and language of software (class names, class methods, class variables) match the business domain.
+where all the software structure (e.g\ methods, classes, variables) match the business domain.
 
 \section{Microservice Lifecycle Management} % (fold)
 \label{sec:microservice_lifecycle_management}
