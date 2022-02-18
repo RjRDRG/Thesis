@@ -78,7 +78,7 @@ For example: renaming two fields of the same type; inserting a new field and rem
 To solve this problem without requiring human intervention,
 all elements must be tagged with an immutable and unique key,
 and the verification process must use element keys rather than element names.
-Editors for low-code visual languages, such as OutSystems or Kony Mobility, can manage element keys transparently and automatically;
+Low-code visual language editors, such as the OutSystems platform \cite{golovin2017outsystems}, can manage element keys transparently and automatically;
 however, in the proposed approach, tags must be manually inserted in the WADL definitions.
 
 \paragraph{}
@@ -132,9 +132,9 @@ in order to keep the endpoints usable by both external and internal clients, whi
 \paragraph{}
 
 The proxy creation mechanism makes use of the available meta-information present in the service registry
-to automatically update the proxy components as needed, adhering to a one-to-one protocol between producer and consumer services.
-Services are initially deployed without a proxy, proxies are generated on demand using a lazy instantiation method,
-that creates them when the first communication between corresponding services occurs.
+to automatically update the proxy components as needed.
+Services are deployed without a proxy, proxies are installed on demand using a lazy instantiation method,
+that creates them on the first communication between services.
 
 In essence, every communication contains information about the agreed-upon version, the handshake protocol uses this information to determine if a proxy update is required or not.
 The lazy instantiation method improves the maintainability of the system by

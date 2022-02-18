@@ -259,7 +259,7 @@ interfaces is used to create a lightweight proxy capable of dynamically adapting
 \paragraph{}
 
 The proxy creation mechanism makes use of the available meta-information
-to automatically update the proxy components as needed, adhering to a one-to-one protocol between producer and consumer services.
+to automatically update the proxy components as needed.
 
 The proxy can be installed on either consumers or producers;
 however, it is usually preferable to install the proxy on consumer services to avoid centralizing the load of message adaptation in a single point.
@@ -268,7 +268,7 @@ it is usually beneficial to install the proxy in producers, since it is difficul
 
 \paragraph{}
 
-Services are initially deployed without a proxy, proxies are generated on demand using a lazy instantiation method, that creates them when the first communication between corresponding services occurs.
+Services are deployed without a proxy, proxies are installed on demand using a lazy instantiation method, that creates them when the first communication between corresponding services occurs.
 
 In essence, every communication contains information about the agreed-upon version, the handshake protocol uses this information to determine if a proxy update is required or not.
 The lazy instantiation method improves the maintainability of the system by
@@ -276,9 +276,9 @@ simplifying deployment operations.
 
 \paragraph{}
 
-Under this approach, changes to type definitions in a producer module do not have immediate impact on the entire system by requiring global downtime.
-For instance, if a consumer and producer service agree on a type definition for an given endpoint,
-their existing service implementations will continue to function correctly even if that type definition evolves.
+With this approach, changes to definitions in a module do not have an immediate effect on the whole system, because they do not require the redeployment of consumers.
+For instance, if two services agree on a definition for a given endpoint,
+their existing implementations will continue to function even if that endpoint definition evolves over time.
 
 \section{Service Integration Adapters} % (fold)
 \label{sec:service_integration_adapters}
@@ -290,12 +290,12 @@ As a result, adaptability in SOA is focused on service integration and replaceab
 
 \paragraph{}
 
-In the setting of SOA, adapters are used to wrap the various services which are in general heterogeneous,
-(communicate with different protocols and support different data formats) so that they can appear as homogeneous and therefore easier to be integrated.
+In the setting of SOA, adapters are used to wrap the heterogeneous services that communicate with distinct protocols and data formats,
+in order to make them homogeneous and integrated them more easily.
 
 These adapters presume that data adaptation has already been established by developers at an upper layer,
-their primary concern is merging services with different communication protocols and mismatches between operations that have the
-same functionality but differ in operation name, number, order or type of operation input/output parameters.
+their primary concern is integrating services with distinct communication protocols and mismatches between operations that have the
+same functionality but different signatures (e.g\ parameters name, order, type).
 
 \paragraph{}
 
@@ -336,25 +336,25 @@ The service registry will aid in the application of these strategies, since it i
 \paragraph{}
 
 A blue-green deployment approach is the most often used deployment strategy.
-The new version (the blue version) is made available for testing and review, while users continue to use the stable version (the green version).
-Users are moved to the blue version after the version passes all compliance checks.
+The new version ''blue'' is made available for testing and review, while users continue to use the stable version ''green''.
+Users are migrated to the new version after it has passed all compliance tests.
 
 \paragraph{}
 
 A common alternative strategy is to have two A/B versions active at the same time, with some users using one and others using the other.
-This can be used to test user interface changes and other features and gather feedback from users.
-It can also be used to test proper operation in a production setting where problems affect only a few users.
+This strategy can be used to test and gather feedback on modifications to user interfaces.
+It can also be used to troubleshoot problems that affect only a subset of users, in a production setting.
 
 \paragraph{}
 
-A canary deployment tests the new version, but if a problem is identified, it rapidly reverts to the previous version.
-This can be performed in either of the above approaches.
+A canary deployment can be used to evaluate a new version, if a problem is discovered, the deployment is quickly reverted.
+This technique can be performed in either of the above approaches.
 
 \paragraph{}
 
 A rolling deployment is an alternative strategy that gradually replaces instances of an service previous version with instances of the new version.
-Before scaling down the old components, a rolling deployment typically waits for new pods to become ready via a readiness check.
-If a significant problem arises, the rolling deployment can be halted.
+Before scaling down the old components, a rolling deployment normally waits for additional pods to become available through a readiness check.
+If a significant problem arises, the rolling deployment is halted.
 
 \paragraph{}
 
