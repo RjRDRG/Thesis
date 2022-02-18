@@ -128,7 +128,7 @@ Docker \cite{docker} is the most popular container technology. It is built on to
 \end{itemize}
 
 Additionally, Docker provides a mechanism for packaging code and its dependencies, referred to as container images.
-A container image is a lightweight, standalone executable package of software that contains all the components necessary to run an application: code, libraries, runtime and settings.
+A container image is an executable package of software that contains all the components necessary to run an application: code, libraries, runtime and settings.
 
 \paragraph{}
 
@@ -150,20 +150,13 @@ Kubernetes accomplishes this through a well-defined, high-level architecture tha
 \begin{itemize}
     \item Pod: Encapsulates an application's container (or multiple containers),
     storage resources, haves a unique network IP address, and provides configuration options for the container(s).
-    \item Service: Is an abstraction which defines a logical set
-    of Pods and a policy by which to access them.
+    \item Service: Is an abstraction that defines a logical set of Pods as well as a policy for accessing them.
     \item Volume: Is a directory which is accessible to the
     Containers in a Pod.
-    \item Namespace: Provide a scope for names. Names
-    of resources need to be unique within a namespace, but not
-    across namespaces.
-    \item Deployment: Describes the desired state of the system. The
-    Deployment Controller changes the actual state to the desired
-    state at a controlled rate.
-    \item ReplicaSet: Ensures that a specified number of pod replicas
-    are running at any given time.
-    \item DaemonSet: ensures that all (or some) Nodes run a copy of
-    a Pod.
+    \item Namespace: Defines the scope of resource names, which must be distinct within the same namespace but not across namespaces.
+    \item Deployment: Describes the desired state of the system.
+    \item ReplicaSet: Ensures that a certain number of pod replicas are active at all times.
+    \item DaemonSet: Ensures that all, or some Nodes are running a replica of a Pod.
     \item StatefulSet: Is used to manage stateful applications.
 \end{itemize}
 
