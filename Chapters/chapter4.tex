@@ -125,7 +125,7 @@ To ensure that changes in producers contracts do not require the consumers upgra
 will be supported at runtime by a generated proxy component that dynamically adapts the data exchanged between services.
 The proxy adapter is capable intercepting and evaluating all the outgoing and incoming TCP requests to determine whether
 they should be left unchanged or how they should be transformed using an adaptation protocol that extends the compatibility mechanism discussed above.
-We allow for addition, removal, renaming and type migration of data fields of a producer module without breaking or upgrading consumer services.
+We allow for the addition, deletion, renaming, and type migration of data fields in a producer module without disrupting or upgrading consumer services.
 More complex changes in data fields, such as altering the format of a date, will be permitted through the use of user-defined adaption functions.
 We also support the modifications on the signatures of WebAPIs, such as changing a path parameter in a HTTP endpoint to a query parameter.
 The contract translation specification between two compatible contracts can be audited and modified by a programmer before it is employed by an adapter.

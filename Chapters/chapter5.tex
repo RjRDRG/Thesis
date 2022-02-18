@@ -14,31 +14,33 @@
 In this section, the technology behind the development and deployment of a microservices-based
 application system will be described using the underlying design principles.
 
+The technology underlying the development and deployment of microservices-based applications will be described in this section:
+
 \section{Microservices} % (fold)
 \label{sec:microservices}
 
 Microservices \cite{microservices, microservices2017tenets, microservicesTomorrow} are an architectural style in which software is developed using self-contained components that
 communicate with one another via standardized interfaces and lightweight mechanisms.
-These services segregate fine-grained business functionalities and can be independently deployed, scaled, and tested by fully automated machinery.
-There is a bare minimum of centralized management, and each service may be written in a different programming language and use different data storage technologies.
+These services segregate fine-grained business functionalities and can be independently deployed, scaled, and tested by automated mechanisms.
+There is virtually no centralized management, and each service may be written in a different programming language and employ a different data storage technology.
 
 \paragraph{}
 
 To understand the microservice style it's useful to compare it to the monolithic style:
-A monolithic application is built often using the Model-View-Controller (MVC) pattern ~\cite{mvc}, which is divided in three main parts:
-The view, a client-side user interface, consisting of HTML pages and javascript running in a browser on the user's machine;
+A monolithic application is built often using the Model-View-Controller (MVC) pattern ~\cite{mvc}, which is composed by three parts:
+The view, a client-side user interface composed of HTML pages and Javascript that runs in the user's browser;
 The model, a relational database management system;
-The controller, a server-side application that handles requests, execute domain logic, retrieve and update data from the database,
-and selects and populates the views to be sent to the browser.
+The controller, a server-side application that handles requests, retrieves and updates data from the database, executes domain logic,
+and populates the views that are sent to the browser.
 
 \paragraph{}
 
 The server-side application is a monolith a single logical executable, in which all logic for handling requests runs as a single process,
 different domains of the application are divided into classes, functions, and namespaces by utilizing the basic features of a programming language.
 
-When monolithic applications need to scale and maintain a high level of availability, they become a source of frustration:
+When large monolithic applications must scale while maintaining a high level of availability, they become a source of frustration:
+Scaling the server-side application involves scaling all the application functionalities, rather than the functionalities that require greater resources;
 Any small change made to the server-side application, involves building and re-deploying the entire monolith;
-Scaling the server-side application involves scaling all the application functionalities, rather than the functionalities that require greater resources.
 
 \begin{figure}[htbp]
     \centering
@@ -62,15 +64,13 @@ making different components scalable across multiple nodes and limiting cascadin
 
 \paragraph{Decentralized Data Management}
 
-While monolithic applications typically use a single logical database for persistent data,
-microservices offer higher flexibility, fault-tolerance and scalability by letting each service manage its own database, either different instances of the same database technology,
-or entirely different database systems.
-Decentralizing the responsibility for data across different services has implications in the implementation of cross-domain operations that affect multiple resources.
-The common approach for dealing with this problem in database systems is to use transactions to guarantee consistency when updating multiple resources.
-Building and maintaining applications that use transactions in a distributed setting is notoriously difficult,
-as a result, microservice architectures emphasize transaction-less coordination between services,
-with explicit recognition that consistency may only be eventual consistency and that problems are dealt with by compensating operations.
-
+While monolithic applications typically use a single logical database for persistent data, microservices provide greater flexibility, fault tolerance,
+and scalability by allowing each service to manage its own database, which can be a different instance of the same database technology or a completely different database system.
+Decentralizing data responsibility across services has implications for the implementation of cross-domain operations affecting multiple resources.
+The common approach for dealing with the problem of consistency when updating multiple resources in a database system is to use transactions.
+Building and maintaining applications that employ distributed transactions is notoriously difficult; as a result,
+microservice architectures advocate for transaction-less service coordination while acknowledging
+that consistency will be only eventual and that divergence must be addressed with compensating operations.
 
 \paragraph{Inter-process Communication Strategies}
 
