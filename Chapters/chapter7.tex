@@ -162,30 +162,30 @@ In addition to the requirements listed in the ~\ref{fig:benchmark}, the platform
 \end{itemize}
 
 The approaches proposed to be evaluated in comparison to our suggested solution are schema resolution rules, chain-adapter pattern, and traditional versioning.
-
+Each solution will be evaluated in terms of granularity, terminal, type, scalability, maintainability and performance.
 \paragraph{}
 
-The architecture of the benchmark platform can be seen in ~\ref{fig:canvas}
+The architecture of the benchmark platform can be seen in section ~\ref{fig:canvas}.
 The architecture components, and their applications are described below:
 
-\paragraph{Kubernetes} will be the test environment.
+\paragraph{Kubernetes ~\cite{kubernetes}} will be the test environment.
 It will host the services holding the solutions implementations.
 The loading testing scripts will also be managed via services in Kubernetes.
 
-\paragraph{Argo} is a robust pipeline engine for Kubernetes, It provides simple, flexible mechanisms for specifying constraints
+\paragraph{Argo ~\cite{argo}} is a robust pipeline engine for Kubernetes, It provides simple, flexible mechanisms for specifying constraints
 between tasks and for linking the output of any task as an input to subsequent task.
 The argo framework will be used to specify the evolution of services through tasks in an argo workflow,
 as well as to manage active virtual users by deploying and stopping docker images that contain load testing scripts.
 Complex experiments can be made with Argo since the state of each deployment in Kubernetes can be queried via a task
 and utilized as input in a decision that leads to different tasks.
 
-\paragraph{API.guro} is repository of applications Web APIs written in the OpenAPI specification.
+\paragraph{API.guro  ~\cite{apiguro}} is repository of applications Web APIs written in the OpenAPI specification.
 The experiments will use the apis available in this repository as a datasets.
 
-\paragraph{OpenAi Generator} is a tool for generating API client libraries, server stubs, configurations, and documentation from OpenAPI documents.
+\paragraph{OpenAi Generator ~\cite{openapigenerator}} is a tool for generating API client libraries, server stubs, configurations, and documentation from OpenAPI documents.
 It will be used to enforce the conformance of tested solution implementations to their OpenAPI contracts.
 
-\paragraph{Promotheus} is a pull-based monitoring system.
+\paragraph{Promotheus ~\cite{turnbull2018monitoring}} is a pull-based monitoring system.
 It periodically sends HTTP scrape requests, the response to this requests is parsed in storage along with the metrics for the scrape itself.
 Prometheus provides a query language that allows the metrics to be aggregated by events, components or metadata.
 The gathered will be visualized in this platform via Grafana dashboards.
