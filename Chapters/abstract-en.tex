@@ -8,6 +8,30 @@
 
 \typeout{NT FILE abstrac-en.tex}%
 
+In a distributed system, reasoning about the impact of modifying one of its compo-
+nents is non-trivial and may require a large bookkeeping effort to manually guarantee
+that the assumptions of its consumers are not broken — in fact, for the extreme case of
+a system where every component depends on all others, the bookkeeping effort grows
+quadratically in the number of system components.
+As microservice-based architectures become evermore widely adopted, finding ways
+to manage their evolution also becomes more important. Depending on how critical a
+microservice is in a system, a single erroneous change leading to it failing may cause
+a cascade of failures across other microservices. Because of this, there is a need for
+ways to reliably ascertain the impact that a change to a component may have on the
+system as a whole. Whereas typical approaches to ensure that microservices are behaving
+“properly” try to verify this via empirical test-based validation, our approach attempts to
+ensure this via a type-based relation between specifications (descriptions of microservices’
+interfaces).
+In this dissertation we present Regent, a distributed tool that uses the aforementioned
+relation to preserve the “proper” behaviour of a distributed system by rejecting addi-
+tions or modifications that would threaten it. In some cases, Regent may detect that a
+microservice is not directly compatible with the rest of the system but could be made so
+if slightly modified. When this happens, Regent uses its knowledge of the microservice’s
+interface to create a lightweight proxy capable of automatically adapting its interface
+at runtime, which frees up the programmer from having to manually adapt either the
+existing microservices or the new one.
+
+
 Regardless of the language in which the dissertation is written, a summary is required in the same language as the main text and another summary in another language. It is assumed that the two languages in question are Portuguese and English.
 
 The abstracts should appear first in the language of the main text and then in the other language. For example, if the dissertation is written in Portuguese the abstract in Portuguese will appear first, then the abstract in English, followed by the main text in Portuguese. If the dissertation is written in English, the abstract in English will appear first, then the abstract in Portuguese, followed by the main text in English. 

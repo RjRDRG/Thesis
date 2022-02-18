@@ -25,24 +25,25 @@ There is a bare minimum of centralized management, and each service may be writt
 \paragraph{}
 
 To understand the microservice style it's useful to compare it to the monolithic style:
-A monolithic application is built often using the Model-View-Controller (MVC) pattern \cite{mvc}, which is divided in three main parts:
-The view, a client-side user interface, consisting of HTML pages and javascript running in a browser on the user's machine.
-The model, a relational database management system,
-The controller, a server-side application that handles requests, execute domain logic, retrieve and update data from the database, and selects and populates the views to be sent to the browser.
+A monolithic application is built often using the Model-View-Controller (MVC) pattern ~\cite{mvc}, which is divided in three main parts:
+The view, a client-side user interface, consisting of HTML pages and javascript running in a browser on the user's machine;
+The model, a relational database management system;
+The controller, a server-side application that handles requests, execute domain logic, retrieve and update data from the database,
+and selects and populates the views to be sent to the browser.
 
 \paragraph{}
 
-This server-side application is a monolith a single logical executable, in which all logic for handling requests runs as a single process,
+The server-side application is a monolith a single logical executable, in which all logic for handling requests runs as a single process,
 different domains of the application are divided into classes, functions, and namespaces by utilizing the basic features of a programming language.
 
-When monolithic applications need to scale and maintain a high level of availability, they become a source of frustration.
-Any small change made to the server-side application, involves building and re-deploying the entire monolith.
+When monolithic applications need to scale and maintain a high level of availability, they become a source of frustration:
+Any small change made to the server-side application, involves building and re-deploying the entire monolith;
 Scaling the server-side application involves scaling all the application functionalities, rather than the functionalities that require greater resources.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=3in]{microVSmono}
-    \caption{Monoliths and Microservices}
+    \caption{Monoliths and Microservices \cite{microservices}}
     \label{fig:monoliths and microservices}
 \end{figure}
 
@@ -76,11 +77,11 @@ with explicit recognition that consistency may only be eventual consistency and 
 \citeauthor{microservices}, a well-known author in the context of microservices, advocates what he calls ''smart endpoints and dumb pipes'' for microservices communication.
 Enterprise Service Buses (ESB) \cite{esb} were previously frequently used in service-oriented architecture (SOA) systems,
 and it was common to incorporate orchestration and transformation logic into the communication infrastructure,
-making the pipe "smart." There were multiple problems with this approach:
+making the pipe ''smart''. There were multiple problems with this approach:
 the tooling was complex and expensive, and it was difficult to troubleshoot when problems occurred in production environments.
 
 The reverse approach has been adopted with microservices,
-where services own their domain-centric logic "smart endpoints" and use "dumb pipes" as a transport method.
+where services own their domain-centric logic ''smart endpoints'' and use ''dumb pipes'' as a transport method.
 The majority of communication between microservices is done via request/response-based communication or event-driven messaging.
 Because these two methods have such dissimilar properties, it's important to weigh their strengths, and the scenarios that call for each.
 
@@ -121,7 +122,7 @@ VMs virtualize an entire machine down to the hardware layers, while containers o
 
 Docker \cite{docker} is the most popular container technology. It is built on top of the following technologies: Kernel namespaces, Cgroups, Copy-on-write File system.
 \begin{itemize}
-    \item Namespaces: Isolate the kernel resources (processes, filesystem, users, network stacks, \ldots) used by each container.
+    \item Namespaces: Isolate the kernel resources (e.g.\ processes, filesystem, users, network stacks) used by each container.
     \item Cgroups: Isolate the hardware resources used by each container.
     \item Copy-On-Write File system: Allows several containers to share common data.
 \end{itemize}
@@ -184,38 +185,38 @@ The following example demonstrates the mechanism:
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=5in]{adapter_example}
-    \caption{Evolution of modules Catalog, Marketing, Backoffice}
+    \caption{Evolution of modules Catalog, Marketing, Backoffice \cite{seco2020robust}}
     \label{fig:evolution_of_modules}
 \end{figure}
 
-Consider a marketing system (Figure ~\ref{fig:evolution_of_modules}) that comprises three distinct modules: Catalog, Marketing, and BackOffice.
+Consider the marketing system shown in Figure ~\ref{fig:evolution_of_modules} that comprises three distinct modules: Catalog, Marketing, and BackOffice.
 These three simple modules combined, form a triangle of dependencies, complex enough to demonstrate the proposed mechanism.
 Please note that the Catalog module is a producer, whereas the Marketing module is a producer and a consumer.
 
 Each module has a unique name, a collection of type and function definitions, and a set of type and function references.
 If a producer module exposes definitions, they can be used by other consumer modules via an explicit reference.
-Each programming element is accompanied by an immutable and unique key; for instance – the key of type "Product" is k1.
+Each programming element is accompanied by an immutable and unique key; for instance – the key of type ''Product'' is k1.
 These keys enable elements to be identified even after they have been renamed or reinstated.
 
 Initially, we have a system composed of a collection of services,
-each of which hosts an instance of one of the deployed modules (in grey Figure ~\ref{fig:evolution_of_modules}).
+each of which hosts an instance of one of the deployed modules shown in grey in Figure ~\ref{fig:evolution_of_modules}.
 The reference definitions indicate their interactions.
 
 \paragraph{}
 
-In a second phase, we develop version 2 of the Catalog and Marketing modules independently (Figure ~\ref{fig:evolution_of_modules}).
-In module Catalog, we rename the element "Amount" to "Price" and add the attribute "Desc", while in module Marketing, we rename "Promote" to "Enhance".
+In a second phase, we develop version 2 of the Catalog and Marketing modules independently.
+In module Catalog, we rename the element ''Amount'' to ''Price'' and add the attribute ''Desc'', while in module Marketing, we rename ''Promote'' to ''Enhance''.
 The module BackOffice has not been modified at this point and will become out of sync with the other modules.
 In Figure ~\ref{fig:evolution_of_modules}, the newly added and modified elements are highlighted in red and blue, respectively.
 
 \paragraph{}
 
-In a third phase, Catalog version 3 is created, with the attribute "Discount" of the element "Product" removed.  (Figure ~\ref{fig:evolution_of_modules}).
-This version cannot be deployed in conjunction with version 2 of Marketing, as the attribute is used by the function "Enhance".
+In a third phase, Catalog version 3 is created, with the attribute ''Discount'' of the element ''Product'' removed.  (Figure ~\ref{fig:evolution_of_modules}).
+This version cannot be deployed in conjunction with version 2 of Marketing, as the attribute is used by the function ''Enhance''.
 
-We can deploy both modules together if we modify the definition of "Enhance" to remove the use of the attribute "Discount", resulting in version 3 of Marketing.
+We can deploy both modules together if we modify the definition of ''Enhance'' to remove the use of the attribute ''Discount'', resulting in version 3 of Marketing.
 Additionally, we could deploy version 3 of Marketing first and then version 3 of Catalog, but not vice versa.
-Besides this, in the reference to catalog we are permitted to retain the attribute "Discount" in the definition of the type "Product".
+Besides this, in the reference to catalog we are permitted to retain the attribute ''Discount'' in the definition of the type ''Product''.
 As long as the attribute is not used, correctness is guaranteed.
 In Figure ~\ref{fig:evolution_of_modules}, the elements that have been removed are highlighted in yellow.
 
@@ -224,9 +225,9 @@ the proposed system is capable of overcoming differences in contract definitions
 that adapts automatically to the following types of changes:
 
 \begin{itemize}
-    \item \textbf{Adding new attributes to a record type} The "Desc" attribute was added to Catalog, and thus the data returned by this module will contain values for this attribute.
+    \item \textbf{Adding new attributes to a record type} The ''Desc'' attribute was added to Catalog, and thus the data returned by this module will contain values for this attribute.
     Other modules will retain this data (as unknown attributes) in order to ensure that no data is lost when crossing services boundaries.
-    \item \textbf{Renaming functions} The "Promote" function in module Marketing has been renamed to "Enhance", which will have an effect on the endpoints exposed by the service.
+    \item \textbf{Renaming functions} The ''Promote'' function in module Marketing has been renamed to ''Enhance'', which will have an effect on the endpoints exposed by the service.
     At runtime, the proxy is dynamically generated to use the actual endpoint name when issuing calls, avoiding the need to update and redeploy the service Backoffice.
     \item \textbf{Removing unused attributes or functions.} Unused elements do not require explicit adaptation.
 \end{itemize}
