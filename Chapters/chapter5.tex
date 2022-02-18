@@ -218,11 +218,11 @@ the proposed system is capable of overcoming differences in contract definitions
 that adapts automatically to the following types of changes:
 
 \begin{itemize}
-    \item \textbf{Adding new attributes to a record type} The ''Desc'' attribute was added to Catalog, and thus the data returned by this module will contain values for this attribute.
-    Other modules will retain this data (as unknown attributes) in order to ensure that no data is lost when crossing services boundaries.
-    \item \textbf{Renaming functions} The ''Promote'' function in module Marketing has been renamed to ''Enhance'', which will have an effect on the endpoints exposed by the service.
-    At runtime, the proxy is dynamically generated to use the actual endpoint name when issuing calls, avoiding the need to update and redeploy the service Backoffice.
-    \item \textbf{Removing unused attributes or functions.} Unused elements do not require explicit adaptation.
+    \item \textbf{Adding new attributes to a type} As a result of the addition of the "Desc" attribute to Catalog, the data returned by this module will include values for this attribute.
+    Other modules will keep this data (as unknown attributes) to ensure that no data is lost.
+    \item \textbf{Renaming functions} The "Promote" function in Marketing module has been renamed "Enhance," which will affect the endpoints exposed by the service.
+    The proxy is dynamically built at runtime to use the actual endpoint name while issuing calls, eliminating the need to update and redeploy the service Backoffice.
+    \item \textbf{Eliminating unused attributes and functions} Unused elements do not require explicit adaptation.
 \end{itemize}
 
 Traditional approaches, such as HTTP, are insufficiently robust to handle these types of changes, effectively rendering them breaking changes.
@@ -234,4 +234,4 @@ This adaptive approach enables gradual module deployment of the referenced modif
 
 Experimental data \cite{seco2020robust} collected over a five-year development period on the evolution of three large software factories each containing over 1000 modules
 (a raw dataset containing 8889 production deployments with a total of 23986 signature changes)
-indicates that this approach would be effective in an average of 57\% of deployments that would require adaptation and recompilation.
+indicates that this approach would be effective in an average of 57\% of deployments.
