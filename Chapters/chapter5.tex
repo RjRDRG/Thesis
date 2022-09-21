@@ -93,6 +93,8 @@ where the client publishes a message to multiple receivers and can process the r
 In this approach there is no orchestrator, each service knows their role and what to do based on events that occurred.
 The main disadvantage of this strategy is that consistency is not guaranteed when multiple services consume events and one of them fails.
 
+TODO: include reference to distributed transaction patterns, and the channels that are used in each approach https://developers.redhat.com/articles/2021/09/21/distributed-transaction-patterns-microservices-compared#the_dual_write_problem
+
 \paragraph{Evolutionary Design}
 When decomposing a software system into components, we must decide how to divide the pieces.
 The concept of independent replacement and upgrade-ability are critical properties when designing a component.
@@ -160,6 +162,7 @@ Kubernetes accomplishes this through a well-defined, high-level architecture tha
 Kubernetes is a more sophisticated container management system than Docker Swarm.
 Docker Swarm is only compatible with Docker, whereas Kubernetes is compatible with other container services.
 In comparison to Swarm, Kubernetes is more difficult to deploy and manage, however is said to be more scalable.
+
 
 \section{Contract Evolution in MicroService Architectures} % (fold)
 \label{sec:contract_evolution_in_microservice_architectures}
