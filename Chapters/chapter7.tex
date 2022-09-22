@@ -15,7 +15,7 @@ In this chapter, we present the design of our system and discuss alternatives to
 A modular approach was adopted to construct the system;
 each module is entirely independent, making it easy to interchange alternative approaches.
 We dedicate the first half of this chapter to define the goals that guided the design of system,
-the remainder of the chapter will be used to discuss each module in sequence.
+the remainder of the chapter will be used to discuss each design aspect in turn.
 
 \section{Discussion} % (fold)
 \label{sec:discussion}
@@ -31,65 +31,170 @@ The goals that informed our decisions, are outlined below by their priority:
     \item Integration with existing tools and workflows
     \item Minimize conception and maintenance effort
     \item Automatic validation of the safety of deployment operations
+    \item Consumers and producers are unaware to the presence of adapters
     \item Transactionless deployment and upgrade of service contracts
     \item No downtime when upgrading service contracts
     \item No overhead when services communicate using the same contract version
 \end{itemize}
 
-When assigning weight to each compromise, we evaluated three factors:
-Flexibility: the applicability of the approach under diverse scenarios;
-Utility: the effort required to adopt and maintain the approach;
-Performance: the overhead associated with approach;
+Four principles were considered when evaluating each approach:
+\textbf{Flexibility} the applicability of the approach under diverse scenarios;
+\textbf{Effectiveness} the efficiency of an approach at solving a problem;
+\textbf{Utility} the effort required to adopt and maintain the approach;
+\textbf{Performance} the overhead associated with approach;
 
 In the prototype's design, we prioritized utility above performance because,
 in the common case, each service will communicate via up-to-date contracts and
 because the effort associated with adopting an approach will be proportional to the complexity and size of a contract and its evolution,
 whereas the performance overhead will remain mostly static under diverse contract changes, as it is largely attributable to communication costs.
-We prioritized flexibility above all other factors because if an approach isn't applicable under a scenario,
+We prioritized flexibility and effectiveness above other principles because if an approach isn't applicable or effective under a scenario,
 then it will be necessary to adopt hybrid solutions, which will have a detrimental effect on the utility of the entire solution.
 
-\section{Specification} % (fold)
-\label{sec:specification}
+\section{Aspects} % (fold)
+\label{sec:aspects}
 
-\paragraph{Description}
+\subsection{Communication protocol} % (fold)
+\label{sec:communication_protocol}
+
+The communication protocol defines the syntax, semantics and synchronization of communication between microservices.
+Our choice in the communication protocol is bounded by the adopted communication strategy between microservices, orchestration or choreography.
+Orchestration relies on request-response protocols while choreography relies on event-driven protocols.
+
+\paragraph{Approach}
+Most applications require a web presence and microservice systems that
+rely on choreography still require the HTTP request-response protocol to have a web presence,
+for this reason we chose to design our system around the orchestration pattern and the HTTP protocol.
+
+\paragraph{Alternatives}
+Other event-driven and request-response protocols, such as RPC, have a simplified
+syntax, and there are already a number of tools that support the evolution of schemas
+under these protocols, albeit with some limitations.
+
+\subsection{Contract Specification} % (fold)
+\label{sec:contract_specification}
+
 It is required that each microservice’s interface be
 described in a high-level language which abstracts away implementation details, because it is common
 for microservices to be implemented under different frameworks and programming languages.
-We use these interface specifications to clearly define and document the capabilities and dependencies of a service.
+We use these interface specifications to clearly define and document the offered capabilities of a service and its consumed resources and requirements.
 
 \paragraph{Approach}
-Because most API definition frameworks do not enable the explicit declaration of dependencies between services,
-and because external specifications would add effort to the working team, we solely utilize contracts to express the capabilities of a service.
-We detect service dependencies indirectly by examining request logs between services, in automated manner.
-
-\paragraph{Other Approaches}
-The explicit definition of service dependencies has two benefits: it allows for the automatic removal of un-utilized adapters without developer intervention,
+Because most API definition frameworks do not allow the explicit declaration of dependencies and requirements of a service,
+contracts are represented by two artifacts, one defines the capabilities of a service, and the other dictates its consumed resources and requirements.
+The definition of a service dependencies and requirements has three benefits: it allows a deployment to be validated and blocked if the corresponding requirements are not met within the system,
+it allows for the automatic removal of un-utilized adapters without developer intervention,
 and it allows developers to clearly see the impact of a contract change on the entire system, as well as the effort required to support the change.
-We considered that these benefits do not out weight the cost off the added documentation effort and that implicit detection of service
-dependencies gives a clear enough view of the system topology.
 
-\section{Evolution} % (fold)
+\paragraph{Alternatives}
+Services dependencies can be determined indirectly by automatically inspecting request logs between services.
+The advantage of this approach is the reduced documentation effort, but it comes at a cost because
+it is no longer possible to validate the safety of deployments;
+it is only possible to validate the safety of the removal of services.
+Un-needed adapters would also have to be removed manually by developers or through an automated inactivity-based warning system.
+
+\subsection{Compatibility Verification} % (fold)
+\label{sec:compatibility_verification}
+
+Intuitively, compatibility verification determines whether
+all the edited elements in a producer service contract are compatible with the ones effectively
+used by the consumer services, and whether the new contract requirements are met
+by the system’s existing resources.
+Edited elements are considered compatible if the information supplied by prior elements is sufficient to meet the edited elements parameters.
+Contract requirements are fulfilled if there are enough computational resources to accommodate the service and if all the
+service dependencies are available and reachable in the system.
+
+\paragraph{Approach}
+Instead of determining if a new contract version is compatible with all consumer references,
+we evaluate only whether the new contract is compatible with the prior versions that are still in use, and if
+the service dependencies and requirements are met.
+If a new contract is missing a capability that was present in a previous version,
+the developers will need to verify if the capability is not being used
+and mark it as obsolete for the contract to be considered safe.
+The advantage of this approach is that it streamlines the verification process by eliminating the need
+for a specialized registry that centralizes all service contracts.
+It this approach, it is sufficient to store service contracts in the same repository as the service code, with semantic versioning, where
+each major version represents incompatible contract changes and minor versions represent backward compatible contract changes.
+
+\paragraph{Alternatives}
+The verification procedure examines both the producer contract and all consumer references to determine the safety of a deployment operation.
+This approach has the benefit of eliminating human error in the verification of un-utilized service capabilities when assessing the safety of contract changes.
+
+\subsection{Evolution Specification} % (fold)
+\label{sec:evolution_specification}
+
+It is not always possible to implicitly deduce the evolutions in a contract when comparing a new version to a prior version.
+For example, renaming one field \textbf{A->B} is indistinguishable, from inserting a new field \textbf{B} and removing another field of the same type \textbf{A}.
+The developer must declare which evolution occurred explicitly.
+
+\paragraph{Approach}
+The evolution is specified in a dedicated file, complete with its own syntax and rules,
+which outlines how to adapt calls between two versions of the contract.
+In this file all mappings between elements in each version are explicitly defined.
+A mapping for one element can fall into one of three types:
+\begin{itemize}
+    \item \textbf{Default value}: The developer provides a default value for the element.
+    This mapping is only valid if the default value has the same type and format as the element.
+    \item \textbf{Link}: The developer indicates that element X on the previous contract is equivalent to element Y in the new contract.
+    This mapping is only valid if the two elements have the same type and format.
+    \item \textbf{Function}: The developer applies a function over Xn elements of previous contract and indicates that the result of the function is equivalent to element Y in the new contract.
+    This mapping is only valid if the function's output type and format are equal to element Y and if the function's arguments match the type and format of the provided Xn elements.
+\end{itemize}
+Renamed fields in contracts are supported with the use of links.
+The addition of new fields in contracts is supported with the use of default values.
+Complex contract changes, such as changing the format of a date are supported with the use of functions.
+
+\paragraph{Alternatives}
+The evolution specification is defined in conjunction with the contract specification.
+Most web API specification languages already support default values and name aliases.
+With these two features it would be possible
+to support the following contract evolutions: renamed fields, addition of fields and removal of fields.
+For simple contract this alternative can seem appealing, but as the number of revisions and consumers in prior versions rises, this solution becomes impractical.
+This approach clutters the contract with information that is irrelevant to consumers, and makes the specification of complex contract changes more cumbersome.
+
+\subsection{Adapter Function} % (fold)
+\label{sec:adapter_function}
+
+The adaptation of messages is supported at runtime by a generated proxy component
+that dynamically adapts the data exchanged between services.
+
+\paragraph{Approach}
+The adapter implementation is generated from a template implementation that is completed by processing an evolution specification.
+The advantage of this approach is that the implementation will be more performant than the alternative approach,
+akin to difference between compiled and interpreted programming languages.
+
+\paragraph{Alternatives}
+The adapter haves a generic implementation and determines how to adapt messages by inspecting specialized headers in the
+message that indicate the message type, service and version and by consulting the corresponding evolution specification.
+The advantage of this approach is that a single adapter can convert messages from any type service and to any version as long as the evolution specification file is provided.
+The disanva
+
+adapter location
+
+management
+
+
+\subsection{Evolution} % (fold)
 \label{sec:evolution}
 
 \paragraph{Description}
 \paragraph{Approach}
 \paragraph{Other Approaches}
 
-\section{Validation} % (fold)
+\subsection{Validation} % (fold)
 \label{sec:validation}
 
 \paragraph{Description}
 \paragraph{Approach}
 \paragraph{Other Approaches}
 
-\section{Adaptation} % (fold)
+\subsection{Adaptation} % (fold)
 \label{sec:adaptation}
 
 \paragraph{Description}
 \paragraph{Approach}
 \paragraph{Other Approaches}
 
-\section{Management} % (fold)
+\subsection{Management} % (fold)
 \label{sec:management}
 
 \paragraph{Description}
