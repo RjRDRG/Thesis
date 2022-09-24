@@ -21,10 +21,12 @@ before delving into the implementation of each module in depth.
 
 The system was built using a modular approach;
 each module is entirely self-contained, making it simple to expand or replace system functionality.
+The system architecture is split into two distinct areas: the runtime, and the pipeline.
+The runtime architecture comprises all essential components to the system liveness,
+whereas the pipeline architecture covers all components needed during the system's provisioning and development.
 
-The system architecture is split into two distinct areas: the runtime, and the DevOps pipeline.
-
-\paragraph{}
+\subsection{Runtime Architecture} % (fold)
+\label{sec:runtime_architecture}
 
 The runtime environment is supported by Kubernetes,
 a simplified configuration with three microservices is depicted in Figure ~\ref{fig:runtime},
@@ -33,7 +35,7 @@ two micro-services that rely on it, the inventory micro-service that was updated
 
 In Kubernetes a microservice is internally accessible through the Service abstraction;
 a Service defines a policy for accessing a logical set of Pods via a load balancer with a
-unique IP address that can be discovered thorough environment variables or a DNS server.
+unique IP address that can be discovered thorough an environment variable, or an DNS name.
 
 The containers of a pod are selected in services policies by attributing names to their exposed ports and assigning the same name on the target port of the service policy.
 In adapter containers we expose one port for each of the supported versions and name each port with the respective version.
@@ -43,19 +45,20 @@ older versions are supported by the adapter, while the most up to date version i
 A consumer accesses a producer app via the service that haves the same version as the one that it's expected in the static code.
 
 When a microservice app is upgraded via a rolling update \footnote{A rolling update gradually replaces old replicas with new replicas},
-the service with previous latest version can point either to the adapter or the application, depending on whether the affected pod was upgraded.
+the services never become unavailable, they point either to the adapter containers or the application containers, depending on whether the affected pods finished the upgrade process.
 
 The only novel module introduced in the runtime environment is the proxy adapter;
-the forthcoming modules are either developer tools or are invoked in stages of the DevOps pipeline.
-
-
+the forthcoming modules are either developer tools or are invoked on stages of the DevOps pipeline.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=2.4in]{runtime}
-    \caption{Example runtime configuration}
+    \caption{Example of a runtime configuration}
     \label{fig:runtime}
 \end{figure}
+
+\subsection{DevOps Pipeline Architecture} % (fold)
+\label{sec:devops_pipeline_architecture}
 
 \begin{figure}[htbp]
     \centering
