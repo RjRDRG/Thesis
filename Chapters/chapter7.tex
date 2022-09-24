@@ -205,7 +205,7 @@ this is only achievable with the use of distributed transactions, which are inhe
 The re-deployment of adapters can be avoided with the use of mobile code that is provided by the service in a dedicated endpoint.
 This could be accomplished in Java with the use of network class loaders.
 We find this approach ineffective because it provides no benefits and requires more resources than alternative approaches since,
-instead of one adapter, we would need N adapters, one for of the service consumers.
+instead of one adapter, we would need N adapters, one for each of the service consumers.
 
 \subsection{Adapter Polymorphism} % (fold)
 \label{sec:adapter_polymorphism}
@@ -238,7 +238,7 @@ We propose to include these operations in stages of continuous deployment pipeli
 The operations of compatibility verification and adapter generation are supported by executables in container images that run as pipeline jobs.
 The verification of contract compatibility should take place prior to the packaging stage.
 The generation of the adapter implementation may be conducted after the unit test stage but before acceptance test stage,
-the adapter should be tested integration and stress tests.
+as the adapter should also be tested in integration and stress tests.
 Adapters could be deployed and removed in tandem with service deployments, in the last stage of the pipeline.
 
 \begin{figure}[htbp]

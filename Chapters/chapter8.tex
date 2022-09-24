@@ -11,20 +11,60 @@
 \chapter{Implementation}
 \label{cha:implementation}
 
-In this chapter, we present the implementation of our system and discuss alternatives to the decisions we took in our implementation.
-A modular approach was adopted to construct the system;
-each module is entirely independent, making it easy to interchange alternative approaches.
-We dedicate the first half of this chapter to define the goals that guided the design of system,
-the remainder of the chapter will be used to discuss each design aspect in turn.
+In this chapter, we present the implementation of our system.
+We begin by offering an overview of system's architecture,
+before delving into the implementation of each module in depth.
 
 \section{Architecture} % (fold)
 \label{sec:architecture}
 
+
+The system was built using a modular approach;
+each module is entirely self-contained, making it simple to expand or replace system functionality.
+
+The system architecture is split into two distinct areas: the runtime, and the DevOps pipeline.
+
+\paragraph{}
+
+The runtime environment is supported by Kubernetes,
+a simplified configuration with three microservices is depicted in Figure ~\ref{fig:runtime},
+in this example, we have one micro-service that has undergone three major API changes the accounts micro-service, and
+two micro-services that rely on it, the inventory micro-service that was updated to account for the changes, and the shipping micro-service which is two versions behind.
+
+In Kubernetes a microservice is internally accessible through the Service abstraction;
+a Service defines a policy for accessing a logical set of Pods via a load balancer with a
+unique IP address that can be discovered thorough environment variables or a DNS server.
+
+The containers of a pod are selected in services policies by attributing names to their exposed ports and assigning the same name on the target port of the service policy.
+In adapter containers we expose one port for each of the supported versions and name each port with the respective version.
+
+We define one service for each major version that is still being consumed, as shown in Figure ~\ref{fig:runtime},
+older versions are supported by the adapter, while the most up to date version is directly supported by the microservice app.
+A consumer accesses a producer app via the service that haves the same version as the one that it's expected in the static code.
+
+When a microservice app is upgraded via a rolling update \footnote{A rolling update gradually replaces old replicas with new replicas},
+the service with previous latest version can point either to the adapter or the application, depending on whether the affected pod was upgraded.
+
+The only novel module introduced in the runtime environment is the proxy adapter;
+the forthcoming modules are either developer tools or are invoked in stages of the DevOps pipeline.
+
+
+
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=9in]{architecture}
-    \label{fig:gantt}
+    \includegraphics[height=2.4in]{runtime}
+    \caption{Example runtime configuration}
+    \label{fig:runtime}
 \end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=9in]{DevOps}
+    \caption{DevOps Pipeline}
+    \label{fig:pipeline}
+\end{figure}
+
+\newpage
 
 \section{Parser} % (fold)
 \label{sec:parser}
