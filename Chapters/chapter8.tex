@@ -45,7 +45,8 @@ older versions are supported by the adapter, while the most up to date version i
 A consumer accesses a producer app via the service that haves the same version as the one that it's expected in the static code.
 
 When a microservice app is upgraded via a rolling update \footnote{A rolling update gradually replaces old replicas with new replicas},
-the services never become unavailable, they point either to the adapter containers or the application containers, depending on whether the affected pods finished the upgrade process.
+the services never become unavailable, they point either to the adapter containers or the application containers, depending on whether the affected pods finished the upgrade process,
+whereas in the traditional approach all consumers would need to be upgraded in tandem with consumed services in order to avoid downtime.
 
 The only novel module introduced in the runtime environment is the proxy adapter;
 the forthcoming modules are either developer tools or are invoked on stages of the DevOps pipeline.
@@ -59,6 +60,19 @@ the forthcoming modules are either developer tools or are invoked on stages of t
 
 \subsection{DevOps Pipeline Architecture} % (fold)
 \label{sec:devops_pipeline_architecture}
+
+The runtime environment is supported by Kubernetes,
+a simplified configuration with three microservices is depicted in Figure ~\ref{fig:runtime},
+
+The operations of contract compatibility verification, adapter generation, deployment, and removal should be automated.
+In this section, we discuss how to integrate these operations with the more common operations of service deployment and upgrade.
+
+We propose to include these operations in stages of continuous deployment pipelines.
+The operations of compatibility verification and adapter generation are supported by executables in container images that run as pipeline jobs.
+The verification of contract compatibility should take place prior to the packaging stage.
+The generation of the adapter implementation may be conducted after the unit test stage but before acceptance test stage,
+as the adapter should also be tested in integration and stress tests.
+Adapters could be deployed and removed in tandem with service deployments, in the last stage of the pipeline.
 
 \begin{figure}[htbp]
     \centering

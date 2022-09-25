@@ -235,3 +235,30 @@ This adaptive approach enables gradual module deployment of the referenced modif
 Experimental data \cite{seco2020robust} collected over a five-year development period on the evolution of three large software factories each containing over 1000 modules
 (a raw dataset containing 8889 production deployments with a total of 23986 signature changes)
 indicates that this approach would be effective in an average of 57\% of deployments.
+
+\section{DevOps} % (fold)
+\label{sec:dev_ops}
+
+DevOps can be viewed as a collection of practices designed to accelerate the software development cycle and shorten the time between developing new features and deploying them to production.
+
+The term DevOps is derived from the words development and IT operations, and it refers to the combination and automation of the traditional responsibilities of both departments.
+
+\paragraph{}
+
+Traditionally the tasks of development, testing, and deployment were divided among different engineering teams.
+Different teams had different goals, and in the typical scenario, communication between teams was slow and inefficient.
+
+By automating repetitive operations, DevOps minimizes the need for team coordination and speeds up manual processes that would have taken days or at least several hours.
+Building automated pipelines that are executed after the developer changes the codebase is a common DevOps practice.
+
+Pipelines are typically in charge of packaging, testing, and deploying code to testing or production environments.
+If any phase of the automated pipeline fails, the developer receives immediate feedback on which task failed, and the pipeline's execution is halted.
+
+An example of a typical build and release pipeline is shown in Figure ~\ref{fig:pipeline_example}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=3in]{pipelineExample}
+    \caption{Pipeline Example}
+    \label{fig:pipeline_example}
+\end{figure}

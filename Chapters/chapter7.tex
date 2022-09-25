@@ -127,12 +127,12 @@ In this section, we discuss how such tools could be implemented.
 Since all service contracts declare their dependencies on other services procedures, determining the impact of change in a procedure is as simple as
 looping over all active services contracts and verifying whether the changed procedure is being consumed.
 Then, using this information, a report indicating all affected services and other metadata may be created.
-We store service contracts in the same repository as the service code, with semantic versioning, where
+We store service contracts in a version control system, with semantic versioning, where
 each major version represents incompatible contract changes and minor versions represent backward compatible contract changes.
 To discover the active services, we run a query against the container orchestration tool, which returns the deployed services.
 A tool like this may be easily created in a bash script and its results shown in an IDE.
 If kubernetes and git are utilized, the active services may be queried with the \textbf{kubectl} command line tool,
-and the service contracts can be fetched using the git repository urls and standard naming convention for the service contracts.
+and the service contracts can be fetched using the git repository urls and a standard naming convention for the service contracts.
 
 \paragraph{Alternative}
 The information about the active services and individual service contract can be translated into an ontology language and hosted in a centralized registry.
@@ -240,9 +240,3 @@ The verification of contract compatibility should take place prior to the packag
 The generation of the adapter implementation may be conducted after the unit test stage but before acceptance test stage,
 as the adapter should also be tested in integration and stress tests.
 Adapters could be deployed and removed in tandem with service deployments, in the last stage of the pipeline.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=0.56in]{CD}
-    \label{fig:gantt}
-\end{figure}
