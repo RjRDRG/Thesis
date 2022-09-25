@@ -230,13 +230,17 @@ The mentioned benefit is obviously lost if the adapter is embedded in every serv
 \subsection{Adapter Management} % (fold)
 \label{sec:adapter_management}
 
-The operations of contract compatibility verification, adapter generation, deployment, and removal should be automated.
-In this section, we discuss how to integrate these operations with the more common operations of service deployment and upgrade.
+The management of adapters should be automated similarly to the management of services.
+In this section, we discuss how to conciliate the operations related to the management of adapters with the more common operations of service deployment and upgrade.
 
 \paragraph{Approach}
-We propose to include these operations in stages of continuous deployment pipelines.
-The operations of compatibility verification and adapter generation are supported by executables in container images that run as pipeline jobs.
-The verification of contract compatibility should take place prior to the packaging stage.
-The generation of the adapter implementation may be conducted after the unit test stage but before acceptance test stage,
+During normal operation the adapters don't require any type of management other than monitoring,
+adapters components only need to be provisioned during the upgrade of service contracts.
+The upgrade of a contract evolves the re-deployment of the affected microservice, this re-deployment is typically managed
+via continuous deployment pipeline.
+We propose to introduce the operations of contract compatibility verification, adapter generation, deployment,
+and removal as additional stages in typical continuous deployment pipelines.
+The verification of contract compatibility may take place prior to the packaging stage.
+The generation of the adapter implementation could be conducted after the unit test stage, but before acceptance test stage,
 as the adapter should also be tested in integration and stress tests.
-Adapters could be deployed and removed in tandem with service deployments, in the last stage of the pipeline.
+The deployment of the adapters could be done in tandem with service deployments, in the last stage of the pipeline.
