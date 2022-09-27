@@ -76,7 +76,7 @@ under these protocols, albeit with some limitations.
 It is required that each microservice’s interface be
 described in a high-level language which abstracts away implementation details, because it is common
 for microservices to be implemented under different frameworks and programming languages.
-We use these interface specifications to clearly define and document the procedures of a service and its consumed resources and requirements.
+We use these interface specifications to clearly define and document the procedures of a service and its consumed resources and inter-service dependencies.
 
 The definition of a service dependencies and requirements has three benefits: it allows a deployment to be validated and blocked if the corresponding requirements are not met within the system,
 it allows for the automatic removal of un-utilized adapters without developer intervention,
@@ -87,19 +87,24 @@ contracts are represented in two distinct manifest files, one defines the proced
 
 \paragraph{Approach}
 The definition of a service dependencies can be done from the perspective of the whole service or the perspective of each service procedure.
-If we map the dependencies of each procedure explicitly, we gain the ability of detecting procedures that are un-used internally by other services.
-With this information we can avoid the installation of unneded adapters in case the
+If we map the dependencies of each procedure individually, we gain the ability of detecting procedures that are un-used internally by other services.
+With this ability, we can avoid installing unnecessary adapters in cases where only unused procedures are updated;
+this case is expected to be very uncommon, and having unused procedures in a microservice is undesirable due to API bloat,
+so we believe it is not worth the documentation effort and that specifying service dependencies from the perspective of the service as a whole is sufficient.
+The only true benefit of explicitly specifying procedure dependencies would be the ability to view the impacted consumer procedures when a breaking change occurs,
+but this information can be obtained through other methods that do not require such a high documentation effort;
+one such solution is presented in the following paragraph.
 
 \paragraph{Alternatives}
 Services dependencies can be determined indirectly by automatically inspecting request logs between services.
 The advantage of this approach is the reduced documentation effort, but it comes at a cost because
-it is no longer possible to validate the safety of service deployments;
-it is only possible to validate the safety of the removal of services.
+it is no longer possible to validate the safety of service deployments, since the dependencies of a service are unknown when it is deployed or upgraded;
+it is only possible to validate the safety of the removal of services after they have been running over a long enough period,
+and even then there could be very rare calls between services that are not mapped by this method, these calls would make removals unsafe.
 Un-needed adapters would also have to be removed manually by developers or through an automated inactivity-based warning system.
-
-\subsection{Contract Specification} % (fold)
-\label{sec:contract_specification}
-
+This approach could be instead employed with a different objective, discovering procedures that are rarely called,
+this information could be used to reduce the bloat of on API by eliminating or merging procedures,
+but this falls outside the scope of this thesis and has not been explored.
 
 
 \subsection{Compatibility Verification} % (fold)
