@@ -53,7 +53,7 @@ then it will be necessary to adopt hybrid solutions, which will have a detriment
 \section{Design Aspects} % (fold)
 \label{sec:design_aspects}
 
-\subsection{Communication protocol} % (fold)
+\subsection{Communication Protocol} % (fold)
 \label{sec:communication_protocol}
 
 The communication protocol defines the syntax, semantics and synchronization of communication between microservices.
@@ -78,19 +78,29 @@ described in a high-level language which abstracts away implementation details, 
 for microservices to be implemented under different frameworks and programming languages.
 We use these interface specifications to clearly define and document the procedures of a service and its consumed resources and requirements.
 
-\paragraph{Approach}
-Because most API definition frameworks do not allow the explicit declaration of dependencies and requirements of a service,
-contracts are represented in two distinct manifest files, one defines the procedures of a service, and the other dictates its consumed resources and requirements.
 The definition of a service dependencies and requirements has three benefits: it allows a deployment to be validated and blocked if the corresponding requirements are not met within the system,
 it allows for the automatic removal of un-utilized adapters without developer intervention,
 and it allows developers to clearly see the impact of a contract change on the entire system, as well as the effort required to support the change.
 
-\paragraph{Alternative}
+Because most API definition frameworks do not allow the explicit declaration of dependencies and requirements of a service,
+contracts are represented in two distinct manifest files, one defines the procedures of a service, and the other dictates its consumed resources and requirements.
+
+\paragraph{Approach}
+The definition of a service dependencies can be done from the perspective of the whole service or the perspective of each service procedure.
+If we map the dependencies of each procedure explicitly, we gain the ability of detecting procedures that are un-used internally by other services.
+With this information we can avoid the installation of unneded adapters in case the
+
+\paragraph{Alternatives}
 Services dependencies can be determined indirectly by automatically inspecting request logs between services.
 The advantage of this approach is the reduced documentation effort, but it comes at a cost because
 it is no longer possible to validate the safety of service deployments;
 it is only possible to validate the safety of the removal of services.
 Un-needed adapters would also have to be removed manually by developers or through an automated inactivity-based warning system.
+
+\subsection{Contract Specification} % (fold)
+\label{sec:contract_specification}
+
+
 
 \subsection{Compatibility Verification} % (fold)
 \label{sec:compatibility_verification}
@@ -207,7 +217,7 @@ This could be accomplished in Java with the use of network class loaders.
 We find this approach ineffective because it provides no benefits and requires more resources than alternative approaches since,
 instead of one adapter, we would need N adapters, one for each of the service consumers.
 
-\subsection{Adapter Polymorphism} % (fold)
+\subsection{Adapter Coverage} % (fold)
 \label{sec:adapter_polymorphism}
 
 The adapter can have a generic implementation that is able to adapt messages from any service, or it can
@@ -236,11 +246,11 @@ In this section, we discuss how to conciliate the operations related to the mana
 \paragraph{Approach}
 During normal operation the adapters don't require any type of management other than monitoring,
 adapters components only need to be provisioned during the upgrade of service contracts.
-The upgrade of a contract evolves the re-deployment of the affected microservice, this re-deployment is typically managed
-via continuous deployment pipeline.
+A contract upgrade is supported by the re-deployment of the impacted microservice, which is often managed via a continuous deployment pipeline.
+
 We propose to introduce the operations of contract compatibility verification, adapter generation, deployment,
 and removal as additional stages in typical continuous deployment pipelines.
-The verification of contract compatibility may take place prior to the packaging stage.
-The generation of the adapter implementation could be conducted after the unit test stage, but before acceptance test stage,
-as the adapter should also be tested in integration and stress tests.
-The deployment of the adapters could be done in tandem with service deployments, in the last stage of the pipeline.
+The generation of the adapter components could be preformed outside the deployment pipeline,
+this would increase the solution flexibility by allowing developers to manually extend adapters to cover unforeseen corner cases,
+however, it is preferable to generate the adapters in the pipeline so that adapter generation program has clearer view
+over the participating services in the system.
