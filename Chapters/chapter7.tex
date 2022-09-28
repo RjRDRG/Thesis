@@ -242,6 +242,34 @@ because a single adapter can handle the load of all requests, whereas the other 
 The downside of this approach is that it requires modifying the service's implementation to add the message headers.
 The mentioned benefit is obviously lost if the adapter is embedded in every service's node.
 
+\subsection{Message Routing} % (fold)
+\label{sec:message_routing}
+
+Messages will need to reach either an application or an adapter, depending on the consumer expected contract, and the current producer contract.
+We can construct routing rules based on the incompatibility of two contracts, or the incompatibility of individual contract procedures.
+
+\paragraph{Approach}
+We route messages thorough the adapter if the expected contract of a consumer is not the current producer contract.
+When a producer service's contract is upgraded, all of its customers will begin diverting their calls to the adapter with the old version.
+The developers are notified, and must manually update all consumers if they wish for them to direct their calls to the producer service application instead of the adapter.
+The downside of this approach is that it requires immediate developer intervention if optimal performance and resource consumption is desired.
+
+\paragraph{Alternative A.}
+Each contract procedure includes the contract version in their endpoint path, in other words each service endpoint is versioned with the corresponding contract version.
+We direct all calls through a reverse proxy such as nginx, and we redirect requests based on custom routing rules that are injected on the reverse proxy.
+The routing rules are injected when a service with contract changes is deployed, in other words the injection is done in a DevOps pipeline stage after the service deployment.
+If no custom rules are submitted the expected behaviour is equal to the behaviour of the approach discussed above.
+This approach is counter-productive since it necessitates the installation of a reverse proxy, which use more resources and adds the same latency as the previous approach.
+
+\paragraph{Alternative B.}
+Instead of using reverse proxies, we use custom DNS rules to direct request.
+This approach is problematic because DNS rules can only be applied over the domain of requests, and we need to apply them based on the path of requests.
+We could create a DNS entry for each service procedure,
+where each entry contains a subdomain that indicates the service version and another subdomain that indicates the service procedure (eg. users.v3.getUser).
+This would achieve the desired behaviour,
+however it would force developers to change the service implementation and start referencing different services procedures by different domains, which could cause interference
+with other API tools that rely on service domains.
+
 \subsection{Adapter Management} % (fold)
 \label{sec:adapter_management}
 

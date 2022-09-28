@@ -60,7 +60,6 @@ the forthcoming modules are either developer tools or are invoked on stages of t
 \label{sec:devops_pipeline_architecture}
 
 A proof-of-concept deployment pipeline as developed, its architecture is depicted in Figure ~\ref{fig:pipeline}.
-
 The nodes on the left side of the graph represent the pipeline;
 development stages are represented in green, while operational stages are represented in red.
 The other nodes on the graph's reflect the resources used in each stage.
@@ -69,6 +68,7 @@ Two novel stages were introduced in the development phase: the writing of servic
 These two stages are skipped if a service only underwent changes that did not affect its API or dependencies.
 We also introduced two novel stages in the development phase:
 the verification of the service compatibility with the rest of the system, and the generation of adapter component.
+
 The pipeline was developed using the Jenkins pipeline suite, each of the novel stages is supported by a distinct Java application that is pulled from version control
 and executed directly on the pipeline, whereas the other stages are supported natively by the Jenkins suite toolkit.
 The modules that enable each novel stage will be discussed in detail in the following section.
@@ -112,7 +112,7 @@ we are not interested in measuring the performance of different object serializa
 there are already sources that provide comparisons in this regard between XML, Json, Protobuf, Thrift and other popular formats \cite{serializationBenchmark}.
 
 The schema of JSON records must also be described,
-the OpenAPI specification also supports this description
+the OpenAPI specification supports the description of records
 in conjunction with the signature of HTTP endpoints.
 Other Json schema specification languages, such as the Json-Schema project
 exist, but using languages other than OpenApi would necessitate decoupling the specification of schemas from the specification
@@ -134,10 +134,12 @@ while property formats are free-form, there are established conventions for the 
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=7in]{openContract}
+    \includegraphics[height=6in]{openContract}
     \caption{OpenAPI Contract}
     \label{fig:open_contract}
 \end{figure}
+
+\newpage
 
 The definition of the dependencies of a service is done using Helm.
 Helm is package manager for Kubernetes that allows developers and operators to more easily package, configure, and deploy applications and services onto Kubernetes clusters.
@@ -146,7 +148,7 @@ The most significant components of a Chart are the:
 \begin{itemize}
     \item The Chart.yaml that allows the definition of the Chart dependencies and other meta-information about the application such as its name and version.
     \item The Template's directory that contains incomplete Kubernetes manifests "Templates" such as Services, Deployments, DaemonSets, Namespaces and so on.
-    \item The Values.yaml that contains key-value pairs used to complete the definition of each template, this values can be overridden later when the chart is deployed, the file defines the default values for each key.
+    \item The Values.yaml that contains key-value pairs used to complete the definition of each template, this values can be overridden later when the chart is deployed, the file is used to define the default values.
 \end{itemize}
 A single Chart might be used to deploy something simple, like a single kubernetes pod, or something complex, like a complete web app stack with HTTP servers, databases, caches, and so on.
 The typical approach is to define an individual Chart for each distinct microservice, so that they can be upgraded individually.
@@ -154,12 +156,8 @@ If a single Chart is used to deploy multiple services it is no longer possible t
 in the chart definition, because the chart syntax doesn't allow the individual definition of the dependencies of each service, it only allows the declaration of the dependencies of the deployment as a whole.
 
 An example of the definition of service dependencies can be seen in Figure ~\ref{fig:serviceDepedencies}.
-Each dependency must point to another Helm chart that can be hosted on local or remote repository.
-
-The declaration of resources consumed by a service is defined in Chart template files,
-for each deployment template we define the resources consumed by its containers by
-defining the minimum amount of cpu and memory resources and by setting a limit on these resources.
-An example of the definition of a service resources can be seen in Figure ~\ref{fig:open_contract}
+The dependencies of a service are mapped indirectly, each dependency point to a Helm Chart that is implicitly associated with one service.
+Helm Charts can be hosted on local or remote repositories.
 
 \begin{figure}[htbp]
     \centering
@@ -168,12 +166,21 @@ An example of the definition of a service resources can be seen in Figure ~\ref{
     \label{fig:serviceDepedencies}
 \end{figure}
 
+\newpage
+
+The declaration of resources consumed by a service is defined in Chart template files,
+for each deployment template we define the resources consumed by its containers by
+defining the minimum amount of cpu and memory resources (represented on the requests key) and by setting a limit on these resources (represented on the limits key).
+An example of the definition of a service resources can be seen in Figure ~\ref{fig:serviceResources}.
+
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=5in]{serviceResources}
+    \includegraphics[height=3in]{serviceResources}
     \caption{Helm Template Resources Definition Example}
     \label{fig:serviceResources}
 \end{figure}
+
+\newpage
 
 \section{Contract Interpretation} % (fold)
 \label{sec:contract_interpretation}
@@ -192,10 +199,72 @@ which validates and parses OpenAPI definitions in JSON or YAML format into a Jav
 
 The interpretation of service resources and dependencies written in Helm charts is also supported by the Parser module under a separate interface.
 The SnakeYAML library \textbf{[TODO: reference]} was used to parse the Charts.yaml and template files, into a Java class that implements a read-only Java interface.
+The following are also decoupled from the Helm and Kubernetes API's they rely only on the read-only interfaces.
+
+\newpage
+
+\section{Evolution Representation} % (fold)
+\label{sec:evolution_representation}
+
+The evolution of contracts is represented in a custom description language.
+The description only maps the details about the changed procedures of a service,
+it is not necessary to map the evolutions in service dependencies and resource requirements because they can be inferred by comparing the last two contract versions.
+The description language is hierarchical, and contains array elements.
+The following Figure ~\ref{fig:evolution_yal} represents its structure, and gives an example.
+Array elements are depicted by the [.] notation.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=3.75in]{evolutionYal}
+    \caption{Evolution Specification Example}
+    \label{fig:evolution_yal}
+\end{figure}
+
+As previously mentioned in the design chapter, resolutions can have one of three distinct types
+DefaultValues, Link or Function.
+The type of resolution is represented in the first segment of a resolution, while the second segment represents the resolution itself.
+
+Link resolutions have the following format "link={Parameter Location}|{Parameter Name}", the parameter of the prior contract must be of the same type and format.
+
+Default value resolutions have the following format "default=#Value", the value that must be of the same type and format.
+
+Function resolutions are written as one line Java expressions that can use parameters of the previous contract, the
+parameters are referenced by their location and name (eg. function= {{json|firstName}} + {{json|lastName}} ).
+These references are replaced in the adapter implementation by their real value.
+
+\newpage
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=2.4in]{editor2}
+    \caption{Evolution Editor}
+    \label{fig:editor2}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=4.4in]{editor1}
+    \caption{Evolution Editor}
+    \label{fig:editor1}
+\end{figure}
+
+To minimize the documentation effort we developed a GUI editor for the specification of evolutions.
+The GUI editor was implemented as an IDE Plugin, the current implementation supports the Intellij IDE.
+The editor compares two contract versions,
+and automatically maps all the parameters that haven't changed from one version to the other, the
+developer is left with the task of explicitly mapping the remaining procedures.
+The editor starts by requesting the developer to map endpoints in the new contract to endpoints in the old contract,
+afterwards the developer must edit each of the endpoint messages and specify a resolution for all the parameters that changed
+in a contract, unresolved parameters are highlighted in red.
+The right column holds the resolutions that were already mapped and uppermost left column allows the developer to write rules
+for each unresolved parameter.
+The developer can select leaf parameters in the hierarchy, or we can choose intermediate properties.
+If he chooses an intermediate property and inputs resolution rule all child parameters are also resolved.
+After all parameters are resolved the developer can submit the specification, and
+the editor outputs an evolution spec with the same description language presented in the beginning of this section.
 
 
-\section{Editor} % (fold)
-\label{sec:editor}
+\newpage
 
 \paragraph{Description}
 \paragraph{Capabilities}
