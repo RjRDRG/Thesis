@@ -147,8 +147,8 @@ The primary goal of this experiment was to assess the overhead of the adapter in
 
 \paragraph{}
 
-Figure ~\ref{fig:cpuPtp} shows the measured cpu overhead of the adapter over a
-range of request rates.
+The measured cpu overhead of the adapter over a
+range of request rates is depicted in Figure ~\ref{fig:cpuPtp}.
 The overhead was calculated by processing the averages of the measured CPU resources in the baseline and adapter tests, and then by dividing the two averages.
 
 In this experiment it is expected to have an overhead of 150\%, because the adapter and the microservices share the same request rate,
@@ -192,28 +192,40 @@ As can be seen in Figure ~\ref{fig:memCostPtp} the adapter real memory cost grow
     \label{fig:memCostPtp}
 \end{figure}
 
+\newpage
+
+The latency overhead of the adapter in the point-to-point experiment is depicted in Figure ~\ref{fig:latPtP}.
+
+It is expected for the overhead to be less or equal to 150\%, because the latency overhead is largely attributable to communication cost.
+The adapter introduces an additional communication step "app1->\textbf{adapter->app2}" to the baseline communication chain that already haves two steps "workers->app1" and "app1->app2".
+The introduced communication step is expected to have a slightly inferior cost to the other steps, because it is performed via interprocess-calls, while the others are done via a private network with 2 GB of bandwidth.
+Our hypothesis is confirmed by the experiment results in Figure ~\ref{fig:latPtP}.
+
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=3in]{Results/PtP/Latency-PtP}
-    \label{fig:gantt}
+    \label{fig:latPtP}
 \end{figure}
+
+The Figures  ~\ref{fig:payloadCpuPtP} and ~\ref{fig:payloadLatPtP} illustrate how larger payload sizes effect the latency and the consumed cpu resources.
+The latency is expected to rise with larger payload sizes because the typical HTTP packet size 1.5 KB bigger messages will need to be sent in multiple packets.
+The cpu cost is also expected to rise, because the cost of deserialization of messages grows with the message payload size.
+The results illustrated don't reveal any difference for the tested range of payload sizes.
+We selected the range of 100 bytes to 2 KB because most services use http messages that fall under this range.
+We intend to repeat this experiment for larger payload sizes up to 2 MB.
+With larger payload sizes it will be necessary to sent multiple packets to transmit one message, we intend to see how the adapter scales in this scenario.
+
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=3in]{Results/PtP_Size/Cpu-PtP_Size}
-    \label{fig:gantt}
-\end{figure}
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=3in]{Results/PtP_Size/Memory-PtP_Size}
-    \label{fig:gantt}
+    \label{fig:payloadCpuPtP}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=3in]{Results/PtP_Size/Latency-PtP_Size}
-    \label{fig:gantt}
+    \label{fig:payloadLatPtP}
 \end{figure}
 
 \begin{figure}[htbp]
