@@ -130,6 +130,13 @@ This section presents measurements obtained from a prototype implementation thro
 \subsection{Point to Point} % (fold)
 \label{sec:point to point}
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=2.4in]{pointExperiment}
+    \caption{point-to-point experiment}
+    \label{fig:point}
+\end{figure}
+
 The topology of this experiment is represent in Figure ~\ref{fig:point}.
 This experiment is composed by two microservices:
 the first receives requests from artillery workers and forwards them to the second microservice, which responds with the request.
@@ -138,33 +145,51 @@ We first established a baseline of comparison
 by doing the tests without the adapter, and then we introduced the adapter and repeat the tests.
 The primary goal of this experiment was to assess the overhead of the adapter in terms of latency and computational resources.
 
+\paragraph{}
+
 Figure ~\ref{fig:cpuPtp} shows the measured cpu overhead of the adapter over a
 range of request rates.
 The overhead was calculated by processing the averages of the measured CPU resources in the baseline and adapter tests, and then by dividing the two averages.
-In this experiment it was expected to have a overhead of 133\% because
-The overhead
-The overhead as negligible with request rates inferior to 120 per seconds, because
 
+In this experiment it is expected to have an overhead of 150\%, because the adapter and the microservices share the same request rate,
+and because the cost of the adapter is expected to be equal or to the cost of the tested microservices.
+The tested microservices were implemented with the same frameworks as the adapter, consequently adding the adapter will be equivalent to adding one more microservice to the existing two.
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=2.4in]{pointExperiment}
-    \caption{point-to-point experiment}
-    \label{fig:point}
-\end{figure}
+As can be seen in the results shown Figure ~\ref{fig:cpuPtp} the measured overhead doesn't fall to far outside our expectations, with the exception of the first data point.
+The overhead 84\% is explainable by the configuration of the containers.
+The adapter and demo application containers were initialized in kubernetes with a default of 100 millicpu (10\% of tested cpu core),
+this cpu resources far exceed the capacity necessary to support a request rate 60 requests/second,
+consequently the container's cpu scheduling was throttle-down after start up,
+the overhead was inferior to 100\% because the scheduled cpu resources in the experiment with the adapter, were throttled down faster than in the baseline experiment without the adapter.
 
+\paragraph{}
+
+Figure ~\ref{fig:memPtp} shows the measured memory overhead of the adapter over a
+range of request rates.
+The average cost of 190\% in Figure ~\ref{fig:memPtp} is understandable because, although being stateless, the adapter stores two messages in memory for each request, the request message and the adapted request message.
+Because the demo application only keeps one request in memory, it stands to reason that the adapter memory cost is the double of the demo application.
+As can be seen in Figure ~\ref{fig:memCostPtp} the adapter real memory cost grows linearly with the request rate.
 
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=3in]{Results/PtP/Cpu-PtP}
+    \caption{Adapter CPU overhead in the point-to-point experiment}
     \label{fig:cpuPtp}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=3in]{Results/PtP/Memory-PtP}
-    \label{fig:gantt}
+    \caption{Adapter memory overhead in the point-to-point experiment}
+    \label{fig:memPtp}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=3in]{Results/PtP/MemoryCost_PtP}
+    \caption{Adapter memory cost in the point-to-point experiment}
+    \label{fig:memCostPtp}
 \end{figure}
 
 \begin{figure}[htbp]
