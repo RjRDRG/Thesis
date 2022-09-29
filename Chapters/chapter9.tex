@@ -11,6 +11,52 @@
 \chapter{Results}
 \label{cha:results}
 
+\section{Benchmark platform} % (fold)
+\label{sec:benchmark_platform}
+
+We plan to construct a benchmark platform to compare our solution to existing ones; this section discusses the proposed benchmark platform's requirements and design.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=4in]{benchmark_requirements}
+    \caption{Benchmark Requirements \cite{microservices2017benchmark}}
+    \label{fig:benchmark}
+\end{figure}
+
+\citeauthor{microservices2017benchmark} propose an initial set of requirements
+to support repeatable microservices research.
+In addition to the requirements listed in the ~\ref{fig:benchmark}, the platform's essential requirements are as follows:
+\begin{itemize}
+    \item The ability to evaluate different solutions in comparable scenarios while utilizing the same evaluation criteria.
+    \item Evaluating solutions without requiring modifications to implementations.
+    \item Experiments must be simple to share and reproduce by different individuals.
+    \item It should be possible to aggregate reported metrics for a specific time period between two events, such as the start and end of a service's evolution.
+    \item Users must be able to specify how and when each service should evolve via a configuration file or directly through a terminal.
+\end{itemize}
+
+The architecture of the benchmark platform can be seen in section ~\ref{fig:canvas}.
+The architecture components, and their applications are described below:
+
+\paragraph{Kubernetes ~\cite{kubernetes}} will be the test environment.
+It will host the services holding the solutions implementations.
+The loading testing scripts will also be managed via services in Kubernetes.
+
+\paragraph{Promotheus ~\cite{turnbull2018monitoring}} is a pull-based monitoring system.
+It periodically sends HTTP scrape requests, the response to this requests is parsed in storage along with the metrics for the scrape itself.
+Prometheus provides a query language that allows the metrics to be aggregated by events, components or metadata.
+The gathered will be visualized in this platform via Grafana dashboards.
+
+\paragraph{Artillery}
+
+\paragraph{Jenkins}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=7in]{canvas}
+    \caption{Benchmark platform components}
+    \label{fig:canvas}
+\end{figure}
+
 \section{Evaluation Methodology} % (fold)
 \label{sec:evaluation_methodology}
 
@@ -42,7 +88,7 @@ The workers are installed and removed from cluster using the artillery operator 
 the creation and execution of distributed Artillery load tests from a Kubernetes cluster, at scale.
 In each experiment all the resources of previous experiments were deleted and a new job and namespace were created in the
 cluster to avoid contamination in the metrics extracted.
-Each experiment was executed in sequence with an pause of 2m.
+Each experiment was executed in sequence with a pause of 2m.
 
 Each experiment had three phases:
 A warm up phase of 30s with an arrival rate of 5 vu/s.
@@ -50,7 +96,7 @@ A ramp up phase of 2m.
 A sustained load phase of 6m.
 The metrics were only extracted during the sustained load phase;
 the first and last 30s were left out to allow time for all the artillery worker threads to enter the sustained load phase.
-We excluded results from experiments that had a high enough throughput to saturate the application.
+We excluded tests that had a high enough throughput to saturate the application.
 The error rate and timeouts were zero during all the presented experiments.
 
 \begin{figure}[htbp]
@@ -62,19 +108,21 @@ The error rate and timeouts were zero during all the presented experiments.
 
 \paragraph{Metrics}
 
-In each experiment we extracted 4 metrics, the cpu/memory resources and the throughput and latency of the system.
+In each experiment we extracted 3 metrics, the cpu/memory resources and latency of the system.
 The resources were only queried from the adapters, and the replicas that belong to the target microservice application.
 The resources consumed by the monitoring system and artillery workers were excluded and have no effect
 on the results.
 The throughput and latency were extracted with the use of the artillery load testing tool.
 
-The cpu resources samples were extracted with an interval of 5 seg from each node using prometheus node exporter.
-The memory resources samples were extracted with an interval of 5 seg from each container using kubelet node agent api.
-The throughput and latency statistics were calculated with a period of 10s over 5 min, the results obtained represent the
+The CPU resource samples were taken from each node at 5-second intervals using the prometheus node exporter.
+Memory resource samples were gathered from each container at 5-second intervals using the kubelet node agent api.
+The latency statistics were calculated with a period of 10s over 5 min, the results obtained represent the
 average of the reported 30 periods.
 
 \section{Experiments} % (fold)
 \label{sec:experiments}
+
+This section presents measurements obtained from a prototype implementation throughout various experiments.
 
 %%Throughout the experiments, if the behavior of the system is similar with different parameters, we select the most
 %%interesting figures or features due to the limited space.
@@ -82,18 +130,35 @@ average of the reported 30 periods.
 \subsection{Point to Point} % (fold)
 \label{sec:point to point}
 
+The topology of this experiment is represent in Figure ~\ref{fig:point}.
+This experiment is composed by two microservices:
+the first receives requests from artillery workers and forwards them to the second microservice, which responds with the request.
+
+We first established a baseline of comparison
+by doing the tests without the adapter, and then we introduced the adapter and repeat the tests.
+The primary goal of this experiment was to assess the overhead of the adapter in terms of latency and computational resources.
+
+Figure ~\ref{fig:cpuPtp} shows the measured cpu overhead of the adapter over a
+range of request rates.
+The overhead was calculated by processing the averages of the measured CPU resources in the baseline and adapter tests, and then by dividing the two averages.
+In this experiment it was expected to have a overhead of 133\% because
+The overhead
+The overhead as negligible with request rates inferior to 120 per seconds, because
+
+
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=2.4in]{pointExperiment}
     \caption{point-to-point experiment}
-    \label{fig:gantt}
+    \label{fig:point}
 \end{figure}
+
 
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=3in]{Results/PtP/Cpu-PtP}
-    \label{fig:gantt}
+    \label{fig:cpuPtp}
 \end{figure}
 
 \begin{figure}[htbp]
@@ -147,9 +212,11 @@ average of the reported 30 periods.
 \newpage
 
 
-
 \subsection{Weighted Point to Point} % (fold)
 \label{sec:weighted point to point}
+
+Objectives:
+Measure How The Consumed Resources Vary With Different Load Distributions
 
 \begin{figure}[htbp]
     \centering
@@ -182,6 +249,11 @@ average of the reported 30 periods.
 
 \subsection{Bi-partition} % (fold)
 \label{sec:bi-partition}
+
+Objective:
+Measure Overhead
+Measure Consumed Resources
+Measure Scalability
 
 \begin{figure}[htbp]
     \centering
