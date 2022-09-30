@@ -210,15 +210,8 @@ The evolution of contracts is represented in a custom description language.
 The description only maps the details about the changed procedures of a service,
 it is not necessary to map the evolutions in service dependencies and resource requirements because they can be inferred by comparing the last two contract versions.
 The description language is hierarchical, and contains array elements.
-The following Figure ~\ref{fig:evolution_yal} represents its structure, and gives an example.
+The following Figure ~\ref{fig:evolution_yal} represents its structure, and Figure ~\ref{fig:evolution_example} gives an example.
 Array elements are depicted by the [.] notation.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=3.75in]{evolutionYal}
-    \caption{Evolution Specification Example}
-    \label{fig:evolution_yal}
-\end{figure}
 
 As previously mentioned in the design chapter, resolutions can have one of three distinct types
 DefaultValues, Link or Function.
@@ -232,21 +225,37 @@ Function resolutions are written as one line Java expressions that can use param
 parameters are referenced by their location and name (eg. function= {{json|firstName}} + {{json|lastName}} ).
 These references are replaced in the adapter implementation by their real value.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=4.3in]{EvoExample}
+    \caption{Evolution Specification Example}
+    \label{fig:evolution_example}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=5in]{evolutionYal}
+    \caption{Evolution Specification Structure}
+    \label{fig:evolution_yal}
+\end{figure}
+
 \newpage
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=2.4in]{editor2}
+    \includegraphics[height=2.5in]{editor2}
     \caption{Evolution Editor}
     \label{fig:editor2}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=4.4in]{editor1}
+    \includegraphics[height=4.5in]{editor1}
     \caption{Evolution Editor}
     \label{fig:editor1}
 \end{figure}
+
+\newpage
 
 To minimize the documentation effort we developed a GUI editor for the specification of evolutions.
 The GUI editor was implemented as an IDE Plugin, the current implementation supports the Intellij IDE.
