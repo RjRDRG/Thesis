@@ -268,62 +268,77 @@ the test time for this experiment was set to 5 minutes for each data point.
 
 \paragraph{}
 
-The measured memory overhead of the adapter in this experiment is depicted in Figure ~\ref{fig:routMem}.
-It is expected for the overhead to increase linearly with the number of requests, the results obtained confirm our expectations.
+The utilized memory of the adapter and demo applications in this experiment is depicted in Figure ~\ref{fig:routMem}.
+It is expected for the used memory to increase linearly with the fraction of requests routed through the adapter, because as discussed previously,
+the adapter implementation spatial complexity is equivalent to double of the demo application implementation spatial complexity.
+The results obtained confirm our expectations.
+
+\paragraph{}
+
+Figure ~\ref{fig:routLatency} shows the request latency.
+In this experiment it is expected for the latency to steadily increase with the fraction of requests routed through the adapter, because of the same reasons previously stated.
+When we compare the first and last data points in Figure ~\ref{fig:routCpu}, we can see that the latency has doubled as expected.
+In the other data points, the latency remains relatively constant, this mainly due to the error introduced by the short test duration, we intend to repeat this test with a longer time window.
+
 
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=3in]{Results/R/Cpu-R}
-    \caption{Adapter CPU cost in the routing experiment \\\hspace{\textwidth} 480 request/s (arrival rate) 100 bytes (payload size)}
+    \caption{CPU used in the routing experiment \\\hspace{\textwidth} 480 request/s (arrival rate) 100 bytes (payload size)}
     \label{fig:routCpu}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=3in]{Results/R/Memory-R}
-    \caption{Adapter Memory cost in the routing experiment \\\hspace{\textwidth} 480 request/s (arrival rate) 100 bytes (payload size)}
+    \caption{Memory used in the routing experiment \\\hspace{\textwidth} 480 request/s (arrival rate) 100 bytes (payload size)}
     \label{fig:routMem}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=3in]{Results/R/Latency-R}
-    \label{fig:gantt}
+    \caption{Request latency in the routing experiment \\\hspace{\textwidth} 480 request/s (arrival rate) 100 bytes (payload size)}
+    \label{fig:routLatency}
 \end{figure}
 
 \newpage
 
-
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=2.4in]{bipartExperiment}
+    \caption{bi-partition experiment}
+    \label{fig:biPart}
+\end{figure}
 
 \paragraph{Bi-partition}
 
-Objective:
-Measure Overhead
-Measure Consumed Resources
-Measure Scalability
+The topology of this experiment is represent in Figure ~\ref{fig:biPart}.
+This experiment is composed by two disjoint sets of microservices, where the first set receives request from the artillery workers and forward the requests to the second of microservices.
+We first established a baseline of comparison by doing the tests without the adapter.
+Then we upgraded all the microservices in the second set and added adapters to support communication across the disjoint sets.
+The goal of this experiment was to see if the conclusions obtained from the point-to-point experiment are also applicable in scenarios with multiple microservices.
+
+The outcomes of the "point-to-point" and "bi-partition" experiments are equivalent, as seen in the Figures ~\ref{fig:biPartCPU}, ~\ref{fig:biPartMem} and ~\ref{fig:biPartLatency}.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=2.7in]{bipartExperiment}
-    \caption{bi-partition experiment}
-    \label{fig:gantt}
+    \includegraphics[height=3in]{Results/Bp/Cpu-Bp}
+    \caption{Adapter CPU overhead in the bi-partition experiment \\\hspace{\textwidth} 100 bytes (payload size)}
+    \label{fig:biPartCPU}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=4in]{Results/Bp/Cpu-Bp}
-    \label{fig:gantt}
-\end{figure}
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=4in]{Results/Bp/Memory-Bp}
-    \label{fig:gantt}
+    \includegraphics[height=3in]{Results/Bp/Memory-Bp}
+    \caption{Adapter memory overhead in the bi-partition experiment \\\hspace{\textwidth} 100 bytes (payload size)}
+    \label{fig:biPartMem}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=3in]{Results/Bp/Latency-Bp}
-    \label{fig:gantt}
+    \caption{Adapter latency overhead in the bi-partition experiment \\\hspace{\textwidth} 100 bytes (payload size)}
+    \label{fig:biPartLatency}
 \end{figure}
