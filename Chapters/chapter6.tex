@@ -160,36 +160,55 @@ This standard assesses the difficulty of maintaining system's that employ the re
 
 \paragraph{}
 
-\subsection{Versioning Endpoints} % (fold)
-\label{sec:versioning_endpoints}
+\subsection{Hand-off Period} % (fold)
+\label{sec:hand_off_period}
 
-The conventional approach for evolving microservices is to keep various versions of a service implementation available with a hand-off period,
+The conventional approach for evolving microservices is to keep the various deployments of the different versions of a service implementation available with a hand-off period,
 and to explicitly redirect requests to the supported version.
 This approach has been proven to be pragmatic, but exceedingly expensive,
 because it necessitates high maintainability and partitions available resources among continually shifting subsets of consumers.
-Bellow we present more effective service evolution approaches.
+
+\subsection{Deprecated Endpoints} % (fold)
+\label{sec:deprecated_endpoints}
+
+Alternatively its possible to support backwards compatibility without distinct deployments, by including in the new service contract the endpoints of the prior contracts
+that are still in use.
+When a breaking contract change occurs, rather than supporting the change by modifying the impacted endpoint implementation,
+we preserve the old endpoint and implement the new contract version in a completely separate endpoint.
+Contract changes that only affect HTTP parameters can easily be accommodated under this approach; however contract changes that affect
+request body schemas are problematic because it would be necessary to write distinct serialization and de-serialization rules for each version of the schema.
+This approach can add significant amount of effort to the development team because each breaking change requires all the serialization rules to be rebuilt.
+Schemas with multiple serialization rules also tend to become unreadable.
+Furthermore, this approach doesn't offer any safety guarantees;
+a developer might easily make the error of deleting a serialization rule that is still in use.
 
 \subsection{Schema Resolution Rules} % (fold)
 \label{sec:schema_resolution_rules}
 
-Frameworks such as WDSL, Avro, Protocol Buffers and Thrift support schema evolution via resolution rules and declarative semantics,
-where the old version of the software can deal with the new version of the service’s syntax; however, their schema evolution support is limited \cite{11}:
+The previous approach can be complemented with the use of sophisticated serialization protocols such as Avro, Protocol Buffers or Thrift that
+support schema evolution via resolution rules and declarative semantics,
+where the old version of the software can deal with the new version of the service’s syntax; however, the schema evolution support in this protocols is limited \cite{11}.
+The following are the common limitations of the protocols mentioned above:
 \begin{itemize}
-    \item Only the addition, removal and renaming of fields is allowed.
-    \item To ensure backwards compatibility, added fields must be optional.
+    \item To ensure backwards compatibility, newly added fields must be optional.
     \item The only fields that can be removed to maintain forward compatibility are optional fields.
-    \item To provide both forward and backward compatibility, removed and added fields must be optional.
+    \item Its not possible to change a field type or its format freely, field types can only be promoted to more embracing types (e.g int->float).
+    \item Renaming fields is supported through the use of aliases that cannot be re-used by other fields in the same scope.
 \end{itemize}
-Backward compatibility refers to a consumer using schema X to process data produced by schema X-1,
-whereas forward compatibility refers to data produced by schema X being read by consumers using schema X-1.
+Backward compatibility is only required in request schemas, while forward compatibility is only required in response schemas.
+In other words the current producer implementation must be able to interpret request messages from outdated consumers, and outdated consumers
+must be able to interpret response messages from the new producer implementation.
+Schemas that are used both in request and response messages most support forward and backward compatibility.
 
 \paragraph{}
 
-The need for optional fields in the above cases is due to a lack of information on the consumer, typically this information is supplied with the use of default values.
-In order to support required fields with backwards-forwards compatibility, the system should enforce required fields when the consumer and producer agree on the schema,
-and only use default values when the consumer and producer disagree on the schema.
+The need for optional fields in the above cases is due to a lack of information on the message receiver, typically this information is supplied with the use of default values.
 
-These limitations are problematic because, in order to enforce required fields in the former case,
+All fields that are optional exclusively because of resolution rules should be treated as required when a consumer and producer agree on the schema version, and the default value should not be utilized, since there is no absence of information in this case.
+To simply put it, the system should enforce required fields when the consumer and producer agree on the schema, and only use default values when the consumer and producer disagree.
+
+The aforementioned protocols do not differentiate between the two cases; instead, their resolution rules solely operate over the syntax of schemas and are agnostic to the version of the consumer and producer's schema.
+In order to enforce required fields in the former case,
 validation logic would need to be written repeatedly by programmers (in the same layer as the business logic).
 This validation should be in a layer above because, the scale of the validation logic is proportional to the complexity of messages being validated;
 for messages with more properties, particularly those with nested objects, the validation footprint can rise dramatically in terms of both line-count and logical complexity.
@@ -197,8 +216,9 @@ for messages with more properties, particularly those with nested objects, the v
 \paragraph{}
 
 The aforementioned frameworks include built-in support for event-driven and RPC communication methods,
-however, if a RESTful communication approach is adopted, these frameworks will be unable to manage changes in the signature of endpoints
-(e.g.\ changing the method of REST endpoint's from GET to POST); only changes in record schemas will be managed in this case.
+however, if a HTTP communication approach is adopted, these frameworks will be unable to manage changes in the signature of endpoints
+(e.g.\ changing the method of HTTP endpoint's from GET to POST); only changes in record schemas will be managed in this case.
+To support the evolution of endpoint signatures, this approach will need to be supplemented the deprecation of endpoints discussed above.
 To decrease the complexity of the evolution adaptation process, we believe it is necessary to handle both the evolution of records schemas, and the evolution of API signatures in a single integrated approach.
 
 \subsection{Chain of adapters} % (fold)
