@@ -287,3 +287,12 @@ The generation of the adapter components could be preformed outside the deployme
 this would increase the solution flexibility by allowing developers to manually extend adapters to cover unforeseen corner cases,
 however, it is preferable to generate the adapters in the pipeline so that adapter generation program has clearer view
 over the participating services in the system.
+
+\subsection{Supported Changes} % (fold)
+\label{sec:supported_changes}
+
+"Message Split Mismatch"
+In order to keep the adapter implementation as lightweight as possible, it is preferable to maintain the old endpoint operational but marked as deprecated, and provide the new endpoints in conjunction with the old endpoint.
+
+"Message Merge Mismatch"
+It is preferable to keep the old endpoints operational but marked as deprecated, and provided the new endpoint in conjunction with the old endpoints.

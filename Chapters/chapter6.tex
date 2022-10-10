@@ -263,36 +263,19 @@ The service's backwards compatibility is ensured by the composition of adapters 
     \label{fig:chain}
 \end{figure}
 
-\paragraph{}
-
-The method used in this technique may be used in our solution as well.
-The availability of our system can be increased by employing this method as a
-placeholder adaption mechanism for when the adapter proxy is being built and initialized for earlier contract versions.
-
-\subsection{Proxy Adapter} % (fold)
+\subsection{Lazy Proxy Adapter} % (fold)
 \label{sec:proxy_adapter}
-
-\citeauthor{seco2020robust} and \citeauthor{santosregent} investigate this approach \cite{seco2020robust, santosregent},
-this method will be further explored and evaluated in our solution.
-
-\paragraph{}
 
 In this strategy the knowledge of a microservice’s
 interfaces is used to create a lightweight proxy capable of dynamically adapting the messages exchanged between services to match them with the static service code.
+The adapter proxy intercepts messages from consumers and adapts the message to the new specification before they reach the producer.
+Consumer services are initially deployed without the adapter proxy. Proxies are installed and updated on demand using a lazy instantiation method, that builds and deploys the adapter proxy when the first communication between corresponding services occurs.
+\citeauthor{seco2020robust} and \citeauthor{santosregent} investigate this approach \cite{seco2020robust, santosregent}.
 
 \paragraph{}
 
 The proxy creation mechanism makes use of the available meta-information
 to automatically update the proxy components as needed.
-
-The proxy can be installed on either consumers or producers;
-however, it is usually preferable to install the proxy on consumer services to avoid centralizing the load of message adaptation in a single point.
-When the service is also consumed by externally developed clients,
-it is usually beneficial to install the proxy in producers, since it is difficult to install the adapter in uncontrolled clients.
-
-\paragraph{}
-
-Services are deployed without a proxy, proxies are installed on demand using a lazy instantiation method, that creates them when the first communication between corresponding services occurs.
 
 In essence, every communication contains information about the agreed-upon version, the handshake protocol uses this information to determine if a proxy update is required or not.
 The lazy instantiation method improves the maintainability of the system by
@@ -310,7 +293,7 @@ their existing implementations will continue to function even if that endpoint d
 There has been substantial investigation on the adaptability of services in the context of service-oriented architectures.
 Although SOA \cite{7} and Microservices \cite{microservices} are similar in that they both use a separation approach based on services,
 these two designs differ in several important ways, most notably in that microservices are loosely coupled whereas SOA services are tightly tied due to common data storage between services.
-As a result, adaptability in SOA is focused on service integration and replaceability rather than evolution.
+As a result, adaptability in SOA is focused on service integration and replace-ability rather than evolution.
 
 \paragraph{}
 
@@ -335,15 +318,21 @@ This type of differences occurs when protocol P needs to receive several message
 functionality while protocol PR requires one message to achieve the same functionality.
 
 \paragraph{Differences at the Operation Level}
-This type of mismatch occurs when the operation O of S imposes constraints on input parameters,
-which are less restrictive than those of OR input parameters in SR (e.g., differences in value ranges).
+This type of mismatch occurs when the operation O of service S imposes constraints on input parameters,
+which are less restrictive than those of operation O input parameters in service SR (e.g., differences in value ranges).
 
 \paragraph{}
 
-The two first types of mismatches can be handled in the context of microservice evolution without the use of adaptors.
+The "Message Split Mismatch" can be handled through an adapter, however doing so
+would require the adapter to use \textbf{distributed transactions} in order to handle independent message failures.
+
+The "Message Merge Mismatch" can also be solved via an adapter, but this
+would require the adapter to become \textbf{stateful}, since it would need store all messages before they could merged and sent through the new endpoint.
+
+The two first types of mismatches can be handled in the context of microservice evolution without the use of adapters.
 Essentially, the old endpoints are kept operational but marked as deprecated until there are no more consumers using them, and the new endpoints are provided in parallel.
 
-The latter form of mismatch has an impact on microservice evolution only if service contracts allow refined types.
+The latter form of mismatch "Differences at the Operation Level" has an impact on microservice evolution only if service contracts allow refined types.
 In other words, when constraints in input parameter are validated in a layer above the application layer.
 If validation is conducted in a lower layer, the mismatch can be easily resolved by modifying the application's implementation while keeping the service contract untouched.
 
