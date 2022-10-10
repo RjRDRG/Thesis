@@ -185,10 +185,11 @@ a developer might easily make the error of deleting a serialization rule that is
 \subsection{Schema Resolution Rules} % (fold)
 \label{sec:schema_resolution_rules}
 
-The previous approach can be complemented with the use of sophisticated serialization protocols such as Avro, Protocol Buffers or Thrift that
-support schema evolution via resolution rules and declarative semantics,
-where the old version of the software can deal with the new version of the service’s syntax; however, the schema evolution support in this protocols is limited \cite{11}.
-The following are the common limitations of the protocols mentioned above:
+The previous approach can be complemented with the use of sophisticated serialization protocols such as Avro, Protocol Buffers or Thrift.
+These protocols support the evolution of schemas via resolution rules and declarative semantics,
+where the old version of the software can deal with the new version of the service’s syntax.
+However, the schema evolution support in these protocols is limited \cite{11}.
+The following are the common limitations of the aforementioned protocols:
 \begin{itemize}
     \item To ensure backwards compatibility, newly added fields must be optional.
     \item The only fields that can be removed to maintain forward compatibility are optional fields.
@@ -219,7 +220,7 @@ The aforementioned frameworks include built-in support for event-driven and RPC 
 however, if a HTTP communication approach is adopted, these frameworks will be unable to manage changes in the signature of endpoints
 (e.g.\ changing the method of HTTP endpoint's from GET to POST); only changes in record schemas will be managed in this case.
 To support the evolution of endpoint signatures, this approach will need to be supplemented the deprecation of endpoints discussed above.
-To decrease the complexity of the evolution adaptation process, we believe it is necessary to handle both the evolution of records schemas, and the evolution of API signatures in a single integrated approach.
+To decrease the complexity of contract evolutions, we believe it is beneficial to handle both the evolution of schemas, and the evolution of endpoint signatures in a single integrated approach.
 
 \subsection{Chain of adapters} % (fold)
 \label{sec:chain_of_adapters}
