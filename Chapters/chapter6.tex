@@ -8,403 +8,340 @@
 
 \typeout{NT FILE chapter4.tex}%
 
-\chapter{Related Work}
-\label{cha:related_work}
+\chapter{Results}
+\label{cha:results}
 
-As mentioned in Section 1, this work will encompass the development of
-mechanisms for evaluating and managing the soundness of updates in RESTfull \cite{feng2009rest} service contracts.
-We now summarize the most important works of literature relating to the evolution of microservices and their APIs.
+\section{Benchmark platform} % (fold)
+\label{sec:benchmark_platform}
 
-\section{Web API Description Languages} % (fold)
-\label{sec:web_api_description_languages}
-
-Web service development has risen dramatically in recent years;  unlike statically linked library APIs,
-where developers may choose to stick with an earlier version that met their needs, with web APIs,
-the provider can discontinue a specific version and capability at any moment, changes are immediate and irreversible.
-This represents a heavy burden for developers of client modules as it causes an endless struggle to keep up
-with changes pushed by the web API providers; this load is exacerbated if the web API is inadequately documented.
-
-\paragraph{}
-
-Web API Description Languages (WADL) are domain-specific languages used to describe web service contracts in a standardized structure;
-also sometimes referred to as interface description languages (IDLs).
-
-These structured descriptions may be used to produce documentation for human programmers, that is easier to read than free-form documentation,
-because all the generated documentation adheres the formatting norms set by the used tool.
-Furthermore, description languages are often accurate enough to allow for the automatic generation of various software artifacts such as mock servers,
-client code generation in different programming languages, load test scripts, and so on.
-
-\paragraph{}
-
-The OpenAPI Specification (OAS) \cite{openAPI} is the most widely adopted Restful API Description Language;
-it defines a standard language-agnostic interface that allows both computers and humans to comprehend the capabilities of a service.
-OpenApi allows a detailed description of the syntactic aspects of the data transferred in REST interactions, however it ignores important semantic aspects, such as the ability to relate
-different parts of the same data, to relate the input against the state of the service, and to relate the output against the input.
-
-For instance, OpenAPI does not allow developers to indicate that the type of representation conveyed in the response to a GET operation is dependent on the value of a query parameter.
-
-\paragraph{}
-
-\citeauthor{headRest} \cite{headRest} proposes an alternative WADL that supports the expression of semantic aspects in data, the HeadRest specification language.
-Two ideas are embodied in the proposed language:
-
-\paragraph{Refinement Types} \cite{freeman1991refinement} can be used to express the properties of data exchanged.
-A refinement type x can be defined as:
-\[ x:T \rightarrow e \]
-Where x is an object of the primitive type T, and e is a predicate which returns true or false depending on whether the value conforms to the boolean expression (e.g.\ x > 10).
-
-\paragraph{Pre- and post-conditions} can be used to express relationships between data sent in
-requests, and the data returned in responses. These conditions can be expressed as a collection of Hoare triple assertions
-\[ \{\phi\} (a : t) \{\psi\} \]
-Where \emph{a} is HTTP operation type (GET, POST, PUT, or DELETE), \emph{t} is an URI template (e.g. /users/), and $\Phi$ and $\Psi$ are boolean expressions.
-Formula $\Phi$, called the pre-condition, addresses the state in which the action is performed as well as the data transmitted in the request,
-whereas $\Psi$, the post-condition, addresses the state resulting from the execution of the operation together with the values transmitted in the response.
-
-\paragraph{}
-
-Our solution will require the use on WADL for defining compatibility relations between service contracts,
-as well for the implementation of the adaptation protocol, which changes messages in accordance to an earlier contract.
-
-The OpenAPI specification is the most widely adopted WADL for RESTfull services and already supports refinement types, instead of designing yet another WADL,
-we aim to extend the OpenAPI specification to incorporate support for Pre- and Post-conditions and other needs of our approach.
-
-\section{Platform Independent Schema Representations} % (fold)
-\label{sec:platform_independent_schema_representations}
-
-Schema representations are need when delivering serialized messages across the network or storing data with durability.
-For serialization, each language usually provides a corresponding library, such as Java serialization.
-In the setting of microservices, serialization libraries supplied by programming languages are typically not used to encode messages between services,
-because each service may be written in a different language. As a result, data consumers will be unable to comprehend data producers.
-
-Cross-language serialization libraries, such as JSON, can solve this problem.
-However, formats such as JSON lack a strictly defined structure,
-making data consumption more difficult due to poor type-safety guarantees, and the ability for fields to be unilaterally added or withdrawn at any moment without the consumers' knowledge.
-What's missing is a schema for data exchange between producers and consumers, akin to an API contract.
-
-\paragraph{}
-
-The benefit of having a schema is that it explicitly defines the data's structure, type, and meaning.
-There have been a few cross-language frameworks that require the data structure to be properly described via schemas.
-XML, Avro, Thrift, and Protocol Buffers \cite{8,9,10} are among them.
-
-Because the schema of the messages exchanged between services can already be described using the OpenAPI description language,
-solutions that describe the schema of messages such as Avro, ProtoBuf, Thrift, and XML will be redundant in our solution.
-
-\section{Schema Registry} % (fold)
-\label{sec:schema_registry}
-
-A schema registry, as the name implies, is a repository for schemas.
-It stores a versioned history of schemas and provides an interface for retrieving, registering, as well as checking the compliance of schemas.
-It is essentially a CRUD (Create, Read, Update, Delete) application with a RESTful API and persistent storage for schema definitions, where each schema is given a unique ID.
-
-\paragraph{}
-
-Schema registries are commonly used in situations where data consumers need to know the structure of the data written by producers at runtime.
-A producer could send its schema to consumers along with the response to a request;
-however, this is usually a bad idea because it would result in duplicating functionality across all services, making the system more difficult to maintain.
-
-\paragraph{}
-
-One framework that makes use of this system is Avro \cite{8}, a data serialization framework developed within Apache's Hadoop project.
-Avro requires a schema registry because the serialized byte sequence of each record does not include field metadata such as the field name or a tag, but only the field value.
-This allows for a more compact serialization method, but it requires data consumers to understand the structure of the data written by producers.
-All field values are appended back to back, in the same order as they appear in the schema as seen in figure \ref{fig:avro}.
+We plan to construct a benchmark platform to compare our solution to existing ones; this section discusses the proposed benchmark platform's requirements and design.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=1.5in]{avro}
-    \caption{A Avro schema and its associated serialized record }
-    \label{fig:avro}
+    \includegraphics[height=4in]{benchmark_requirements}
+    \caption{Benchmark Requirements \cite{microservices2017benchmark}}
+    \label{fig:benchmark}
 \end{figure}
 
-The deserializer knows which bytes belong to which field by comparing both the consumer and producer schemas and by matching fields by their names.
-
-Another system that makes use of schema registries, is the Java RMI \cite{12},
-a Java API that supports remote procedure calls (RPC) with distributed garbage-collection.
-
-The Java RMI makes use of a schema registry to enable clients to obtain a references (stubs) to a remote objects.
-The RMI registry is only used for locating the first object that a client needs, each reply from the registry provides
-support for finding other objects.
-
-\paragraph{}
-
-Our approach will need the use of a service registry, which will enhance the capabilities of a schema registry by storing not just schemas but also service-to-service dependencies.
-
-\section{Service Evolution Approaches} % (fold)
-\label{sec:service_evolution_approaches}
-
-Due to various factors services can not keep their stability
-permanently, evolution occurs throughout their entire life cycle.
-
-Controlling and supporting the evolution of services is a significant technological research endeavor.
-\citeauthor{webServiceEvolution} propose five standards for evaluating existing methods for evolving Web services;
-these standards, and some methods are also applicable in a micro-service setting, as microservices can be viewed as web services:
-
-\paragraph{Granularity of evolution}
-Granularity refers to the unit on which the evolution is based.
-Coarse-grained evolution strategies support the evolution of general interface properties,
-whereas fine-grained evolution strategies support the evolution individual basic properties, such as the type of parameter in a method.
-
-\paragraph{Terminal of evolution}
-The term refers to whether the end result of a changed service affects the producer, the consumer, or both.
-
-\paragraph{Type of evolution}
-Evolutionary methods can be divided into two broad categories: semantic and architectural.
-Architectural methods typically evolve changes to the composition of components, whereas semantic methods are primarily based on the semantic extension of contracts.
-
-\paragraph{Scalability}
-This standard assesses an evolutionary method's applicability and generality in different contexts.
-
-\paragraph{Maintainability}
-This standard assesses the difficulty of maintaining system's that employ the relevant evolutionary method.
-
-\paragraph{}
-
-\subsection{Hand-off Period} % (fold)
-\label{sec:hand_off_period}
-
-The conventional approach for evolving microservices is to keep the various deployments of the different versions of a service implementation available with a hand-off period,
-and to explicitly redirect requests to the supported version.
-This approach has been proven to be pragmatic, but exceedingly expensive,
-because it necessitates high maintainability and partitions available resources among continually shifting subsets of consumers.
-
-\subsection{Deprecated Endpoints} % (fold)
-\label{sec:deprecated_endpoints}
-
-Alternatively its possible to support backwards compatibility without distinct deployments, by including in the new service contract the endpoints of the prior contracts
-that are still in use.
-When a breaking contract change occurs, rather than supporting the change by modifying the impacted endpoint implementation,
-we preserve the old endpoint and implement the new contract version in a completely separate endpoint.
-Contract changes that only affect HTTP parameters can easily be accommodated under this approach; however contract changes that affect
-request body schemas are problematic because it would be necessary to write distinct serialization and de-serialization rules for each version of the schema.
-This approach can add significant amount of effort to the development team because each breaking change requires all the serialization rules to be rebuilt.
-Schemas with multiple serialization rules also tend to become unreadable.
-Furthermore, this approach doesn't offer any safety guarantees;
-a developer might easily make the error of deleting a serialization rule that is still in use.
-
-\subsection{Schema Resolution Rules} % (fold)
-\label{sec:schema_resolution_rules}
-
-The previous approach can be complemented with the use of sophisticated serialization protocols such as Avro, Protocol Buffers or Thrift.
-These protocols support the evolution of schemas via resolution rules and declarative semantics,
-where the old version of the software can deal with the new version of the service’s syntax.
-However, the schema evolution support in these protocols is limited \cite{11}.
-The following are the common limitations of the aforementioned protocols:
+\citeauthor{microservices2017benchmark} propose an initial set of requirements
+to support repeatable microservices research.
+In addition to the requirements listed in the ~\ref{fig:benchmark}, the platform's essential requirements are as follows:
 \begin{itemize}
-    \item To ensure backwards compatibility, newly added fields must be optional.
-    \item The only fields that can be removed to maintain forward compatibility are optional fields.
-    \item Its not possible to change a field type or its format freely, field types can only be promoted to more embracing types (e.g int->float).
-    \item Renaming fields is supported through the use of aliases that cannot be re-used by other fields in the same scope.
-\end{itemize}
-Backward compatibility is only required in request schemas, while forward compatibility is only required in response schemas.
-In other words the current producer implementation must be able to interpret request messages from outdated consumers, and outdated consumers
-must be able to interpret response messages from the new producer implementation.
-Schemas that are used both in request and response messages most support forward and backward compatibility.
-
-\paragraph{}
-
-The need for optional fields in the above cases is due to a lack of information on the message receiver, typically this information is supplied with the use of default values.
-
-All fields that are optional exclusively because of resolution rules should be treated as required when a consumer and producer agree on the schema version, and the default value should not be utilized, since there is no absence of information in this case.
-To simply put it, the system should enforce required fields when the consumer and producer agree on the schema, and only use default values when the consumer and producer disagree.
-
-The aforementioned protocols do not differentiate between the two cases; instead, their resolution rules solely operate over the syntax of schemas and are agnostic to the version of the consumer and producer's schema.
-In order to enforce required fields in the former case,
-validation logic would need to be written repeatedly by programmers (in the same layer as the business logic).
-This validation should be in a layer above because, the scale of the validation logic is proportional to the complexity of messages being validated;
-for messages with more properties, particularly those with nested objects, the validation footprint can rise dramatically in terms of both line-count and logical complexity.
-
-\paragraph{}
-
-The aforementioned frameworks include built-in support for event-driven and RPC communication methods,
-however, if a HTTP communication approach is adopted, these frameworks will be unable to manage changes in the signature of endpoints
-(e.g.\ changing the method of HTTP endpoint's from GET to POST); only changes in record schemas will be managed in this case.
-To support the evolution of endpoint signatures, this approach will need to be supplemented the deprecation of endpoints discussed above.
-To decrease the complexity of contract evolutions, we believe it is beneficial to handle both the evolution of schemas, and the evolution of endpoint signatures in a single integrated approach.
-
-\subsection{Chain of adapters} % (fold)
-\label{sec:chain_of_adapters}
-
-The chain of adapters is a design strategy for supporting web services in the face of independently developed unsupervised clients while preserving strict backwards compatibility.
-This approach decomposes long update/rollback transactions into smaller, independent transactions.
-
-This technique is discussed in depth in the work \cite{13}. The key concepts of the approach are presented below.
-
-\paragraph{}
-
-When a new service API is published, the old API is not decommissioned;
-instead, it is made available in a different namespace.
-In a RESTful system, this often entails supporting operations in different versions;
-Endpoints belonging to the API in v1.0 can be made accessible via the path \texttt{http://example.system/v1},
-whereas endpoints belonging to the API in v2.0 are accessible via the path \texttt{http://example.system/v2}.
-
-The previous API implementations are replaced by adapters that redirect all calls to the next API version implementation and also translate data structures as necessary.
-
-\paragraph{}
-
-Updating a service's API in this manner requires the programmer to do two additional steps:
-\begin{itemize}
-    \item Duplicate all modified endpoints in service contract into a different namespace.
-    \item Implement an adapter that translates the endpoints in version vi->vi+1.
+    \item The ability to evaluate different solutions in comparable scenarios while utilizing the same evaluation criteria.
+    \item Evaluating solutions without requiring modifications to implementations.
+    \item Experiments must be simple to share and reproduce by different individuals.
+    \item It should be possible to aggregate reported metrics for a specific time period between two events, such as the start and end of a service's evolution.
+    \item Users must be able to specify how and when each service should evolve via a configuration file or directly through a terminal.
 \end{itemize}
 
-The same web service that supports the revised service endpoints also supports the older endpoints that require adapters.
-It is not necessary to deploy the web service in several versions.
+The architecture of the benchmark platform can be seen in section ~\ref{fig:canvas}.
+The architecture components, and their applications are described below:
 
-When a consumer is using version v1, and the producer is using version v4, the endpoints that provide the service
-in version v1 use the adapters v1 \textrightarrow v2, v2 \textrightarrow v3, and v3 \textrightarrow v4 to translate the operation before forwarding it to the endpoint in the current version.
-The service's backwards compatibility is ensured by the composition of adapters in a chain, as seen in figure \ref{fig:chain}.
+\paragraph{Kubernetes ~\cite{kubernetes}} will be the test environment.
+It will host the services holding the solutions implementations.
+The loading testing scripts will also be managed via services in Kubernetes.
+
+\paragraph{Promotheus ~\cite{turnbull2018monitoring}} is a pull-based monitoring system.
+It periodically sends HTTP scrape requests, the response to this requests is parsed in storage along with the metrics for the scrape itself.
+Prometheus provides a query language that allows the metrics to be aggregated by events, components or metadata.
+The gathered will be visualized in this platform via Grafana dashboards.
+
+\paragraph{Artillery}
+Artillery is an open-source performance and reliability testing suite for developers and system administrators.
+
+\paragraph{Jenkins}
+Jenkins is a free and open automation server.
+It aids in the automation of portions of software development such as building, testing, and deploying, allowing for continuous integration and continuous delivery.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=1.5in]{chain}
-    \caption{Chain of Adapters structure
-    after n versions have been published }
-    \label{fig:chain}
+    \includegraphics[height=7in]{canvas}
+    \caption{Benchmark platform components}
+    \label{fig:canvas}
 \end{figure}
 
-\subsection{Lazy Proxy Adapter} % (fold)
-\label{sec:proxy_adapter}
+\section{Evaluation Methodology} % (fold)
+\label{sec:evaluation_methodology}
 
-In this strategy the knowledge of a microservice’s
-interfaces is used to create a lightweight proxy capable of dynamically adapting the messages exchanged between services to match them with the static service code.
-The adapter proxy intercepts messages from consumers and adapts the message to the new specification before they reach the producer.
-Consumer services are initially deployed without the adapter proxy. Proxies are installed and updated on demand using a lazy instantiation method, that builds and deploys the adapter proxy when the first communication between corresponding services occurs.
-\citeauthor{seco2020robust} and \citeauthor{santosregent} investigate this approach \cite{seco2020robust, santosregent}.
+\paragraph{Environment}
 
-\paragraph{}
+The experiments were conducted in a cloud environment with 10 virtual machines.
+All 10 nodes were hosted in the same datacenter in the region of Strasbourg, France.
+Each virtual machines was hosted in different physical machines, no two VMs shared the same hardware.
+Each node is interconnected with a bandwidth of 2 Gb/s.
+Each virtual machine is equipped with 4GB of RAM and 2 virtual cores of an Intel Core Haswell (no TSX) cpu.
 
-The proxy creation mechanism makes use of the available meta-information
-to automatically update the proxy components as needed.
+\paragraph{Tested microservice system }
 
-In essence, every communication contains information about the agreed-upon version, the handshake protocol uses this information to determine if a proxy update is required or not.
-The lazy instantiation method improves the maintainability of the system by
-simplifying deployment operations.
+To test the cost of the adapter system a demo application was developed.
+The demo application holds a configurable amount of services that run an identical image.
+The image is a simple http spring server that returns received requests unchanged.
+The interconnections between microservices is configurable thorough environment variables.
+The number of synchronous calls (SyC) between microservices for a single request is also configurable.
+The number of parallel calls (PrC) between microservices is also configurable.
+Two http endpoints are contained in the image, which was developed in two separate versions with unique contracts.
+In one of the endpoints, all the parameters in the body's schema were given new names.
 
-\paragraph{}
+\paragraph{Experiment Setup}
 
-With this approach, changes to definitions in a module do not have an immediate effect on the whole system, because they do not require the redeployment of consumers.
-For instance, if two services agree on a definition for a given endpoint,
-their existing implementations will continue to function even if that endpoint definition evolves over time.
+To inject load in the experiments, 10 workers of artillery load testing tool were used,
+the workers are executed remotely in the cluster and were spread in 6 nodes.
+The workers are supported by kubernetes pods that are monitored by a common kubernetes job.
+The workers are installed and removed from cluster using the artillery operator project, that enables
+the creation and execution of distributed Artillery load tests from a Kubernetes cluster, at scale.
+In each experiment all the resources of previous experiments were deleted and a new job and namespace were created in the
+cluster to avoid contamination in the metrics extracted.
+Each experiment was executed in sequence with a pause of 2m.
 
-\section{Service Integration Adapters} % (fold)
-\label{sec:service_integration_adapters}
+Each experiment had three phases:
+A warm up phase of 30s with an arrival rate of 5 vu/s.
+A ramp up phase of 2m.
+A sustained load phase of 6m.
+The metrics were only extracted during the sustained load phase;
+the first and last 30s were left out to allow time for all the artillery worker threads to enter the sustained load phase.
+We excluded tests that had a high enough throughput to saturate the application.
+The error rate and timeouts were zero during all the presented experiments.
 
-There has been substantial investigation on the adaptability of services in the context of service-oriented architectures.
-Although SOA \cite{7} and Microservices \cite{microservices} are similar in that they both use a separation approach based on services,
-these two designs differ in several important ways, most notably in that microservices are loosely coupled whereas SOA services are tightly tied due to common data storage between services.
-As a result, adaptability in SOA is focused on service integration and replace-ability rather than evolution.
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=3in]{artillery-operator-architecture}
+    \caption{Artillery Operator Architecture}
+    \label{fig:gantt}
+\end{figure}
 
-\paragraph{}
+\paragraph{Metrics}
 
-In the setting of SOA, adapters are used to wrap the heterogeneous services that communicate with distinct protocols and data formats,
-in order to make them homogeneous and integrated them more easily.
+In each experiment we extracted 3 metrics, the cpu/memory resources and latency of the system.
+The resources were only queried from the adapters, and the replicas that belong to the target microservice application.
+The resources consumed by the monitoring system and artillery workers were excluded and have no effect
+on the results.
+The throughput and latency were extracted with the use of the artillery load testing tool.
 
-These adapters presume that data adaptation has already been established by developers at an upper layer,
-their primary concern is integrating services with distinct communication protocols and mismatches between operations that have the
-same functionality but different signatures (e.g\ parameters name, order, type).
+The CPU resource samples were taken from each node at 5-second intervals using the prometheus node exporter.
+Memory resource samples were gathered from each container at 5-second intervals using the kubelet node agent api.
+The latency statistics were calculated with a period of 10s over 5 min, the results obtained represent the
+average of the reported 30 periods.
 
-\paragraph{}
+\section{Experiments} % (fold)
+\label{sec:experiments}
 
-\citeauthor{adaptersWebServices} \cite{adaptersWebServices} present a taxonomy of all conceivable mismatches as well as remedies to each type in the context of SOA.
-Some of the defined mismatches remain important in the context of microservice evolution:
+This section presents measurements obtained from a prototype implementation throughout various experiments.
 
-\paragraph{Message Split Mismatch}
-This type of differences occurs when the protocol P requires a single message to achieve certain functionality,
-while in protocol PR the same behavior is achieved by receiving several messages.
+%%Throughout the experiments, if the behavior of the system is similar with different parameters, we select the most
+%%interesting figures or features due to the limited space.
 
-\paragraph{Message Merge Mismatch}
-This type of differences occurs when protocol P needs to receive several messages for achieving certain
-functionality while protocol PR requires one message to achieve the same functionality.
+\paragraph{Point to Point}
 
-\paragraph{Differences at the Operation Level}
-This type of mismatch occurs when the operation O of service S imposes constraints on input parameters,
-which are less restrictive than those of operation O input parameters in service SR (e.g., differences in value ranges).
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=2.4in]{pointExperiment}
+    \caption{point-to-point experiment}
+    \label{fig:point}
+\end{figure}
 
-\paragraph{}
+The topology of this experiment is represent in Figure ~\ref{fig:point}.
+This experiment is composed by two microservices:
+the first receives requests from artillery workers and forwards them to the second microservice, which responds with the request.
 
-The "Message Split Mismatch" can be handled through an adapter, however doing so
-would require the adapter to use \textbf{distributed transactions} in order to handle independent message failures.
-
-The "Message Merge Mismatch" can also be solved via an adapter, but this
-would require the adapter to become \textbf{stateful}, since it would need store all messages before they could merged and sent through the new endpoint.
-
-The two first types of mismatches can be handled in the context of microservice evolution without the use of adapters.
-Essentially, the old endpoints are kept operational but marked as deprecated until there are no more consumers using them, and the new endpoints are provided in parallel.
-
-The latter form of mismatch "Differences at the Operation Level" has an impact on microservice evolution only if service contracts allow refined types.
-In other words, when constraints in input parameter are validated in a layer above the application layer.
-If validation is conducted in a lower layer, the mismatch can be easily resolved by modifying the application's implementation while keeping the service contract untouched.
-
-\section{Deployment Strategies} % (fold)
-\label{sec:deployment_strategies}
-
-Deployment strategies are techniques that aim to provide means to upgrade a service,
-while discontinuing the previous implementation without incurring downtime.
-
-These strategies will be beneficial in the context of our solution since all service updates will evolve the immediate termination of the prior implementation,
-as it is no longer required to keep several versions available to offer backwards compatibility in service contracts.
-The service registry will aid in the application of these strategies, since it is responsible for managing service deployments and un-deployments.
-
-\paragraph{}
-
-A blue-green deployment approach is the most often used deployment strategy.
-The new version ''blue'' is made available for testing and review, while users continue to use the stable version ''green''.
-Users are migrated to the new version after it has passed all compliance tests.
+We first established a baseline of comparison
+by doing the tests without the adapter, and then we introduced the adapter and repeat the tests.
+The primary goal of this experiment was to assess the overhead of the adapter in terms of latency and computational resources.
 
 \paragraph{}
 
-A common alternative strategy is to have two A/B versions active at the same time, with some users using one and others using the other.
-This strategy can be used to test and gather feedback on modifications to user interfaces.
-It can also be used to troubleshoot problems that affect only a subset of users, in a production setting.
+The measured cpu overhead of the adapter over a
+range of request rates is depicted in Figure ~\ref{fig:cpuPtp}.
+The overhead was calculated by processing the averages of the measured CPU resources in the baseline and adapter tests, and then by dividing the two averages.
+
+In this experiment it is expected to have an overhead of 150\%, because the adapter and the microservices share the same request rate,
+and because the cost of the adapter is expected to be equal or to the cost of the tested microservices.
+The tested microservices were implemented with the same frameworks as the adapter, consequently adding the adapter will be equivalent to adding one more microservice to the existing two.
+
+As can be seen in the results shown Figure ~\ref{fig:cpuPtp} the measured overhead doesn't fall to far outside our expectations, with the exception of the first data point.
+The overhead 84\% is explainable by the configuration of the containers.
+The adapter and demo application containers were initialized in kubernetes with a default of 100 millicpu (10\% of tested cpu core),
+this cpu resources far exceed the capacity necessary to support a request rate 60 requests/second,
+consequently the container's cpu scheduling was throttle-down after start up,
+the overhead was inferior to 100\% because the scheduled cpu resources in the experiment with the adapter, were throttled down faster than in the baseline experiment without the adapter.
 
 \paragraph{}
 
-A canary deployment can be used to evaluate a new version, if a problem is discovered, the deployment is quickly reverted.
-This technique can be performed in either of the above approaches.
+Figure ~\ref{fig:memPtp} shows the measured memory overhead of the adapter over a
+range of request rates.
+The average cost of 190\% in Figure ~\ref{fig:memPtp} is understandable because, although being stateless, the adapter stores two messages in memory for each request, the request message and the adapted request message.
+Because the demo application only keeps one request in memory, it stands to reason that the adapter memory cost is the double of the demo application.
+As can be seen in Figure ~\ref{fig:memCostPtp} the adapter real memory cost grows linearly with the request rate.
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=3in]{Results/PtP/Cpu-PtP}
+    \caption{Adapter CPU overhead in the point-to-point experiment \\\hspace{\textwidth} 100 bytes (payload size)}
+    \label{fig:cpuPtp}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=3in]{Results/PtP/Memory-PtP}
+    \caption{Adapter memory overhead in the point-to-point experiment \\\hspace{\textwidth} 100 bytes (payload size)}
+    \label{fig:memPtp}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=3in]{Results/PtP/MemoryCost_PtP}
+    \caption{Adapter memory cost in the point-to-point experiment \\\hspace{\textwidth} 100 bytes (payload size)}
+    \label{fig:memCostPtp}
+\end{figure}
+
+\newpage
+
+The latency overhead of the adapter in the point-to-point experiment is depicted in Figure ~\ref{fig:latPtP}.
+
+It is expected for the overhead to be less or equal to 150\%, because the latency overhead is largely attributable to communication cost.
+The adapter introduces an additional communication step "app1->\textbf{adapter->app2}" to the baseline communication chain that already haves two steps "workers->app1" and "app1->app2".
+The introduced communication step is expected to have a slightly inferior cost to the other steps, because it is performed via interprocess-calls, while the others are done via a private network with 2 GB of bandwidth.
+Our hypothesis is confirmed by the experiment results in Figure ~\ref{fig:latPtP}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=3in]{Results/PtP/Latency-PtP}
+    \caption{Adapter latency cost in the point-to-point experiment \\\hspace{\textwidth} 100 bytes (payload size)}
+    \label{fig:latPtP}
+\end{figure}
+
+The Figures  ~\ref{fig:payloadCpuPtP} and ~\ref{fig:payloadLatPtP} illustrate how larger payload sizes effect the latency and the consumed cpu resources.
+A request rate of 480 request per second was used in this experiment.
+The latency is expected to rise with larger payload sizes because the typical HTTP packet size 1.5 KB bigger messages will need to be sent in multiple packets.
+The cpu cost is also expected to rise, because the cost of deserialization of messages grows with the message payload size.
+The results illustrated don't reveal any difference for the tested range of payload sizes.
+We selected the range of 100 bytes to 2 KB because most services use http messages that fall under this range.
+We intend to repeat this experiment for larger payload sizes up to 2 MB.
+With larger payload sizes it will be necessary to sent multiple packets to transmit one message, we intend to see how the adapter scales in this scenario.
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=3in]{Results/PtP_Size/Cpu-PtP_Size}
+    \caption{Adapter CPU cost in the point-to-point experiment \\\hspace{\textwidth} 480 request/s (arrival rate)}
+    \label{fig:payloadCpuPtP}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=3in]{Results/PtP_Size/Latency-PtP_Size}
+    \caption{Adapter Latency cost in the point-to-point experiment \\\hspace{\textwidth} 480 request/s (arrival rate)}
+    \label{fig:payloadLatPtP}
+\end{figure}
+
+\newpage
+
+\paragraph{Weighted Point to Point}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=1.8in]{routingExperiment}
+    \caption{routing experiment}
+    \label{fig:routExp}
+\end{figure}
+
+The topology of this experiment is represent in Figure ~\ref{fig:routExp}.
+This experiment is also composed by the two microservices, where the first microservice forwards a percentage of its request thorough the adapter
+and forwards its remaining requests directly to the other microservice.
+The primary goal of this experiment was to see if the adapter overhead is significantly lower in scenarios where only a small percentage of all requests require adaptation.
 
 \paragraph{}
 
-A rolling deployment is an alternative strategy that gradually replaces instances of an service previous version with instances of the new version.
-Before scaling down the old components, a rolling deployment normally waits for additional pods to become available through a readiness check.
-If a significant problem arises, the rolling deployment is halted.
+Figure ~\ref{fig:routCpu} depicts the measured CPU cost of the adapter, the horizontal axis represents the percentage of requests that need adaptation, and the vertical axis represents the
+CPU cores utilized by the adapter and demo applications.
+In this experiment it is expected for the overhead to steadily increase, because as the adapter receives a higher percentage of requests, its request arrival rate will increase, to support higher request rates
+the adapter implementation will need to launch more client threads, which consequently increase the consumed CPU resources.
+
+When we compare the first and last data points in Figure ~\ref{fig:routCpu}, we can see that consumed resources have doubled as expected.
+
+In the other data points, the overhead remains relatively constant with a margin of error of 20\%,
+this explainable because the default amount of allocated threads by Tomcat (200 threads) is sufficient to handle the arrival rate in these data points.
+When 50\% of requests are routed through the adapter, the arrival rate is 240 requests/s, the tomcat thread model uses a thread per request,
+consequently 240 threads are necessary to handle the arrival rate, which can be translated to an overhead of 120\%.
+The 20\% margin of error in the other data points explainable by the nondeterministic nature of the artillery workers.
+The artillery test has two scenarios: one where the worker calls an endpoint that can only be handled by using the adapter, and another in which the adapter is not utilized.
+Each scenario weight as set to reflect the corresponding test percentages;
+however, the distribution of requests is nondeterministic and will only be equal to the given weights over very long test periods;
+the test time for this experiment was set to 5 minutes for each data point.
 
 \paragraph{}
 
-Our solution will use the rolling deployment strategy because it provides the best availability guarantees
-and is natively supported by Kubernetes, the microservice orchestration tool that has been adopted.
-
-\section{API Management Tools} % (fold)
-\label{sec:api_management_tools}
-
-API management is the process of overseeing API functions like API creation, description, testing, analysis, publication, securing, and monitoring.
-All of these API management requirements can only be met with the assistance of tools, this is where API management tools enter the picture.
+The utilized memory of the adapter and demo applications in this experiment is depicted in Figure ~\ref{fig:routMem}.
+It is expected for the used memory to increase linearly with the fraction of requests routed through the adapter, because as discussed previously,
+the adapter implementation spatial complexity is equivalent to double of the demo application implementation spatial complexity.
+The results obtained confirm our expectations.
 
 \paragraph{}
 
-Microsoft Azure's API Management platform (AAMP) is a tool that provides some of the above functionalities in a manner that is similar to that of our solution.
-In this platform, programmers are allowed to manually define transformations that should be performed on all responses from a microservice [].
-The primary distinction is that Azure API Management transformations are intended to be specified by the programmer in policy statements,
-whereas our transformations can be applied automatically without the intervention of developers.
-
-The main use case of these transformations in AAMP is the integration of legacy backends by modernizing their APIs and making them accessible from cloud services, without the risk of migration.
-
-\paragraph{}
-
-In AAMP all requests from client applications are routed through the API gateway, which then forwards them to the appropriate backend services.
-The API gateway, like our adapter proxy, acts as a facade to the backend services,
-allowing API providers to abstract API implementations and evolve backend architecture without impacting API consumers.
-The AAMP's responsibilities and functionalities include:
-
-\begin{itemize}
-    \item Accepting API calls and routing them to configured backends;
-    \item Verifying API keys, JWT tokens, certificates, and other credentials;
-    \item Enforcing usage quotas and rate limits;
-    \item Transforming requests and responses as specified in policy statements;
-    \item Caching responses to improve response latency and minimize the load on backend services;
-    \item Emitting traces for monitoring, reporting, and troubleshooting;
-    \item Collecting API usage metrics
-\end{itemize}
+Figure ~\ref{fig:routLatency} shows the request latency.
+In this experiment it is expected for the latency to steadily increase with the fraction of requests routed through the adapter, because of the same reasons previously stated.
+When we compare the first and last data points in Figure ~\ref{fig:routCpu}, we can see that the latency has doubled as expected.
+In the other data points, the latency remains relatively constant, this mainly due to the error introduced by the short test duration, we intend to repeat this test with a longer time window.
 
 
-We aim to include some of the aforementioned features in our service registry implementation, particularly the collection of usage metrics.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=3in]{Results/R/Cpu-R}
+    \caption{CPU used in the routing experiment \\\hspace{\textwidth} 480 request/s (arrival rate) 100 bytes (payload size)}
+    \label{fig:routCpu}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=3in]{Results/R/Memory-R}
+    \caption{Memory used in the routing experiment \\\hspace{\textwidth} 480 request/s (arrival rate) 100 bytes (payload size)}
+    \label{fig:routMem}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=3in]{Results/R/Latency-R}
+    \caption{Request latency in the routing experiment \\\hspace{\textwidth} 480 request/s (arrival rate) 100 bytes (payload size)}
+    \label{fig:routLatency}
+\end{figure}
+
+\newpage
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=2.4in]{bipartExperiment}
+    \caption{bi-partition experiment}
+    \label{fig:biPart}
+\end{figure}
+
+\paragraph{Bi-partition}
+
+The topology of this experiment is represent in Figure ~\ref{fig:biPart}.
+This experiment is composed by two disjoint sets of microservices, where the first set receives request from the artillery workers and forward the requests to the second of microservices.
+We first established a baseline of comparison by doing the tests without the adapter.
+Then we upgraded all the microservices in the second set and added adapters to support communication across the disjoint sets.
+The goal of this experiment was to see if the conclusions obtained from the point-to-point experiment are also applicable in scenarios with multiple microservices.
+
+The outcomes of the "point-to-point" and "bi-partition" experiments are equivalent, as seen in the Figures ~\ref{fig:biPartCPU}, ~\ref{fig:biPartMem} and ~\ref{fig:biPartLatency}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=3in]{Results/Bp/Cpu-Bp}
+    \caption{Adapter CPU overhead in the bi-partition experiment \\\hspace{\textwidth} 100 bytes (payload size)}
+    \label{fig:biPartCPU}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=3in]{Results/Bp/Memory-Bp}
+    \caption{Adapter memory overhead in the bi-partition experiment \\\hspace{\textwidth} 100 bytes (payload size)}
+    \label{fig:biPartMem}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=3in]{Results/Bp/Latency-Bp}
+    \caption{Adapter latency overhead in the bi-partition experiment \\\hspace{\textwidth} 100 bytes (payload size)}
+    \label{fig:biPartLatency}
+\end{figure}

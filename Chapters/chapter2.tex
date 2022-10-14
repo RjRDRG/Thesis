@@ -1,295 +1,264 @@
 %!TEX root = ../template.tex
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% chapter2.tex
+%% chapter4.tex
 %% NOVA thesis document file
 %%
-%% Chapter with the template manual
+%% Chapter with lots of dummy text
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\typeout{NT FILE chapter2.tex}%
+\typeout{NT FILE chapter4.tex}%
 
-\chapter{NOVAthesis Template \emph{User's Manual}}
-\label{cha:users_manual}
+\chapter{Background}
+\label{cha:background}
 
-\glsresetall
+The technology underlying the development and deployment of microservices-based applications will be described in this section:
 
-\begin{center}
-  \fbox{\LARGE
-    This manual is outdated and must be revised!}
-\end{center}
+\section{Microservices} % (fold)
+\label{sec:microservices}
 
-Referência ao Potássio é \gls{chem:potassio} e Sódio também \gls{chem:sodio}.
+Microservices \cite{microservices, microservices2017tenets, microservicesTomorrow} are an architectural style in which software is developed using self-contained components that
+communicate with one another via standardized interfaces and lightweight mechanisms.
+These services segregate fine-grained business functionalities and can be independently deployed, scaled, and tested by automated mechanisms.
+There is virtually no centralized management, and each service may be written in a different programming language and employ a different data storage technology.
 
-\section{Introduction}
-\label{sec:introduction}
+\paragraph{}
 
-This chapter describes how to use the \gls{novathesis}\ Template and the \gls{novathesisclass} file.  I will assume you have a working installation of \LaTeX, wither local (in your own computer) or remote (in Overleaf), and that it compiled successfully the default configuration (PhD for \gls{FCT}).
+To understand the microservice style it's useful to compare it to the monolithic style:
+A monolithic application is built often using the Model-View-Controller (MVC) pattern ~\cite{mvc}, which is composed by three parts:
+The view, a client-side user interface composed of HTML pages and Javascript that runs in the user's browser;
+The model, a relational database management system;
+The controller, a server-side application that handles requests, retrieves and updates data from the database, executes domain logic,
+and populates the views that are sent to the browser.
 
+\paragraph{}
 
-\section{Folder Structure}
-\label{sec:folder_structure}
+The server-side application is a monolith a single logical executable, in which all logic for handling requests runs as a single process,
+different domains of the application are divided into classes, functions, and namespaces by utilizing the basic features of a programming language.
 
-The \gls{novathesis} template is organized into many files and folders. At the main level it includes the following files and folders:
+When large monolithic applications must scale while maintaining a high level of availability, they become a source of frustration:
+Scaling the server-side application involves scaling all the application functionalities, rather than the functionalities that require greater resources;
+Any small change made to the server-side application, involves building and re-deploying the entire monolith;
 
-\noindent\rowcolors{1}{GhostWhite}{}
-\begin{xltabular}{\linewidth}{>{\ttfamily}l>{\itshape}l>{\upshape}X}
-novathesis.cls     & file    & 
-The main class file. It will include additional files from \texttt{NOVAthesisFiles} folder and its sub-folders. 
-\\ 
-template.tex      & file    & 
-The main template file. You need to \emph{compile} this file with one of pdf\LaTeX, \XeLaTeX, or \LuaLaTeX\ to obtain the \texttt{template.pdf} file.
-\\
-bibliography.bib  & file    & 
-An example of a bibliography file. You may have has many as you want. \\
-template.pdf      & file    & 
-A possible result of applying pdf\LaTeX\ to the \texttt{template.tex} file. The template supports multiple types of documents (e.g., MSc dissertation, PhD thesis, …) and multiple Schools (e.g., FCT-NOVA, FCSH-NOVA, IST-UL, FC-UL, …) and each will produce different results.
-\\
-Chapters          & folder  & Examples of thesis chapters. Replace them with your own chapters. 
-\\
-Examples          & folder  & Some more examples of the use of the template for different document types and Schools. 
-\\
-Scripts           & folder  & Some (possibly useful) scripts for Unix-based systems (Linux, Mac OSx). If you are a windows user, ignore this folder (you may safely delete it if you want). 
-\\
-NOVAthesisFiles   & folder  & 
-Additional files for the \gls{novathesisclass}\ file.  Unless you know what you are doing, avoid messing up with the files and folders inside this folder (except for deleting the unused Schools, see below). 
-\\
-\end{xltabular}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=3in]{microVSmono}
+    \caption{Monoliths and Microservices \cite{microservices}}
+    \label{fig:monoliths and microservices}
+\end{figure}
 
-The \texttt{NOVAthesisFiles} folder contains additional files and folders that complement the main \gls{novathesisclass}\ file.  These are:
+The requirements of system scalability, high availability, and continuous delivery are addressed in different microservice architectural characteristics.
 
-\noindent
-\begin{tabularx}{\linewidth}{>{\ttfamily}l>{\itshape}l>{\upshape}X}
-README.txt      & file    &
-A file that should be read!  :) 
-\\
-fix-babel.tex   & file    &
-Simple fixes to the \texttt{babel} package.
-\\
-lang-text.ldf   & file    &
-Translations of important strings used in the template.  Currently fully supported are Portuguese and English, but French is on the way.  If you add translations for your own language, please be so kind and send them to me. Thank you!
-\\
-options.tex     & file    &
-Processing of \gls{novathesisclass}\ options.  \emph{Don't mess with this!}
-\\
-packages.tex    & file    &
-Additional packages to be loaded into the \gls{novathesis}\ template. \emph{You should not mess with this!}
-\\
-spine.tex       & file    &
-This file is loaded only if the option \texttt{spine=full} or \texttt{spine=trim}, and includes the typesetting of the book spine.
-\\
-ChapStyles      & folder  &
-Contains a lot of files, one for each chapter style.  If you really know what you are doing, you may add your own chapter style here.
-\\
-FontStyles      & folder  &
-Contains a few files, one for each set of fonts (main text font, chapter font, section font, subsection font, etc).  If you really know what you are doing, you may add your own set here.
-\\
-Schools         & folder  &
-Configuration files for each school.  This folder is organized into subfolders, one for each university.  \emph{You may safely delete all the subfolders except the one for your University.}  Then open the subfolder of your University and \emph{you may safely delete all the subfolders except the one for your School/Faculty}.
-\\
-\end{tabularx}
+\paragraph{Componentization}
 
-As stated above, the \texttt{Schools} folder contains per-university folders and per-school (faculty) subfolders.  Currently these are the available folders:
+In contrast to monoliths, which achieve componentization solely via the use of libraries and programming language capabilities,
+microservices achieve componentization primarily through the division of different business domains and functionalities into distinct executables
+that are exposed as services.
 
-\noindent
-\begin{tabularx}{\linewidth}{>{\ttfamily}r@{~/~}>{\ttfamily}l>{\itshape}l>{\upshape}X}
-ul     & ist    & folder  & 
-The folder for the \href{http://www.tecnico.ulisboa.pt}{\emph{Instituto Superior Técnico}} of the \emph{University of Lisbon}.
-\\
-nova    & fcsh   & folder  & 
-The folder for the \href{http:www.fcsh.unl.pt}{\emph{Faculty of Human and Social Sciences}}  of the \emph{NOVA University of Lisbon}.
-\\
-nova    & fct    & folder  & 
-The folder for the \href{http:www.fct.unl.pt}{\emph{Faculty of Sciences and Technology}} of the \emph{NOVA University of Lisbon}.
-\\
-nova    & novaims    & folder  & 
-The folder for the \href{http:www.novaims.unl.pt}{\emph{Information and Management School}} of the \emph{NOVA University of Lisbon}.
-\\
-\end{tabularx}
+While this componentization approach helps to enforce component's encapsulation via more explicit component interfaces,
+its primary benefit is that services become independently deployable.
+This feature helps to fulfill the requirements of system scalability and high availability by
+making different components scalable across multiple nodes and limiting cascading errors via the replication and isolation of components.
 
-% section folder_structure (end)
+\paragraph{Decentralized Data Management}
 
-% ===================
-% = Package options =
-% ===================
-\section{\glsfmtshort{novathesisclass}\ Class Options}
-\label{sec:package_options}
+While monolithic applications typically use a single logical database for persistent data, microservices provide greater flexibility, fault tolerance,
+and scalability by allowing each service to manage its own database, which can be a different instance of the same database technology or a completely different database system.
+Decentralizing data responsibility across services has implications for the implementation of cross-domain operations affecting multiple resources.
+The common approach for dealing with the problem of consistency when updating multiple resources in a database system is to use transactions.
+Building and maintaining applications that employ distributed transactions is notoriously difficult; as a result,
+microservice architectures advocate for transaction-less service coordination while acknowledging
+that consistency will be only eventual and that divergence must be addressed with compensating operations.
 
-The \gls{novathesisclass}\ can be customized with the options listed below.
+\paragraph{Inter-process Communication Strategies}
 
-\newcommand{\classoption}[3]{\textbf{#1=OPT}\qquad #2\\\qquad\emph{#3}\\}
+\citeauthor{microservices}, a well-known author in the context of microservices, promotes the use of ''smart endpoints'' and ''dumb pipes'' for microservices communication.
+Enterprise Service Buses (ESB) \cite{esb} were previously commonly used in service-oriented architecture (SOA) systems,
+and it was common to incorporate orchestration and transformation logic into the communication infrastructure,
+making the ''pipe smart''.
+This approach had several flaws, it was difficult to solve problems in production environments, and the tooling was complex and expensive.
 
-\noindent
-\begin{ctabular}{@{}p{\linewidth}@{}}
-  \toprule
-  \classoption{docdegree}%
-    {phd(*), phdplan, phdprop, msc, mscplan, bsc}%
-    {The type of the document: PhD Thesis (default), PhD Plan, PhD Proposal, MSc Dissertation, MSc Plan, BSc Report}
-    \midrule
-  \classoption{school}%
-		{nova/fct(*), nova/fcsh, nova/ims, ul/ist, ul/fc}%
-    {The name of the school. This option changes the typesetting of the cover and some School specific formating, like margins, fonts, paragraph spacing and indentation, etc…}
-    \midrule
-  \classoption{lang}%
-    {en(*), pt}%
-    {The main language for the document.  Currently only Portuguese and English are supported.  Other languages are expected to be support in forthcoming versions.}
-    \midrule
-  \classoption{fontstyle}%
-    {bookman, charter, fourier, kpfonts(*), mathpazo1, mathpazo2, newcent}%
-    {The font set to be used in the document.  Please note that a font set include definitions for the main text, headings, maths, etc.}
-    \midrule
-  \classoption{chapstyle}%
-    {bianchi, bluebox, brotherton, dash, default, elegant(*), ell, ger, hansen, ist, jenor, lyhne, madsen, pedersen, veelo, vz14, vz34, vz43}%
-    {The chapter style, i.e., the look of the chapter beginning.}
-    \midrule
-  \classoption{converlang}%
-    {en, pt(*)}%
-    {The language to be used when typesetting the cover page.}
-    \midrule
-  \classoption{otherlistsat}%
-    {front(*), back}%
-    {Where to put the other lists besides the table of contents. The default is (\texttt{front}) before the main text.  But some scientific areas prefer them at the end of the document (\texttt{back}), just before the Appendixes.}
-    \midrule
-  \classoption{statement}%
-    {true, false(*)}%
-    {Include or don't include the contents of the “\texttt{statement}” file. The default is for this file to be ignored (if it exists).}
-    \midrule
-  \classoption{linkscolor}%
-    {darkblue(*), black}%
-    {The color for all the hyperlinks in the PDF file.  The “\texttt{media=paper}” option (see below) will override this option to “\texttt{black}”}
-    \midrule
-  \classoption{spine}%
-    {true, false(*)}%
-    {Generate the book spine and the last page in the PDF.}
-    \midrule
-  \classoption{biblatex}%
-    {OPT=\{list of options for \texttt{biblatex}\}}%
-    {Customize \texttt{biblatex}, the bibliography management system used in this class. Probably you will want to change the value of the \texttt{biblatex} “\texttt{style}” option. For other customizations of \texttt{biblatex} check its manual.}
-    \midrule
-  \classoption{memoir}%
-    {OPT=\{list of options for \texttt{memoir}\}}%
-    {Customize the base class \texttt{memoir}. The \texttt{memoir} manual should be the first document to be consulted when looking for “\textbf{how can I do this?}” You may what to change the base font size from 11pt to a smaller (10pt) or larger (12pt) size.  Also, remember to change the “\texttt{draft}” to final when your document is finished.}
-    \midrule
-  \classoption{media}%
-    {screen(*), paper}%
-    {Behavior to be customized in the school options/configuration. Expected definitions for screen are: left and right margins are equal and use colored links. Expected definitions for paper are: left and right margins are different and use black links.}
-    \bottomrule
-\end{ctabular}
+The reverse approach has been adopted with microservices,
+where services own their domain-centric logic "smart endpoints" and transport messages via "dumb pipes".
+The majority of communication between microservices is done via request/response-based communication or event-driven messaging.
+Because these two methods have such dissimilar properties, it's important to weigh their strengths, and the scenarios that call for each.
 
-\section{Additional considerations about the class options}
-\label{sec:additional_considerations}
+Request/response-based communication protocols are typically suited for synchronous settings,
+where the client contacts one receiver at time and needs the response before it can continue.
+In this approach there is a clear control of the flow,
+there is a service that plays the role of orchestrator and determines the sequence of operations to be performed in other services.
+The HTTP and RPC protocols are the most widely adopted protocols that follow this approach.
 
-In this section we will provide some additional considerations about some of the customizations available as class options.
+Event-driven messaging communication protocols are suited for asynchronous settings,
+where the client publishes a message to multiple receivers and can process the responses at a later time.
+In this approach there is no orchestrator, each service knows their role and what to do based on events that occurred.
+The main disadvantage of this strategy is that consistency is not guaranteed when multiple services consume events and one of them fails.
 
-\subsection{The main language}
-\label{sub:the_main_language}
+TODO: include reference to distributed transaction patterns, and the channels that are used in each approach https://developers.redhat.com/articles/2021/09/21/distributed-transaction-patterns-microservices-compared#the_dual_write_problem
 
-The choice of the main language with the option “\texttt{lang=OPT}” affects:
+\paragraph{Evolutionary Design}
+When decomposing a software system into components, we must decide how to divide the pieces.
+The concept of independent replacement and upgrade-ability are critical properties when designing a component.
+The disadvantage of incorporating components into services is that we must be concerned about changes to one service breaking its consumers.
+The conventional approach is to resolve this issue through the use of versioning.
+In the context of microservices, versioning entails the maintenance of multiple deployments of the same service in distinct versions.
+We can minimize the use of versioning by designing services in such a way that they are as tolerant as possible to supplier changes,
+utilizing techniques such as Domain-Driven Design (DDD) \cite{ddd}.
+DDD is a software design approach that decomposes a complex system into multiple autonomous bounded contexts,
+where all the software structure (e.g\ methods, classes, variables) match the business domain.
 
+\section{Microservice Lifecycle Management} % (fold)
+\label{sec:microservice_lifecycle_management}
+
+To run microservices in the cloud, we need two essential ingredients a method for packaging and isolating services,
+and a management system capable of provisioning physical hardware to support them.
+
+\paragraph{}
+
+The isolation of services is accomplished through resource virtualization in one of two ways: containers or virtual machines (VM).
+
+Containers provide the most efficient approach because unlike VMs, containers share the host system’s kernel with other containers.
+VMs virtualize an entire machine down to the hardware layers, while containers only virtualize software layers above the operating system level.
+
+Docker \cite{docker} is the most popular container technology. It is built on top of the following technologies: Kernel namespaces, Cgroups, Copy-on-write File system.
 \begin{itemize}
-	\item \textbf{The order of the summaries.} First is printed the abstract in the main language and then in the foreign language. This means that if your main language for the document in English, you will see first the “abstract” (in English) and then the “resumo” (in Portuguese). If you switch the main language for the document for Portuguese, it will also automatically switch the order of the summaries to “resumo” and then “abstract”.
-	\item \textbf{The names for document sectioning.} E.g., ``Chapter'' vs.\ ``Capítulo'', ``Table of Contents'' vs.\ ``Índice'', ``Figure'' vs.\ ``Figura'', etc.
-	\item \textbf{The type of documents in the bibliography.} E.g., ``Technical Report'' vs.\ ``Relatório Técnico'', ``PhD Thesis'' vs.\ ``Tese de Doutoramento'', etc.
-\end{itemize} 
-
-No mater which language you chose, you will always have the appropriate hyphenation rules according to the language at that point. You always get Portuguese hyphenation rules in the ``Resumo'', English hyphenation rules in the ``Abstract'', and then the main language hyphenation rules for the rest of the document.
-
-% subsection the_main_language (end).
-
-% section additional_consideration (end)
-
-
-\subsection{Class of Text}
-\label{sub:class_of_text}
-
-You must choose the class of text for the document. The available options are:
-
-\begin{enumerate}
-	\item \textbf{bsc} --- BSc graduation report.
-	\item \textbf{*mscplan} --- Preparation of MSc dissertation. This is a preliminary report graduate students at DI-FCT-NOVA must prepare to conclude the first semester of the two-semesters MSc work. The files specified by \verb!\ntdedicatoryfile! and \verb!\acknowledgmentsfile! are ignored, even if present, for this class of document.
-	\item \textbf{msc} --- MSc dissertation.
-	\item \textbf{phdprop} ---  Proposal for a PhD work. The files specified by \verb!\ntdedicatoryfile! and \verb!\acknowledgmentsfile! are ignored, even if present, for this class of document.
-	\item \textbf{prepphd} ---  Preparation of a PhD thesis. This is a preliminary report PhD students at DI-FCT-NOVA must prepare before the end of the third semester of PhD work. The files specified by \verb!\ntdedicatoryfile! and \verb!\acknowledgmentsfile! are ignored, even if present, for this class of document.
-	\item \textbf{phd} --- PhD dissertation.
-\end{enumerate}
-% subsection class_of_text (end)
-
-% ============
-% = Printing =
-% ============
-\subsection{Printing}
-\label{sub:printing}
-
-You must choose how your document will be printed. The available options are:
-\begin{enumerate}
-	\item \textbf{oneside} --- Single side page printing.
-	\item \textbf{*twoside} --- Double sided page printing.
-\end{enumerate}
-% subsection printing (end)
-
-% =============
-% = Font Size =
-% =============
-\subsection{Font Size}
-\label{ssec:font_size}
-
-You must select the encoding for your text. The available options are:
-\begin{enumerate}
-	\item \textbf{11pt} --- Eleven (11) points font size.
-	\item \textbf{*12pt} --- Twelve (12) points font size. You should really stick to 12pt\ldots
-\end{enumerate}
-% subsection font_size (end)
-
-% =================
-% = Text encoding =
-% =================
-\subsection{Text Encoding}
-\label{ssec:text_encoding}
-
-You must choose the font size for your document. The available options are:
-\begin{enumerate}
-	\item \textbf{latin1} --- Use Latin-1 (\href{http://en.wikipedia.org/wiki/ISO/IEC_8859-1}{ISO 8859-1}) encoding.  Most probably you should use this option if you use Windows;
-	\item \textbf{utf8} --- Use \href{http://en.wikipedia.org/wiki/UTF-8}{UTF8} encoding.    Most probably you should use this option if you are not using Windows.
-\end{enumerate}
-% subsection font_size (end)
-
-% ============
-% = Examples =
-% ============
-\subsection{Examples}
-\label{ssec:examples}
-
-Let's have a look at a couple of examples:
-
-\begin{itemize}
-	\item Preparation of PhD thesis, in portuguese, with 11pt size and to be printed single sided (I wonder why one would do this!)\\
-	\verb!\documentclass[prepphd,pt,11pt,oneside,latin1]{thesisdifct-nova}!
-	\item MSc dissertation, in English, with 12pt size and to be printed double sided\\
-	\verb!\documentclass[msc,en,12pt,twoside,utf8]{thesisdifct-nova}!
+    \item Namespaces: Isolate the kernel resources (e.g.\ processes, filesystem, users, network stacks) used by each container.
+    \item Cgroups: Isolate the hardware resources used by each container.
+    \item Copy-On-Write File system: Allows several containers to share common data.
 \end{itemize}
-% subsection examples (end)
 
-\section{How to Write Using \LaTeX}
-\label{sec:how_to_write_using_latex}
+Additionally, Docker provides a mechanism for packaging code and its dependencies, referred to as container images.
+A container image is an executable package of software that contains all the components necessary to run an application: code, libraries, runtime and settings.
 
-Please have a look at Chapter~\ref{cha:a_short_latex_tutorial_with_examples}, where you may find many examples of \LaTeX constructs, such as Sectioning, inserting Figures and Tables, writing Equations, Theorems and algorithms, exhibit code listings, etc.
+\paragraph{}
 
-% section how_to_write_using_latex (end)
+The management of services can be accomplished with the use container orchestration technologies.
+Container orchestration eliminates many of the manual processes involved in the management of distributed systems.
+Some popular options used for the lifecycle management of services are Docker Swarm \cite{docker2016swarm} and Kubernetes \cite{kubernetes}.
+
+Kubernetes \cite{kubernetes} is an open-source container orchestration system that evolved from Google's Borg and Omega projects \cite{burns2016borg}.
+Kubernetes is an ambitious platform. It manages the deployment, management, scaling, and networking of containers of distributed systems across a wide range of environments
+and cloud providers.
+
+This means ensuring that all containers used to execute various workloads are scheduled to run on physical or virtual machines,
+while adhering to the deployment environment's and cluster configuration's constraints.
+Any containers that are dead, unresponsive, or otherwise unhealthy are automatically replaced.
+Additionally, Kubernetes also provides a control plane to monitor all running containers.
+
+Kubernetes accomplishes this through a well-defined, high-level architecture that encourages extensibility:
+
+\begin{itemize}
+    \item Pod: Encapsulates an application's container (or multiple containers),
+    storage resources, haves a unique network IP address, and provides configuration options for the container(s).
+    \item Service: Is an abstraction that defines a logical set of Pods as well as a policy for accessing them.
+    \item Volume: Is a directory which is accessible to the
+    Containers in a Pod.
+    \item Namespace: Defines the scope of resource names, which must be distinct within the same namespace but not across namespaces.
+    \item Deployment: Describes the desired state of the system.
+    \item ReplicaSet: Ensures that a certain number of pod replicas are active at all times.
+    \item DaemonSet: Ensures that all, or some Nodes are running a replica of a Pod.
+    \item StatefulSet: Is used to manage stateful applications.
+\end{itemize}
+
+Kubernetes is a more sophisticated container management system than Docker Swarm.
+Docker Swarm is only compatible with Docker, whereas Kubernetes is compatible with other container services.
+In comparison to Swarm, Kubernetes is more difficult to deploy and manage, however is said to be more scalable.
 
 
+\section{Contract Evolution in MicroService Architectures} % (fold)
+\label{sec:contract_evolution_in_microservice_architectures}
 
-\section{Example glossary, acronyms, and symbols}
-%
-% \todo[inline]{A a note in a line by itself.}
-%
-This is the first occurrence of an abbreviation: \gls{abbrev}. And now the second occurrence of the same abbreviation: \gls{abbrev}. And a new acronym with capital letter: \Gls{xpt} and reused \gls{xpt}.  Let's also use a few other acronyms such as \gls{aaa}, \gls{aab}, \gls{aba}, \gls{bbb} and \gls{xpt}.
-In geometry, the area enclosed by a circle of radius \gls{r} is $\pi r^2$. Here the Greek letter \gls{pi} is equal to the ratio of the circumference of any circle to its diameter.
-Lets add ``\gls{computer}'' to the glossary! Be carefull with mathematical symbols in acronyms, please see the definition of \gls{mu}.
-%
-% Please note that
-% \begin{center}
-%   \textbf{\large this package and template are not official for FCT/NOVA}.
-% \end{center}
+The evolution of a microservice contracts while ensuring their soundness and
+avoiding heavy adaptation processes due to service redeploying is demonstrated to be possible by \citeauthor{seco2020robust} \cite{seco2020robust}.
+The proposed approach to microservice contract evolution \cite{seco2020robust} makes use of a global deployment manager component that is responsible for managing module references,
+as well as dynamically generated proxies that are capable of adapting messages exchanged between modules when contracts mismatch.
+The following example demonstrates the mechanism:
 
+\paragraph{}
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=5in]{adapter_example}
+    \caption{Evolution of modules Catalog, Marketing, Backoffice \cite{seco2020robust}}
+    \label{fig:evolution_of_modules}
+\end{figure}
 
-% \printbibliography[heading=subbibliography, segment=\therefsegment, title={\bibname\ for chapter~\thechapter}]
+Consider the marketing system shown in Figure ~\ref{fig:evolution_of_modules} that comprises three distinct modules: Catalog, Marketing, and BackOffice.
+These three simple modules combined, form a triangle of dependencies, complex enough to demonstrate the proposed mechanism.
+Please note that the Catalog module is a producer, whereas the Marketing module is a producer and a consumer.
+
+Each module has a unique name, a collection of type and function definitions, and a set of type and function references.
+If a producer module exposes definitions, they can be used by other consumer modules via an explicit reference.
+Each programming element is accompanied by an immutable and unique key; for instance – the key of type ''Product'' is k1.
+These keys enable elements to be identified even after they have been renamed or reinstated.
+
+Initially, we have a system composed of a collection of services,
+each of which hosts an instance of one of the deployed modules shown in grey in Figure ~\ref{fig:evolution_of_modules}.
+The reference definitions indicate their interactions.
+
+\paragraph{}
+
+In a second phase, we develop version 2 of the Catalog and Marketing modules independently.
+In module Catalog, we rename the element ''Amount'' to ''Price'' and add the attribute ''Desc'', while in module Marketing, we rename ''Promote'' to ''Enhance''.
+The module BackOffice has not been modified at this point and will become out of sync with the other modules.
+In Figure ~\ref{fig:evolution_of_modules}, the newly added and modified elements are highlighted in red and blue, respectively.
+
+\paragraph{}
+
+In a third phase, Catalog version 3 is created, with the attribute ''Discount'' of the element ''Product'' removed.  (Figure ~\ref{fig:evolution_of_modules}).
+This version cannot be deployed in conjunction with version 2 of Marketing, as the attribute is used by the function ''Enhance''.
+
+We can deploy both modules together if we modify the definition of ''Enhance'' to remove the use of the attribute ''Discount'', resulting in version 3 of Marketing.
+Additionally, we could deploy version 3 of Marketing first and then version 3 of Catalog, but not vice versa.
+Besides this, in the reference to catalog we are permitted to retain the attribute ''Discount'' in the definition of the type ''Product''.
+As long as the attribute is not used, correctness is guaranteed.
+In Figure ~\ref{fig:evolution_of_modules}, the elements that have been removed are highlighted in yellow.
+
+As illustrated by the multiple versions of the modules,
+the proposed system is capable of overcoming differences in contract definitions by utilizing a communication protocol
+that adapts automatically to the following types of changes:
+
+\begin{itemize}
+    \item \textbf{Adding new attributes to a type} As a result of the addition of the "Desc" attribute to Catalog, the data returned by this module will include values for this attribute.
+    Other modules will keep this data (as unknown attributes) to ensure that no data is lost.
+    \item \textbf{Renaming functions} The "Promote" function in Marketing module has been renamed "Enhance," which will affect the endpoints exposed by the service.
+    The proxy is dynamically built at runtime to use the actual endpoint name while issuing calls, eliminating the need to update and redeploy the service Backoffice.
+    \item \textbf{Eliminating unused attributes and functions} Unused elements do not require explicit adaptation.
+\end{itemize}
+
+Traditional approaches, such as HTTP, are insufficiently robust to handle these types of changes, effectively rendering them breaking changes.
+
+For instance, renaming functions results in the modification of remote URIs, and changing the name of an attribute may result in data loss.
+By contrast, with the presented approach, such changes are permitted without compromising module compatibility.
+
+This adaptive approach enables gradual module deployment of the referenced modifications without halting the entire system, avoiding data loss and misinterpretations.
+
+Experimental data \cite{seco2020robust} collected over a five-year development period on the evolution of three large software factories each containing over 1000 modules
+(a raw dataset containing 8889 production deployments with a total of 23986 signature changes)
+indicates that this approach would be effective in an average of 57\% of deployments.
+
+\section{DevOps} % (fold)
+\label{sec:dev_ops}
+
+DevOps can be viewed as a collection of practices designed to accelerate the software development cycle and shorten the time between developing new features and deploying them to production.
+
+The term DevOps is derived from the words development and IT operations, and it refers to the combination and automation of the traditional responsibilities of both departments.
+
+\paragraph{}
+
+Traditionally the tasks of development, testing, and deployment were divided among different engineering teams.
+Different teams had different goals, and in the typical scenario, communication between teams was slow and inefficient.
+
+By automating repetitive operations, DevOps minimizes the need for team coordination and speeds up manual processes that would have taken days or at least several hours.
+Building automated pipelines that are executed after the developer changes the codebase is a common DevOps practice.
+
+Pipelines are typically in charge of packaging, testing, and deploying code to testing or production environments.
+If any phase of the automated pipeline fails, the developer receives immediate feedback on which task failed, and the pipeline's execution is halted.
+
+An example of a typical build and release pipeline is shown in Figure ~\ref{fig:pipeline_example}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=3in]{pipelineExample}
+    \caption{Pipeline Example}
+    \label{fig:pipeline_example}
+\end{figure}

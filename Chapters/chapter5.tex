@@ -8,257 +8,337 @@
 
 \typeout{NT FILE chapter4.tex}%
 
-\chapter{Background}
-\label{cha:background}
+\chapter{Implementation}
+\label{cha:implementation}
 
-The technology underlying the development and deployment of microservices-based applications will be described in this section:
+In this chapter, we present the implementation of our system.
+We begin by offering an overview of system's architecture,
+before delving into the implementation of each module in depth.
 
-\section{Microservices} % (fold)
-\label{sec:microservices}
-
-Microservices \cite{microservices, microservices2017tenets, microservicesTomorrow} are an architectural style in which software is developed using self-contained components that
-communicate with one another via standardized interfaces and lightweight mechanisms.
-These services segregate fine-grained business functionalities and can be independently deployed, scaled, and tested by automated mechanisms.
-There is virtually no centralized management, and each service may be written in a different programming language and employ a different data storage technology.
-
-\paragraph{}
-
-To understand the microservice style it's useful to compare it to the monolithic style:
-A monolithic application is built often using the Model-View-Controller (MVC) pattern ~\cite{mvc}, which is composed by three parts:
-The view, a client-side user interface composed of HTML pages and Javascript that runs in the user's browser;
-The model, a relational database management system;
-The controller, a server-side application that handles requests, retrieves and updates data from the database, executes domain logic,
-and populates the views that are sent to the browser.
-
-\paragraph{}
-
-The server-side application is a monolith a single logical executable, in which all logic for handling requests runs as a single process,
-different domains of the application are divided into classes, functions, and namespaces by utilizing the basic features of a programming language.
-
-When large monolithic applications must scale while maintaining a high level of availability, they become a source of frustration:
-Scaling the server-side application involves scaling all the application functionalities, rather than the functionalities that require greater resources;
-Any small change made to the server-side application, involves building and re-deploying the entire monolith;
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=3in]{microVSmono}
-    \caption{Monoliths and Microservices \cite{microservices}}
-    \label{fig:monoliths and microservices}
-\end{figure}
-
-The requirements of system scalability, high availability, and continuous delivery are addressed in different microservice architectural characteristics.
-
-\paragraph{Componentization}
-
-In contrast to monoliths, which achieve componentization solely via the use of libraries and programming language capabilities,
-microservices achieve componentization primarily through the division of different business domains and functionalities into distinct executables
-that are exposed as services.
-
-While this componentization approach helps to enforce component's encapsulation via more explicit component interfaces,
-its primary benefit is that services become independently deployable.
-This feature helps to fulfill the requirements of system scalability and high availability by
-making different components scalable across multiple nodes and limiting cascading errors via the replication and isolation of components.
-
-\paragraph{Decentralized Data Management}
-
-While monolithic applications typically use a single logical database for persistent data, microservices provide greater flexibility, fault tolerance,
-and scalability by allowing each service to manage its own database, which can be a different instance of the same database technology or a completely different database system.
-Decentralizing data responsibility across services has implications for the implementation of cross-domain operations affecting multiple resources.
-The common approach for dealing with the problem of consistency when updating multiple resources in a database system is to use transactions.
-Building and maintaining applications that employ distributed transactions is notoriously difficult; as a result,
-microservice architectures advocate for transaction-less service coordination while acknowledging
-that consistency will be only eventual and that divergence must be addressed with compensating operations.
-
-\paragraph{Inter-process Communication Strategies}
-
-\citeauthor{microservices}, a well-known author in the context of microservices, promotes the use of ''smart endpoints'' and ''dumb pipes'' for microservices communication.
-Enterprise Service Buses (ESB) \cite{esb} were previously commonly used in service-oriented architecture (SOA) systems,
-and it was common to incorporate orchestration and transformation logic into the communication infrastructure,
-making the ''pipe smart''.
-This approach had several flaws, it was difficult to solve problems in production environments, and the tooling was complex and expensive.
-
-The reverse approach has been adopted with microservices,
-where services own their domain-centric logic "smart endpoints" and transport messages via "dumb pipes".
-The majority of communication between microservices is done via request/response-based communication or event-driven messaging.
-Because these two methods have such dissimilar properties, it's important to weigh their strengths, and the scenarios that call for each.
-
-Request/response-based communication protocols are typically suited for synchronous settings,
-where the client contacts one receiver at time and needs the response before it can continue.
-In this approach there is a clear control of the flow,
-there is a service that plays the role of orchestrator and determines the sequence of operations to be performed in other services.
-The HTTP and RPC protocols are the most widely adopted protocols that follow this approach.
-
-Event-driven messaging communication protocols are suited for asynchronous settings,
-where the client publishes a message to multiple receivers and can process the responses at a later time.
-In this approach there is no orchestrator, each service knows their role and what to do based on events that occurred.
-The main disadvantage of this strategy is that consistency is not guaranteed when multiple services consume events and one of them fails.
-
-TODO: include reference to distributed transaction patterns, and the channels that are used in each approach https://developers.redhat.com/articles/2021/09/21/distributed-transaction-patterns-microservices-compared#the_dual_write_problem
-
-\paragraph{Evolutionary Design}
-When decomposing a software system into components, we must decide how to divide the pieces.
-The concept of independent replacement and upgrade-ability are critical properties when designing a component.
-The disadvantage of incorporating components into services is that we must be concerned about changes to one service breaking its consumers.
-The conventional approach is to resolve this issue through the use of versioning.
-In the context of microservices, versioning entails the maintenance of multiple deployments of the same service in distinct versions.
-We can minimize the use of versioning by designing services in such a way that they are as tolerant as possible to supplier changes,
-utilizing techniques such as Domain-Driven Design (DDD) \cite{ddd}.
-DDD is a software design approach that decomposes a complex system into multiple autonomous bounded contexts,
-where all the software structure (e.g\ methods, classes, variables) match the business domain.
-
-\section{Microservice Lifecycle Management} % (fold)
-\label{sec:microservice_lifecycle_management}
-
-To run microservices in the cloud, we need two essential ingredients a method for packaging and isolating services,
-and a management system capable of provisioning physical hardware to support them.
-
-\paragraph{}
-
-The isolation of services is accomplished through resource virtualization in one of two ways: containers or virtual machines (VM).
-
-Containers provide the most efficient approach because unlike VMs, containers share the host system’s kernel with other containers.
-VMs virtualize an entire machine down to the hardware layers, while containers only virtualize software layers above the operating system level.
-
-Docker \cite{docker} is the most popular container technology. It is built on top of the following technologies: Kernel namespaces, Cgroups, Copy-on-write File system.
-\begin{itemize}
-    \item Namespaces: Isolate the kernel resources (e.g.\ processes, filesystem, users, network stacks) used by each container.
-    \item Cgroups: Isolate the hardware resources used by each container.
-    \item Copy-On-Write File system: Allows several containers to share common data.
-\end{itemize}
-
-Additionally, Docker provides a mechanism for packaging code and its dependencies, referred to as container images.
-A container image is an executable package of software that contains all the components necessary to run an application: code, libraries, runtime and settings.
-
-\paragraph{}
-
-The management of services can be accomplished with the use container orchestration technologies.
-Container orchestration eliminates many of the manual processes involved in the management of distributed systems.
-Some popular options used for the lifecycle management of services are Docker Swarm \cite{docker2016swarm} and Kubernetes \cite{kubernetes}.
-
-Kubernetes \cite{kubernetes} is an open-source container orchestration system that evolved from Google's Borg and Omega projects \cite{burns2016borg}.
-Kubernetes is an ambitious platform. It manages the deployment, management, scaling, and networking of containers of distributed systems across a wide range of environments
-and cloud providers.
-
-This means ensuring that all containers used to execute various workloads are scheduled to run on physical or virtual machines,
-while adhering to the deployment environment's and cluster configuration's constraints.
-Any containers that are dead, unresponsive, or otherwise unhealthy are automatically replaced.
-Additionally, Kubernetes also provides a control plane to monitor all running containers.
-
-Kubernetes accomplishes this through a well-defined, high-level architecture that encourages extensibility:
-
-\begin{itemize}
-    \item Pod: Encapsulates an application's container (or multiple containers),
-    storage resources, haves a unique network IP address, and provides configuration options for the container(s).
-    \item Service: Is an abstraction that defines a logical set of Pods as well as a policy for accessing them.
-    \item Volume: Is a directory which is accessible to the
-    Containers in a Pod.
-    \item Namespace: Defines the scope of resource names, which must be distinct within the same namespace but not across namespaces.
-    \item Deployment: Describes the desired state of the system.
-    \item ReplicaSet: Ensures that a certain number of pod replicas are active at all times.
-    \item DaemonSet: Ensures that all, or some Nodes are running a replica of a Pod.
-    \item StatefulSet: Is used to manage stateful applications.
-\end{itemize}
-
-Kubernetes is a more sophisticated container management system than Docker Swarm.
-Docker Swarm is only compatible with Docker, whereas Kubernetes is compatible with other container services.
-In comparison to Swarm, Kubernetes is more difficult to deploy and manage, however is said to be more scalable.
+\section{Architecture} % (fold)
+\label{sec:architecture}
 
 
-\section{Contract Evolution in MicroService Architectures} % (fold)
-\label{sec:contract_evolution_in_microservice_architectures}
+The system was built using a modular approach;
+each module is entirely self-contained, making it simple to expand or replace system functionality.
+The system architecture is split into two distinct areas: the runtime, and the pipeline.
+The runtime architecture comprises all essential components to the system liveness,
+whereas the pipeline architecture covers all components needed during the system's provisioning and development.
 
-The evolution of a microservice contracts while ensuring their soundness and
-avoiding heavy adaptation processes due to service redeploying is demonstrated to be possible by \citeauthor{seco2020robust} \cite{seco2020robust}.
-The proposed approach to microservice contract evolution \cite{seco2020robust} makes use of a global deployment manager component that is responsible for managing module references,
-as well as dynamically generated proxies that are capable of adapting messages exchanged between modules when contracts mismatch.
-The following example demonstrates the mechanism:
+\subsection{Runtime Architecture} % (fold)
+\label{sec:runtime_architecture}
 
-\paragraph{}
+The runtime environment is supported by Kubernetes,
+a simplified configuration with three microservices is depicted in Figure ~\ref{fig:runtime},
+in this example, we have one micro-service that has undergone three major API changes the accounts micro-service, and
+two micro-services that rely on it, the inventory micro-service that was updated to account for the changes, and the shipping micro-service which is two versions behind.
+
+In Kubernetes a microservice is internally accessible through the Service abstraction;
+a Service defines a policy for accessing a logical set of Pods via a load balancer with a
+unique IP address that can be discovered thorough an environment variable, or an DNS name.
+The containers of a pod are selected in services policies by attributing names to their exposed ports and assigning the same name on the target port of the service policy.
+In adapter containers we expose one port for each of the supported versions and name each port with the respective version.
+
+We define one service for each major version that is still being consumed, as shown in Figure ~\ref{fig:runtime},
+older versions are supported by the adapter, while the most up to date version is directly supported by the microservice app.
+A consumer accesses a producer app via the service that haves the same version as the one that it's expected in the static code.
+When a microservice app is upgraded via a rolling update \footnote{A rolling update gradually replaces old replicas with new replicas},
+the services never become unavailable, they point either to the adapter containers or the application containers, depending on whether the affected pods finished the upgrade process,
+whereas in the traditional approach all consumers would need to be upgraded in tandem with consumed services in order to avoid downtime.
+
+The only novel module introduced in the runtime environment is the proxy adapter;
+the forthcoming modules are either developer tools or are invoked on stages of the DevOps pipeline.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=5in]{adapter_example}
-    \caption{Evolution of modules Catalog, Marketing, Backoffice \cite{seco2020robust}}
-    \label{fig:evolution_of_modules}
+    \includegraphics[height=2.4in]{runtime}
+    \caption{Example of a runtime configuration}
+    \label{fig:runtime}
 \end{figure}
 
-Consider the marketing system shown in Figure ~\ref{fig:evolution_of_modules} that comprises three distinct modules: Catalog, Marketing, and BackOffice.
-These three simple modules combined, form a triangle of dependencies, complex enough to demonstrate the proposed mechanism.
-Please note that the Catalog module is a producer, whereas the Marketing module is a producer and a consumer.
+\subsection{DevOps Pipeline Architecture} % (fold)
+\label{sec:devops_pipeline_architecture}
 
-Each module has a unique name, a collection of type and function definitions, and a set of type and function references.
-If a producer module exposes definitions, they can be used by other consumer modules via an explicit reference.
-Each programming element is accompanied by an immutable and unique key; for instance – the key of type ''Product'' is k1.
-These keys enable elements to be identified even after they have been renamed or reinstated.
+A proof-of-concept deployment pipeline as developed, its architecture is depicted in Figure ~\ref{fig:pipeline}.
+The nodes on the left side of the graph represent the pipeline;
+development stages are represented in green, while operational stages are represented in red.
+The other nodes on the graph's reflect the resources used in each stage.
+External resources are depicted in blue, while the novel modules developed in this thesis are depicted in black.
+Two novel stages were introduced in the development phase: the writing of service contracts, and the specification of contract evolutions.
+These two stages are skipped if a service only underwent changes that did not affect its API or dependencies.
+We also introduced two novel stages in the development phase:
+the verification of the service compatibility with the rest of the system, and the generation of adapter component.
 
-Initially, we have a system composed of a collection of services,
-each of which hosts an instance of one of the deployed modules shown in grey in Figure ~\ref{fig:evolution_of_modules}.
-The reference definitions indicate their interactions.
-
-\paragraph{}
-
-In a second phase, we develop version 2 of the Catalog and Marketing modules independently.
-In module Catalog, we rename the element ''Amount'' to ''Price'' and add the attribute ''Desc'', while in module Marketing, we rename ''Promote'' to ''Enhance''.
-The module BackOffice has not been modified at this point and will become out of sync with the other modules.
-In Figure ~\ref{fig:evolution_of_modules}, the newly added and modified elements are highlighted in red and blue, respectively.
-
-\paragraph{}
-
-In a third phase, Catalog version 3 is created, with the attribute ''Discount'' of the element ''Product'' removed.  (Figure ~\ref{fig:evolution_of_modules}).
-This version cannot be deployed in conjunction with version 2 of Marketing, as the attribute is used by the function ''Enhance''.
-
-We can deploy both modules together if we modify the definition of ''Enhance'' to remove the use of the attribute ''Discount'', resulting in version 3 of Marketing.
-Additionally, we could deploy version 3 of Marketing first and then version 3 of Catalog, but not vice versa.
-Besides this, in the reference to catalog we are permitted to retain the attribute ''Discount'' in the definition of the type ''Product''.
-As long as the attribute is not used, correctness is guaranteed.
-In Figure ~\ref{fig:evolution_of_modules}, the elements that have been removed are highlighted in yellow.
-
-As illustrated by the multiple versions of the modules,
-the proposed system is capable of overcoming differences in contract definitions by utilizing a communication protocol
-that adapts automatically to the following types of changes:
-
-\begin{itemize}
-    \item \textbf{Adding new attributes to a type} As a result of the addition of the "Desc" attribute to Catalog, the data returned by this module will include values for this attribute.
-    Other modules will keep this data (as unknown attributes) to ensure that no data is lost.
-    \item \textbf{Renaming functions} The "Promote" function in Marketing module has been renamed "Enhance," which will affect the endpoints exposed by the service.
-    The proxy is dynamically built at runtime to use the actual endpoint name while issuing calls, eliminating the need to update and redeploy the service Backoffice.
-    \item \textbf{Eliminating unused attributes and functions} Unused elements do not require explicit adaptation.
-\end{itemize}
-
-Traditional approaches, such as HTTP, are insufficiently robust to handle these types of changes, effectively rendering them breaking changes.
-
-For instance, renaming functions results in the modification of remote URIs, and changing the name of an attribute may result in data loss.
-By contrast, with the presented approach, such changes are permitted without compromising module compatibility.
-
-This adaptive approach enables gradual module deployment of the referenced modifications without halting the entire system, avoiding data loss and misinterpretations.
-
-Experimental data \cite{seco2020robust} collected over a five-year development period on the evolution of three large software factories each containing over 1000 modules
-(a raw dataset containing 8889 production deployments with a total of 23986 signature changes)
-indicates that this approach would be effective in an average of 57\% of deployments.
-
-\section{DevOps} % (fold)
-\label{sec:dev_ops}
-
-DevOps can be viewed as a collection of practices designed to accelerate the software development cycle and shorten the time between developing new features and deploying them to production.
-
-The term DevOps is derived from the words development and IT operations, and it refers to the combination and automation of the traditional responsibilities of both departments.
-
-\paragraph{}
-
-Traditionally the tasks of development, testing, and deployment were divided among different engineering teams.
-Different teams had different goals, and in the typical scenario, communication between teams was slow and inefficient.
-
-By automating repetitive operations, DevOps minimizes the need for team coordination and speeds up manual processes that would have taken days or at least several hours.
-Building automated pipelines that are executed after the developer changes the codebase is a common DevOps practice.
-
-Pipelines are typically in charge of packaging, testing, and deploying code to testing or production environments.
-If any phase of the automated pipeline fails, the developer receives immediate feedback on which task failed, and the pipeline's execution is halted.
-
-An example of a typical build and release pipeline is shown in Figure ~\ref{fig:pipeline_example}.
+The pipeline was developed using the Jenkins pipeline suite, each of the novel stages is supported by a distinct Java application that is pulled from version control
+and executed directly on the pipeline, whereas the other stages are supported natively by the Jenkins suite toolkit.
+The modules that enable each novel stage will be discussed in detail in the following section.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=3in]{pipelineExample}
-    \caption{Pipeline Example}
-    \label{fig:pipeline_example}
+    \includegraphics[height=9in]{DevOps}
+    \caption{DevOps Pipeline}
+    \label{fig:pipeline}
 \end{figure}
+
+\newpage
+
+\section{Contract Representation} % (fold)
+\label{sec:contract_representation}
+
+The functionalities of web service's can be expressed with the
+use Web Api Description Languages (WADL).
+The OpenAPI specification is the most
+widely adopted WADL for HTTP services, instead of designing yet another WADL, we
+adopted the OpenAPI specification to support the needs of our implementation.
+The OpenAPI initiative is on a continuous effort to develop API tooling on top of their specification, some of the supported tools of version 3.0 range from:
+
+\begin{itemize}
+    \item Auto Generators: Tools that parse code and turn it into an OpenAPI Specification document
+    \item Mock Servers: Fake servers that take description document as input, then route incoming HTTP requests to example responses or dynamically generates examples.
+    \item Data Validators: Verifies if API requests and responses are lining up with the API description.
+    \item Security: Tools that can look out for attack vectors by inspecting OpenAPI descriptions.
+    \item Converters: Various tools to convert to and from OpenAPI and other API description formats.
+\end{itemize}
+
+Designing a WADL tailored for this problem would be counterproductive because many teams already rely on the aforementioned tools,
+and supporting an additional WADL would require the development of an extensive converter tool
+that would need to be constantly maintained in order to support changes in new versions of the OpenApi and the new WADL specification's.
+
+To represent records in messages, we chose the Json format, because of its simplicity and widespread adoption.
+Json is a human-readable data-interchange format,
+there are more performant formats that have binary representation,
+however such formats are usually not supported by front-end frameworks and for the purpose of this prototype
+we are not interested in measuring the performance of different object serialization protocols, since
+there are already sources that provide comparisons in this regard between XML, Json, Protobuf, Thrift and other popular formats \cite{serializationBenchmark}.
+
+The schema of JSON records must also be described,
+the OpenAPI specification supports the description of records
+in conjunction with the signature of HTTP endpoints.
+Other Json schema specification languages, such as the Json-Schema project
+exist, but using languages other than OpenApi would necessitate decoupling the specification of schemas from the specification
+of http endpoints, which would require additional effort on the part of the developing team to maintain the cross-references
+between each specification manifest, and their versions.
+
+A snippet of a "Pet Store" OpenApi contract can be seen in Figure ~\ref{fig:open_contract}.
+In this example we can view the specification of a JSON schema for a Pet data object,
+as well the specification for an HTTP endpoint.
+OpenApi allows properties to be defined robustly with specification of not only their type but also their format, as shown in line 31.
+
+The types and formats of properties are standardized between object schemas and http parameters;
+properties have the following data types: string, number, integer, boolean, array, and object;
+while property formats are free-form, however there are established conventions for the most common formats.
+
+The types and formats of properties are standardized between object schemas and http parameters;
+properties have the following data types: string, number, integer, boolean, array, and object;
+while property formats are free-form, there are established conventions for the most common types.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=6in]{openContract}
+    \caption{OpenAPI Contract}
+    \label{fig:open_contract}
+\end{figure}
+
+\newpage
+
+The definition of the dependencies of a service is done using Helm.
+Helm is package manager for Kubernetes that allows developers and operators to more easily package, configure, and deploy applications and services onto Kubernetes clusters.
+A Chart is a Helm package, composed of a collection of files that describe a related set of Kubernetes resources.
+The most significant components of a Chart are the:
+\begin{itemize}
+    \item The Chart.yaml that allows the definition of the Chart dependencies and other meta-information about the application such as its name and version.
+    \item The Template's directory that contains incomplete Kubernetes manifests "Templates" such as Services, Deployments, DaemonSets, Namespaces and so on.
+    \item The Values.yaml that contains key-value pairs used to complete the definition of each template, this values can be overridden later when the chart is deployed, the file is used to define the default values.
+\end{itemize}
+A single Chart might be used to deploy something simple, like a single kubernetes pod, or something complex, like a complete web app stack with HTTP servers, databases, caches, and so on.
+The typical approach is to define an individual Chart for each distinct microservice, so that they can be upgraded individually.
+If a single Chart is used to deploy multiple services it is no longer possible to represent accurately the dependencies of each service
+in the chart definition, because the chart syntax doesn't allow the individual definition of the dependencies of each service, it only allows the declaration of the dependencies of the deployment as a whole.
+
+An example of the definition of service dependencies can be seen in Figure ~\ref{fig:serviceDepedencies}.
+The dependencies of a service are mapped indirectly, each dependency point to a Helm Chart that is implicitly associated with one service.
+Helm Charts can be hosted on local or remote repositories.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=2in]{serviceDepedencies}
+    \caption{Helm Chart Dependencies Definition Example}
+    \label{fig:serviceDepedencies}
+\end{figure}
+
+\newpage
+
+The declaration of resources consumed by a service is defined in Chart template files,
+for each deployment template we define the resources consumed by its containers by
+defining the minimum amount of cpu and memory resources (represented on the requests key) and by setting a limit on these resources (represented on the limits key).
+An example of the definition of a service resources can be seen in Figure ~\ref{fig:serviceResources}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=3in]{serviceResources}
+    \caption{Helm Template Resources Definition Example}
+    \label{fig:serviceResources}
+\end{figure}
+
+\newpage
+
+\section{Contract Interpretation} % (fold)
+\label{sec:contract_interpretation}
+
+The interpretation of contract specification is done in the Parser module.
+This module is meant to be used as Java library by other modules,
+it interprets contracts written in OpenApi format and provides a read-only Java interface
+that is agnostic to the original specification format.
+All the forthcoming modules operate under this interface not the OpenApi format.
+Although we adopted the OpenApi format our solution is not dependent on it, this module provides a decoupling point.
+This enables the specification of different contract to be written in different or even mixed WADL,
+as long as the parser module is extended to support the new WADL's.
+
+The actual parsing of OpenApi contracts is supported by the swagger-parser project, \textbf{[TODO: reference]}
+which validates and parses OpenAPI definitions in JSON or YAML format into a Java POJO representation.
+
+The interpretation of service resources and dependencies written in Helm charts is also supported by the Parser module under a separate interface.
+The SnakeYAML library \textbf{[TODO: reference]} was used to parse the Charts.yaml and template files, into a Java class that implements a read-only Java interface.
+The following are also decoupled from the Helm and Kubernetes API's they rely only on the read-only interfaces.
+
+\newpage
+
+\section{Evolution Representation} % (fold)
+\label{sec:evolution_representation}
+
+The evolution of contracts is represented in a custom description language.
+The description only maps the details about the changed procedures of a service,
+it is not necessary to map the evolutions in service dependencies and resource requirements because they can be inferred by comparing the last two contract versions.
+The description language is hierarchical, and contains array elements.
+The following Figure ~\ref{fig:evolution_yal} represents its structure, and Figure ~\ref{fig:evolution_example} gives an example.
+Array elements are depicted by the [.] notation.
+
+As previously mentioned in the design chapter, resolutions can have one of three distinct types
+DefaultValues, Link or Function.
+The type of resolution is represented in the first segment of a resolution, while the second segment represents the resolution itself.
+
+Link resolutions have the following format "link={Parameter Location}|{Parameter Name}", the parameter of the prior contract must be of the same type and format.
+
+Default value resolutions have the following format "default=#Value", the value that must be of the same type and format.
+
+Function resolutions are written as one line Java expressions that can use parameters of the previous contract, the
+parameters are referenced by their location and name (eg. function= {{json|firstName}} + {{json|lastName}} ).
+These references are replaced in the adapter implementation by their real value.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=4.3in]{EvoExample}
+    \caption{Evolution Specification Example}
+    \label{fig:evolution_example}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=5in]{evolutionYal}
+    \caption{Evolution Specification Structure}
+    \label{fig:evolution_yal}
+\end{figure}
+
+\newpage
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=2.5in]{editor2}
+    \caption{Evolution Editor}
+    \label{fig:editor2}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=4.5in]{editor1}
+    \caption{Evolution Editor}
+    \label{fig:editor1}
+\end{figure}
+
+\newpage
+
+To minimize the documentation effort we developed a GUI editor for the specification of evolutions.
+The GUI editor was implemented as an IDE Plugin, the current implementation supports the Intellij IDE.
+The editor compares two contract versions,
+and automatically maps all the parameters that haven't changed from one version to the other, the
+developer is left with the task of explicitly mapping the remaining procedures.
+The editor starts by requesting the developer to map endpoints in the new contract to endpoints in the old contract,
+afterwards the developer must edit each of the endpoint messages and specify a resolution for all the parameters that changed
+in a contract, unresolved parameters are highlighted in red.
+The right column holds the resolutions that were already mapped and uppermost left column allows the developer to write rules
+for each unresolved parameter.
+The developer can select leaf parameters in the hierarchy, or we can choose intermediate properties.
+If he chooses an intermediate property and inputs resolution rule all child parameters are also resolved.
+After all parameters are resolved the developer can submit the specification, and
+the editor outputs an evolution spec with the same description language presented in the beginning of this section.
+
+\section{Compatiblity Verification} % (fold)
+\label{sec:compatiblity_verification}
+
+The compatibility verification process is done by the verifier module.
+This module was implemented in java as command-line application.
+The module verifies if the provided evolution specification is valid.
+It starts by checking if all the new contract procedures, messages and parameters are present in the specification,
+then it verifies if all the resolutions for each parameter are valid.
+Resolutions can be invalid due to four reasons:
+
+\begin{itemize}
+    \item Invalid syntax in resolution expressions
+    \item References parameters that don't exist in the previous contract
+    \item Uses functions that are not supported
+    \item Uses resolutions that have a different type and format then the parameter
+\end{itemize}
+
+The present implementation of the Verifier module does not test whether the cluster has adequate computational resources to provision the service or whether all service dependencies are alive and reachable.
+
+These functionalities were not implemented since the Helm deployment process already performs these verifications prior to the deployment of a service;
+nonetheless, including these verifications in the Verifier module would be useful in order for the solution to be decoupled from Helm.
+
+\newpage
+
+\section{Adapter Generation} % (fold)
+\label{sec:adapter_generation}
+
+The generation of the adapter module is done by the adapter module.
+The adapter is generated by populating a template implementation with the information provided in evolution specs.
+The adapter must be able to support all prior versions that are still in use, and adapt to the last version, in other words
+a single adapter is used to support the adaptation of multiple versions to the current version.
+
+The evolution specifications only provide information on how to adapt messages from contiguous versions (eg. v1->v2),
+the information necessary to adapt messages from discontinuous versions is obtained by chaining the evolution specifications and
+merging their resolutions (e.g merge[v1->v2, v2->v3] = v1->v3).
+
+This module begins by querying the active versions of the target service with the kubectl command-line tool.
+Kubectl is tool that interfaces with kubernetes clusters and can be used to inspect and manage cluster resources.
+After determining the active service versions, this module retrieves all evolution specifications up to the oldest version that is still active,
+and then combines them so that all specifications link to the current version. Figure ~\ref{fig:merge} exemplifies the merge process.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=3in]{merge}
+    \caption{Evolution Specification Merge Process}
+    \label{fig:merge}
+\end{figure}
+
+The generated adapter contains one endpoint for each of the procedures in each version.
+Identical procedures in different versions are distinguished by versioning their endpoint paths.
+It is also possible to version procedures with header parameters,
+but the generated adapter code must be more complex because a single endpoint must be able to adapt messages from multiple versions.
+
+\section{Adapter} % (fold)
+\label{sec:adapter}
+
+The adaption approach is straightforward: for each endpoint the
+adapter re-constructs the entire request from zero and populates the parameter resolutions with the information of the original request.
+The implementation of "Function" resolutions is simple since the expressions are written in java and only have one line;
+they may be injected directly into the template implementation, and the parameter references are then replaced with the parameters themselves.
+
+The adapter's current template implementation does not allow HTTPS, however this may easily be added.
+Because TLS is mandatory in HTTP 1.2, the implementation only supports HTTP 1.1.
+
+The adapter was built with Spring Boot and an Apache Tomcat/9.0.65 http server, the base image of the adapter docker container is an "openjdk:11-nanoserver".
+In order to prevent the JVM from calling garbage collector frequently and reallocating the heap memory while Tomcat is trying to serve requests,
+the JVM has started with a higher maximum heap memory, and the initial heap memory
+size was set to the same value as its maximum memory size.
+The maximum number of threads for Tomcat was set to 2000, in order to support a higher load of requests.
+

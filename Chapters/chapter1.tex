@@ -1,287 +1,152 @@
 %!TEX root = ../template.tex
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% chapter1.tex
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% chapter4.tex
 %% NOVA thesis document file
 %%
-%% Chapter with introduction
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Chapter with lots of dummy text
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\typeout{NT FILE chapter1.tex}%
+\typeout{NT FILE chapter4.tex}%
 
 \chapter{Introduction}
 \label{cha:introduction}
 
-\prependtographicspath{{Chapters/Figures/Covers/phd/}{Chapters/Figures/Covers/msc/}}
+Architecture is the most important factor that influences the capabilities and constraints of a system's evolution throughout its lifecycle \cite{Breivold2012}.
+In software engineering, the subject of architecture is the conciliation of various architectural systems or components
+with the objective of satisfying a system's functional and non-functional requirements.
 
-% epigraph configuration
-\epigraphfontsize{\small\itshape}
-\setlength\epigraphwidth{12.5cm}
-\setlength\epigraphrule{0pt}
+That is, a software architecture can be seen as a set of architectural elements that are divided into three classes: processing elements, data elements, and connecting elements \cite{architecture}.
+The data elements contain the state of system;
+The processing elements transform the data elements.
+The connecting elements, which may be either processing or data elements, or both, are the glue that keeps the architecture together.
+(e.g.\ procedure calls, shared data, messages)
+The connecting elements are frequently used to differentiate one architecture from another,
+because among the other elements, they have the greatest impact on non-functional requirements, such as the system's ability to evolve, security, scalability, and so on.
 
-\includegraphics[width=0.1\linewidth]{NOVAthesisFiles/Images/novathesis-insignia}\hfill
-\includegraphics[width=0.875\linewidth]{NOVAthesisFiles/Images/novathesis-text}
+\paragraph{}
 
-\noindent This is the \novathesis\ \LaTeX\ template Version \novathesisversion\ from \novathesisdate.
+The field of software architecture traces back to 1960s, but it wasn't until 1992 that \citeauthor{architecture} \cite{architecture} created a firm basis on the subject.
+Software architecture has been extensively studied over the last several decades, and as a result,
+software engineers have developed novel methods for composing systems that offer broad functionality and fit a diverse set of criteria.
+Bosch's work \cite{3, 4} overviews software architectural research.
 
-\epigraph{
-  This work is licensed under the \href{https://www.latex-project.org/lppl/lppl-1-3c/}{\LaTeX\ Project Public License v1.3c}.
-  To view a copy of this license, visit the \href{https://www.latex-project.org/lppl/}{LaTeX project public license}.
-}
+\paragraph{}
 
-\section{If You Use this Template…} 
-\label{sub:if_you_use_this_template}
+A typical example of a monolithic architectural design pattern is the Model-View-controller (MVC) \cite{mvc, microservices}.
+Although the MVC pattern encourages separate layers, which can improve software maintainability,
+such structures are notorious for their lack of agility and scalability due to their monolithic nature.
+Creating instances of massive monoliths is time-consuming and inefficient;
+even minor system updates require the complete redeployment of the application, severely limiting a system's ability to evolve.
 
-This first Chapter introduces the \gls{novathesis} template and how it is organized. In Chapter~\ref{cha:users_manual} you can find some specific instructions on how to use the \gls{novathesis} template.  Chapter~\ref{cha:a_short_latex_tutorial_with_examples} shows some examples and give some hints on how to write your text. Please read these next Chapters carefully.
+\paragraph{}
 
-\subsection{Your Time is Valuable}
-\label{sub:time_is_money}
+Service-Oriented Computing (SOC) \cite{6} is a paradigm for distributed computing.
+In SOC, a program known as a service provides functionality to other components via network message passing.
+Messages are exchanged using service interfaces, which are implementation-independent.
+The first generation of service-oriented architectures (SOA) \cite{7} set imposing and ambiguous criteria for services, which hampered its adoption.
+Microservices \cite{microservices} are a modern iteration of the SOC idea;
+their aim is to reduce excessive layers of complexity so that developers can focus on building simple services that efficiently fulfill a specific task.
 
-Did you learn how to drive by sitting by the wheel and throwing your car into the road?  Or did you take your time \emph{learning the rules} and \emph{practicing} first?  Thus, it is not wise to throw yourself at the task of writing a thesis/dissertation without seriously considering the following statement!
+\paragraph{}
 
-% subsection subsection_name (end)
-\begin{quote}
-  \rule{\linewidth}{2pt}
-If you are going to spend zillions of hours writing your thesis/dissertation using this \gls{novathesis} template, be wise and spend a couple of hours learning how to use it properly by reading this manual.  And then be even wiser and spend a few more hours \href{https://github.com/joaomlourenco/novathesis/wiki#learning-latex}{learning some \LaTeX}.  I am sure that the time you are investing now will pay itself countless times before you submit your thesis/dissertation.
-\hfill \raisebox{-1ex}{\itshape João Lourenço}\\[-1ex]
-  \rule{\linewidth}{2pt}
-\end{quote}
-
-\subsection{Appeal}
-\label{sub:appeal}
-
-The \gls{novathesis} tempalte was born in~1996, and what you see now accumulates to many many hundreds (thousands?!) of working hours, unpaid and stollen from family and friends.  This work is available to the community under the \href{LaTeX project public license}{\LaTeX\ Project Public License v1.3c}, which means you are entitled to use it for free.  However, if you decide to use this template to write your thesis/dissertation, \textbf{be fair to the developers} and:
-\begin{enumerate}
-  \item Cite the \gls{novathesis} manual~\cite{novathesis-manual} in a place of your choice (e.g., in the \emph{Acknowledgments}) of your thesis/disseration with “\verb!\cite{novathesis-manual}!” .  If you cite it this way, the correct entry will be added automatically to your bibliography (no need to worry with the necessary BibTeX entry, as it will be added automatically);
-  \item Go to the
-\href{https://github.com/joaomlourenco/novathesis}{project web page in GitGub} and give the project a star (marked with a red ellipse at the top-right in Figure~\ref{fig:github}); and
-  \item Make a donation by visiting the \gls{novathesis} project page and clicking in the button marked with a green ellipse at the top-center in Figure~\ref{fig:github}).  Alternatively, just click \href{https://www.paypal.com/donate/?hosted_button_id=8WA8FRVMB78W8}{\fcolorbox{DarkGreen}{gray!15}{\textbf{~HERE~}}} and your browser will be directed to the right page.
-\end{enumerate}
-
-\begin{figure}[htbp]
-  \centering
-    \includegraphics[width=0.7\textwidth]{github1}
-  \caption{The \novathesis\ project web page in GitHub.}
-  \label{fig:github}
-\end{figure}
-
-\section{The \emph{NOVAthesis} template}
-\label{sec:a_bit_of_history}
-
-\newcommand{\mysmallcoversize}{0.09\linewidth}
-\renewcommand{\theadfont}{\large\bfseries}
-\definecolor{Schlgray}{gray}{0.95}  
-\newtoggle{ntRow}
-
-\newcommand{\ntSchool}[2]{%
-    % #1 = cover image
-    % #2 = School name
-    % #3 = School acronym
-    % #3 = School URL
-    \setlength{\fboxsep}{0pt}%
-    \def\myspace{}%
-    \gape{
-    \@for\listitem:=#1\do{%
-      \myspace\fbox{\colorbox{White}{\includegraphics[align=c,width=\mysmallcoversize]{\listitem}}}%
-      \def\myspace{~}%
-    }}%
-    &
-    \parbox[c]{\linewidth}{%
-    \def\mynewline{}
-    \@for\listitem:=#2\do{%
-      % \@ntschldata(\listitem)
-      \StrCut{\listitem}{;}\schlname\@remainder%
-      \StrCut{\@remainder}{;}\schlacrn\schlurl%
-      \mynewline\schlname\ \href{\schlurl}{(\schlacrn)}%
-      \def\mynewline{\newline}
-    }}\\
-}
-% \def\@ntschldata(#1;#2;#3){}%#4#5#6{\def#4{#1}\def#5{#2}\def#6{#3}}
-
-\newenvironment{ntUniversity}[1]{
-  \renewcommand\cellgape{\Gape[5pt]}
-  \rowcolors{1}{}{GhostWhite}
-    \xltabular{\linewidth}{cX}%
-    \toprule%
-    \rowcolor{Gainsboro}%
-    & \Gape[1.5ex]{\thead[l]{#1}}\\
-    \midrule%
-}{%
-    \bottomrule
-    \endxltabular%
-}
-
-The \gls{novathesis} template was born at the \gls{DI} of  \gls{FCT} of \gls{NOVA}, Portugal.  But the user base grew… initially to other Departments of FCT-NOVA, then to other Schools of NOVA, and later to other Schools of other Universities.  Currently more than 25 Schools are natively supported by the \gls{novathesis} teamplte.
-
-\begin{ntUniversity}{NOVA University Lisbon}
-    \ntSchool{cover-nova-fct-phd,cover-nova-fct-msc}%
-                  {{NOVA School of Science and Technology [PhD]};{FCT-NOVA};{https://www.fct.unl.pt},%
-                  {NOVA School of Science and Technology [MSc]};{FCT-NOVA};{https://www.fct.unl.pt}}
-    \ntSchool{cover-nova-fcsh-phd}%
-                  {{NOVA School of Social Sciences and  Humanities};{FCSH-NOVA};{https://www.fcsh.unl.pt}}
-    \ntSchool{cover-nova-ims-phd}%
-                  {{NOVA Information Management School};{NOVA-IMS};{https://www.novaims.unl.pt}}
-    \ntSchool{cover-nova-ensp-phd}%
-                  {{National School of Public Heath};{ENSP-NOVA};{https://www.ensp.unl.pt}}
-\end{ntUniversity}
-
-\begin{ntUniversity}{University of Lisbon}
-    \ntSchool{cover-ulisboa-ist-phd}%
-                  {{Instituto Superior Técnico};{IST-UL};{https://tecnico.ulisboa.pt}}
-    \ntSchool{cover-ulisboa-fc-phd}%
-                  {{Faculdade de Ciências [PhD]};{FCUL};{https://ciencias.ulisboa}}
-    \ntSchool{cover-ulisboa-fc-msc}%
-                  {{Faculdade de Ciências [MSc]};{FCUL};{https://ciencias.ulisboa}}
-\end{ntUniversity}
-
-\begin{ntUniversity}{University of Minho}
-    \ntSchool{cover-uminho-ea-phd,cover-uminho-ec-phd,cover-uminho-ed-phd}%
-                  {{{Escola de Arquitetura};{EA-UM};{https://www.arquitetura.uminho.pt}},%
-                  {{Escola de Ciências};{EC-UM};{https://www.ecum.uminho.pt}},%
-                  {{Escola de Direito};{ED-UM};{https://www.direito.uminho.pt}}}
-    \ntSchool{cover-uminho-ec-phd,cover-uminho-ed-phd,cover-uminho-eeg-phd}%
-                  {{{Escola de Ciências};{EC-UM};{https://www.ecum.uminho.pt}},%
-                  {{Escola de Direito};{ED-UM};{https://www.direito.uminho.pt}},%
-                  {{Escola de Economia e Gestão};{EEG-UM};{https://www.eeg.uminho.pt}}}
-    \ntSchool{cover-uminho-ee-phd,cover-uminho-em-phd,cover-uminho-ep-phd}%
-                  {{{Escolha de Engenharia};{EE-UM};{https://www.eng.uminho.pt}},%
-                  {{Escola de Medicina};{EM-UM};{https://www.med.uminho.pt}},%
-                  {{Escola de Psicologia};{EP-UM};{https://www.psi.uminho.pt}}}
-    \ntSchool{cover-uminho-ese-phd,cover-uminho-ics-phd,cover-uminho-ie-phd}%
-                  {{{Escola Superior de Enfermagem};{ESE-UM};{https://www.ese.uminho.pt}},%
-                  {{Instituto de Ciências Sociais};{ICS-UM};{https://www.ilch.uminho.pt}},%
-                  {{Instituto de Educação};{IE-UM};{https://www.ie.uminho.pt}}}
-    \ntSchool{cover-uminho-ilch-phd,cover-uminho-i3b-phd}%
-                  {{{Instituto de Letras e Ciências Humanas};{ILCH-UM};{https://www.ilch.uminho.pt}},%
-                  {{Instituto de Investigação em Biomateriais; Biodegradáveis e Biomiméticos};{I3B-UM};{https://i3bs.uminho.pt}}}
-\end{ntUniversity}
-%
-% \begin{ntUniversity}{ISCTE — Instituto Universitário de Lisboa}
-%     \ntSchool{cover-iscteiul-eta-phd}%
-%              {Escola{ de Tecnologias e Arquitectura};{ETA-ISCTE-IUL};{https://ciencia.iscte-iul.pt/schools/escola-tecnologias-arquitectura}%}
-% \end{ntUniversity}
-
-\begin{ntUniversity}{Instituto Politécnico de Lisboa}
-    \ntSchool{cover-ipl-isel-msc}%
-             {{Instituto Superior de Engenharia de Lisboa};{ISEL-IPL};{https://www.isel.pt}}
-\end{ntUniversity}
-
-\begin{ntUniversity}{Instituto Politécnico de Setúbal}
-    \ntSchool{cover-ips-ests-msc}%
-             {{Escola Superior de Tecnologia de Setúbal};{ISEL-IPL};{https://www.estbarreiro.ips}}%
-\end{ntUniversity}
-
-\begin{ntUniversity}{Other Universities/Schools/Degrees}
-    \ntSchool{cover-other-esep-phd}%
-             {{Escola Superior de Enfermagem do Porto};{ESEP};{https://www.esenf.pt/pt}}%
-    \ntSchool{cover-other-mscgt-msc}%
-             {{Masters Program in Geospatial Technologies};{GT};{https://mastergeotech.info}}%
-\end{ntUniversity}
-
-
-\section{Getting Started}
-\label{sec:getting_started}
-
-The template provides an \emph{easy to use} setting for you to write your thesis/dissertation in \LaTeX:
+Some advantages of service orientation over monoliths are as follows:
 \begin{itemize}
-  \item  Select your school;
-  \item Fill your thesis metadata (title, research field, etc) in the file “\texttt{template.tex}”;
-  \item Create your thesis/dissertation contents using the files in folder “\texttt{Chapters}”; and
-  \item Process using you favorite \LaTeX\ processor (pdf\LaTeX, \XeLaTeX\ or \LuaLaTeX).
+    \item Functional independence - Each service is operationally independent, the only way services communicate is through their published interfaces.
+    \item Component Scalability - When a single component becomes overloaded, additional instances of the component can be deployed separately.
+    \item Distributed development - Separate teams may work on different modules of the system simultaneously if they agree on the interfaces of modules ahead of time.
 \end{itemize}
 
-\subsection{Using Overleaf}
-\label{sub:using_overleaf}
+These advantages boost the system's ability to evolve by allowing it to be disassembled into subsystems composed primarily of loosely coupled services.
 
-\begin{wrapfigure}{r}{0.3\linewidth}
-\vspace*{-10ex}\includegraphics[width=\linewidth]{overleaf}%
-\caption{NOVAthesis template in Overleaf.}
-\end{wrapfigure}
+\paragraph{}
 
-If you do not have an account in \href{https://www.overleaf.com?r=f5160636&rm=d&rs=b}{Overleaf}, you must \href{https://www.overleaf.com?r=f5160636&rm=d&rs=b}{create one first}.
+In a microservice architecture, subsystems can fully evolve independently of one another, as long they don't share services or components.
+Because services are tied to one another via their interfaces, they can only evolve separately if their contracts remain consistent.
+It is often advantageous to have the capacity to change service contracts independently,
+particularly in agile workflows and the early phases of development, where contracts are prone to frequent changes.
 
-Once you have an account, please access the \gls{novathesis} template in \href{https://www.overleaf.com/latex/templates/new-university-of-lisbon-universidade-nova-de-lisboa-slash-unl-thesis-template/fwbztcrptjmg}{Overleaf} and select the green button \emph{Open as Template}. 
+\section{Problem Statement} % (fold)
+\label{sec:problem_statement}
 
-\bgroup
-  \itshape
-  Please notice that the version currently available in Overleaf (v6.5.3) is slightly outdated (current version is v\novathesisversion). A new version will be submitted to Overleaf soon.  Until then, please:
-  \begin{enumerate}
-    \item Download the \href{https://github.com/joaomlourenco/novathesis/archive/master.zip}{latest version} from the GitHub repository as a Zip file.
-    \item Login to your favorite LaTeX cloud service. I recommend \href{https://www.overleaf.com/?r=f5160636&rm=d&rs=b}{Overleaf} but there are alternatives (these instructions apply to Overleaf and you'll have to adapt for other providers).
-    \item In the menu select: \texttt{New project} $\rightarrow$ \texttt{Upload project}.
-    \item Upload the zip with all the “novathesis” files.
-    \item Select “template.tex” as the main file.
-    \item Let Overleaf compile the document.
-  \end{enumerate}
-\egroup
+The main challenge in developing applications based on microservices-based architectures is the lack of mechanisms for evaluating the safety of service contract updates.
 
-\subsection{Using a Local \LaTeX\ Installation}
-\label{sub:using_local_latex}
+\paragraph{}
 
-\newcommand{\MikTeX}{Mik\TeX}
-\newcommand{\TeXLive}{\TeX Live}
+In a monolithic application, interactions between different system components are conducted through function calls.
+In a distributed system, however, each individual component has to communicate with other components across the network,
+without the same guarantees.
 
-First of all, start by installing \LaTeX\ in your computer.  There are two main distributions, \href{https://miktex.org}{\MikTeX}\ and \href{https://www.tug.org/texlive/}{\TeXLive}, and both of them are available for the~3 most popular Operating Systems: Linux, macOS and Windows.
+In a regular program, refactoring a function definition can be done quickly with the aid of an IDE.
+Distributed systems do not have equivalent tools to detect mismatches between endpoints and their consumers.
+Developers are left with the burden of manually tracking down and refactoring the system's dependencies across all consumers and producers;
+there is a lack of tools that alleviate this problem.
 
-\begin{wrapfigure}{r}{0.3\linewidth}
-\includegraphics[width=\linewidth]{github}%
-\caption{The NOVAthesis Project page in GitHub.}
-\end{wrapfigure}
+\paragraph{}
 
-Be aware that a full installation of \MikTeX\ or \TeXLive\ will take near~5\,GB of hard disk space.  So, think twice before installing the full distribution.  See the \gls{novathesis} Wiki for the \href{https://github.com/joaomlourenco/novathesis/wiki/installing-latex#minimal-installation-in-any-of-the-systems-above}{list of packages required to compile the template}.
+With a rising number of separate services and their interactions, contract administration and service integration become progressively more challenging.
+Software engineering guidelines assume a scenario of frequent service implementation changes and few interface or contract modifications;
+in the context of iterative approaches to software development, such as agile, contracts are typically modified as frequently as implementation details.
 
-Once you have \LaTeX\ up and running, remember to install a good \LaTeX\ text editor.  I recommend you to take a look at  \href{https://tex.stackexchange.com/questions/339/latex-editors-ides}{this post} in the \url{tex.stackexchange.com} site.  If you want a quick and dirty recommendation, try \href{https://www.texstudio.org/}{TeXStudio}.
+Preserving the integrity of microservice architectures is a daunting task that can only be accomplished by the most diligent teams, for the following reasons:
 
-Now, you must access the \gls{novathesis} repository in \href{https://github.com/joaomlourenco/novathesis}{GitHub}, select the green button \emph{Code} and then \emph{download} (or \emph{clone}) the template.  You will always get the latest version of the template (currently v\novathesisversion\ from \novathesisdate).
+\paragraph{- The ramifications of changing a contract are discovered after the fact:}
+Services evolve independently, and contracts are rarely formally specified or documented.
+The only symptoms of a broken system are runtime errors or unexpected behaviors.
+The use of contract management tools, and a common contract specification is necessary to ensure the security of service-based architectures.
 
+\paragraph{- The safety of a deployment operation is unknown:}
+Established platforms like Kubernetes can't guarantee the security of deployments because they rely on service level meta-information (like version IDs) to manage them.
+A new model for such environments is required to ensure the safety of deployment tasks, one that uses generic meta-information from previously deployed services,
+uses expanded type-based contracts, and employs a compatibility relation on service contracts.
 
-\section{Getting Help}
-\label{sec:getting_help}
-Let's start with some simple suggestions:
+\paragraph{- A contract change, entails the redeployment and downtime of its consumers:}
+Modifications to a module's definition have an immediate impact on the entire system, by requiring the downtime of all consumer modules.
+Deployments of “compatible” modules should not disrupt the system soundness by imposing the redeployment of services.
+Instead, one service should be able to be replaced while the remainder of the system remains operational.
 
-\begin{enumerate}
-  \item No! You don't have to use this template to write your thesis.  You don't even have to use \LaTeX.  However, writing a thesis is serious stuff, and which tool you shall use to write it is not a decision to make lighthearted.
-  \item \LaTeX\ is hard enough by itself.  This template aims at making your life easier, but not easy. If you choose to use this template to write your thesis, you are very welcome.  However, don't expect me to provide you help with \LaTeX.  Look for help with your friends (you have some friends, don't you?), or search the web, or try even to read some book(s) on \LaTeX. In the end you will certainly find the experience rewarding.
-  \item So, don't forget, when you come to the point of “\emph{How do I do this with \LaTeX?}” look for help!  Google is your best friend. You may also ask for help in the \gls{novathesis} \href{https://www.facebook.com/groups/novathesis}{NOVAtheis Facebook group} or the \href{https://github.com/joaomlourenco/novathesis/discussions}{GitHub Discussions page}.  If you can't find help there from previous posts/messages, then post your own question. Hopefully someone will answer you. There were huge changes from version 4.x.y to version \novathesisversion, so \textbf{always} state the version number you are using when asking for help.
-\end{enumerate}
+\section{Contributions} % (fold)
+\label{sec:contributions}
 
-\begin{center}  
-  \fcolorbox{red}{gray!15}{\parbox{\textwidth}{\begin{center}\large\textbf{Please do not attempt to contact me directly (email, Messenger, etc)…\\I WILL NOT REPLY!}\end{center}}}
-\end{center}
- 
-% \subsection{Google Help}
-% \label{sub:group_google}
-%
-% Remember, when looking for hints or help, \emph{\href{google.com}{Google} is your best friend}!   And if you prefix your Google query with “\emph{LaTeX}”, your fist link will most probably direct you to \texttt{tex.stackexchange.com}.
-%
-% \subsection{Group Support Help}
-% \label{sub:group_support}
-%
-% To get directed help on the \gls{novathesis} please join:
-% \begin{itemize}
-%   \item the \href{https://www.facebook.com/groups/novathesis}{NOVAtheis Facebook group}, or
-%   \item the \href{https://github.com/joaomlourenco/novathesis/discussions}{GitHub Discussions page}.
-% \end{itemize}
-%
-% There were huge changes from version 4.x.y to version \novathesisversion\ so, please, \textbf{always} state the version number you are using when asking for help.
+We present a microservice management system that aims to solve the problems stated above.
 
-\section{Reporting Problems}
-\label{sec:reporting_problems}
+\paragraph{}
 
-If you just need some help, see above \Autoref{sub:group_google} and \Autoref{sub:group_support}.
+The challenge of insuring the safety of contract evolutions will be handled by defining and adopting an API description language, as well as implementing a schema
+registry that offers a pre-flight safety check procedure that verifies whether two service contracts are compatible before
+deployment.
+The compatibility mechanism is akin to typechecking procedures in compiled languages and is applied upon a
+pair of service contracts, which are typically two distinct versions of the same service. The aforementioned mechanism preserves
+a distributed system's correct behavior by rejecting additions or modifications that would threaten it and by informing the programmer
+of all the repercussions of the deployment, such as consumer services that are outdated.
 
-If you believe \emph{you found a bug} or if \emph{you need some improvement} in the template, please \href{https://github.com/joaomlourenco/novathesis/issues}{fill an issue} in the \gls{novathesis} \href{https://github.com/joaomlourenco/novathesis/issues}{project page in GitHub}.
+\paragraph{}
 
+To ensure that changes in producers contracts do not require the consumers upgrade and redeployment, contract evolution
+will be supported at runtime by a generated proxy component that dynamically adapts the data exchanged between services.
+The proxy adapter is capable intercepting and evaluating all the outgoing and incoming TCP requests to determine whether
+they should be left unchanged or how they should be transformed using an adaptation protocol that extends the compatibility mechanism discussed above.
+We allow for the addition, deletion, renaming, and type migration of data fields in a producer module without disrupting or upgrading consumer services.
+More complex changes in data fields, such as altering the format of a date, will be permitted through the use of user-defined adaption functions.
+We also support the modifications on the signatures of WebAPIs, such as changing a path parameter in a HTTP endpoint to a query parameter.
+The contract translation specification between two compatible contracts can be audited and modified by a programmer before it is employed by an adapter.
 
-\section{Donors}
-\label{sec:donations}
+\paragraph{}
 
-The \href{https://github.com/joaomlourenco/novathesis/wiki#donators}{list of \emph{Donnors}} is available in the \gls{novathesis} Project page.
+Our work will make the following contributions, which will be discussed in depth in Chapter 4:
 
+\begin{itemize}
+    \item A compatibility verification on service contracts that determines whether or not messages may be exchanged without data loss;
+    \item Definition of a core language for the specification of contract compatibility corrections;
+    \item Implementation of a robust type-directed adaptation protocol for service contracts;
+    \item Implementation of a service registry tasked with holding service contracts, tracking service dependencies;
+    and providing a lightweight preflight safety check procedure for deployment/un-deployment operations;
+    \item Implementation of a benchmark platform to compare the solution to existing ones.
+\end{itemize}
 
-\section{Disclaimer}
-\label{sec:disclaimer}
+\section{Document Scructure} % (fold)
+\label{sec:document_structure}
 
-Although the \gls{novathesis} template is endorsed by some Schools (e.g., \href{https://www.fct.unl.pt/estudante/informacao-academica/teses-e-dissertacoes}{linked from FCT-NOVA web site}), the \gls{novathesis} template \textbf{this not an official template} for any School.
-
-The \gls{novathesis} template exists to make your life easier and we do our best to make it compliant to the supported ($+25$) Schools' regulations but, in the end of the line, you and only you are accountable for both the look and the contents of the document you submit as your thesis/dissertation.
-
+The following sections of the document start with a review of the main the concepts,
+techniques and applications behind our approach (Chapter 2).
+Sequent sections, first introduce a summary of the key related work (Chapter 3), then we present the design of our system and discuss alternatives (Chapter 4),
+in (Chapter 5) we present the implementation and conclude with results in (Chapter 6).
