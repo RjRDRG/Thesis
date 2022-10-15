@@ -326,7 +326,8 @@ TSWLatexianTemp*
 .LSOverride
 
 # Icon must end with two \r
-Icon
+Icon
+
 
 # Thumbnails
 ._*
@@ -386,3 +387,4 @@ $RECYCLE.BIN/
 
 # Project exclude paths
 /out/
+/.idea/vcs.xml
