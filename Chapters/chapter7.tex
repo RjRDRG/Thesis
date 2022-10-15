@@ -8,282 +8,49 @@
 
 \typeout{NT FILE chapter4.tex}%
 
-\chapter{Design}
-\label{cha:test}
+\chapter{Conclusions and Future Work}
+\label{cha:conclusions and future work}
 
-In this chapter, we present the design of our system and discuss alternatives to the decisions we took in our implementation.
-A modular approach was adopted to construct the system;
-each module is entirely independent, making it easy to interchange alternative approaches.
-We dedicate the first half of this chapter to define the goals that guided the design of system,
-the remainder of the chapter will be used to discuss each design aspect in turn.
+Throughout the sections ~\ref{sec:compatibility_verification_design} and ~\ref{sec:compatiblity_verification}, we demonstrated the safety guarantees of our solution while refactoring parts of a distributed system:
+deployments that would lead to irremediably incompatible states are rejected, such as a
+microservice attempting to utilize a renamed endpoint, or a microservice being deployed before its dependencies are alive and reachable.
 
-\section{Discussion} % (fold)
-\label{sec:discussion}
+\paragraph{}
 
-Recall that the problem we are trying to solve is how to make the process of updating contracts in
-microservice-based systems more robust, in the sense that it should be harder to deploy a service that could
-potentially break the system soundness.
-There are many approaches to solve this problem, each with its own set of compromises.
-The goals that informed our decisions, are outlined below by their priority:
+Additionally, we argued how the proposed solution could be supported under widely adopted workflows and documentation formats, such as DevOp pipelines and the OpenAPI description language.
 
-\begin{itemize}
-    \item Supporting all types of contract changes
-    \item Integration with existing tools and workflows
-    \item Minimize conception and maintenance effort
-    \item Automatic validation of the safety of deployment operations
-    \item Consumers and producers are unaware to the presence of adapters
-    \item Transactionless deployment and upgrade of service contracts
-    \item No downtime when upgrading service contracts
-    \item No overhead when services communicate using the same contract version
-\end{itemize}
+\paragraph{}
 
-Four principles were considered when evaluating each approach:
-\textbf{Flexibility} the applicability of the approach under diverse scenarios;
-\textbf{Effectiveness} the efficiency of an approach at solving a problem;
-\textbf{Utility} the effort required to adopt and maintain the approach;
-\textbf{Performance} the overhead associated with approach;
+We also discussed approaches to lessen the solution's additional documentation requirements.
+Section ~\ref{sec:evolution_representation} provides an IDE tool that automatically identifies unmodified service procedures and possible contract evolutions,
+with the goal of minimizing the effort necessary to explicitly document all contract evolutions.
 
-In the prototype's design, we prioritized utility above performance because,
-in the common case, each service will communicate via up-to-date contracts and
-because the effort associated with adopting an approach will be proportional to the complexity and size of a contract and its evolution,
-whereas the performance overhead will remain mostly static under diverse contract changes, as it is largely attributable to communication costs.
-We prioritized flexibility and effectiveness above other principles because if an approach isn't applicable or effective under a scenario,
-then it will be necessary to adopt hybrid solutions, which will have a detrimental effect on the utility of the entire solution.
+\paragraph{}
 
-\section{Design Aspects} % (fold)
-\label{sec:design_aspects}
+The proposed solution is agnostic to the underling application, all of its components don't require the modification of application microservices or their architecture.
+We offer a solution that may be plugged into any distributed application that employs HTTP as its communication protocol, with the only condition being that the application endpoints be versioned through path segments or header parameters.
 
-\subsection{Communication Protocol} % (fold)
-\label{sec:communication_protocol}
+\paragraph{}
 
-The communication protocol defines the syntax, semantics and synchronization of communication between microservices.
-Our choice in the communication protocol is bounded by the adopted communication strategy between microservices, orchestration or choreography.
-Orchestration relies on request-response protocols while choreography relies on event-driven protocols.
+One conclusion we can draw from the results is that the latency introduced by an embed adapter is similar to the latency introduced by an additional call between two distinct nodes;
+thus, installing the adapter in the same node as the adapted service is unnecessary;
+instead, it would be more beneficial to host the adapter in a different node of the same node pool, and use an adapter with a more generic implementation that can handle the adaptation of multiple services.
+Such an approach would require fewer computational resources since a distinct adapter replica wouldn't need to be installed on every service replica, in other words a single adapter would serve multiple services.
 
-\paragraph{Approach}
-Most applications require a web presence and microservice systems that
-rely on choreography still require the HTTP request-response protocol to have a web presence,
-for this reason we chose to design our system around the orchestration pattern and the HTTP protocol.
+Furthermore, the acquired findings show that the adapter CPU and memory cost grow with the arrival rate of requests that must be adapted.
+If only a small fraction of requests require adaptation, the computational cost of the adapter will be low in comparison to the cost of the application.
 
-\paragraph{Alternative}
-Other event-driven and request-response protocols, such as RPC, have a simplified
-syntax, and there are already a number of tools that support the evolution of schemas
-under these protocols, albeit with some limitations.
+\paragraph{}
 
-\subsection{Contract Specification} % (fold)
-\label{sec:contract_specification}
+An interesting avenue to explore would be the implementation of the adapter using HTTP server's that support different threading models, the current implementation
+was made under the Blocking I/O (BIO) model.
+In the BIO model each request is processed by a different thread, which has a significant thread overhead and cannot handle highly concurrent applications.
+The adoption of a Non-blocking I/O (NIO) model,would result in improved performance and lower CPU resource usage than the traditional BIO model.
 
-It is required that each microservice’s interface be
-described in a high-level language which abstracts away implementation details, because it is common
-for microservices to be implemented under different frameworks and programming languages.
-We use these interface specifications to clearly define and document the procedures of a service and its consumed resources and inter-service dependencies.
+\paragraph{}
 
-The definition of a service dependencies and requirements has three benefits: it allows a deployment to be validated and blocked if the corresponding requirements are not met within the system,
-it allows for the automatic removal of un-utilized adapters without developer intervention,
-and it allows developers to clearly see the impact of a contract change on the entire system, as well as the effort required to support the change.
-
-Because most API definition frameworks do not allow the explicit declaration of dependencies and requirements of a service,
-contracts are represented in two distinct manifest files, one defines the procedures of a service, and the other dictates its consumed resources and requirements.
-
-\paragraph{Approach}
-The definition of a service dependencies can be done from the perspective of the whole service or the perspective of each service procedure.
-If we map the dependencies of each procedure individually, we gain the ability of detecting procedures that are un-used internally by other services.
-With this ability, we can avoid installing unnecessary adapters in cases where only unused procedures are updated;
-this case is expected to be very uncommon, and having unused procedures in a microservice is undesirable due to API bloat,
-so we believe it is not worth the documentation effort and that specifying service dependencies from the perspective of the service as a whole is sufficient.
-The only true benefit of explicitly specifying procedure dependencies would be the ability to view the impacted consumer procedures when a breaking change occurs,
-but this information can be obtained through other methods that do not require such a high documentation effort;
-one such solution is presented in the following paragraph.
-
-\paragraph{Alternatives}
-Services dependencies can be determined indirectly by automatically inspecting request logs between services.
-The advantage of this approach is the reduced documentation effort, but it comes at a cost because
-it is no longer possible to validate the safety of service deployments, since the dependencies of a service are unknown when it is deployed or upgraded;
-it is only possible to validate the safety of the removal of services after they have been running over a long enough period,
-and even then there could be very rare calls between services that are not mapped by this method, these calls would make removals unsafe.
-Un-needed adapters would also have to be removed manually by developers or through an automated inactivity-based warning system.
-This approach could be instead employed with a different objective, discovering procedures that are rarely called,
-this information could be used to reduce the bloat of on API by eliminating or merging procedures,
-but this falls outside the scope of this thesis and has not been explored.
+Lastly, we believe it would be interesting to use a formal language to define function resolution in contract evolution specifications.
+The current implementation supports function resolutions with one-line java expressions,
+the adoption of a formal language would make the compatibility verification process more robust and enable the adapter to be implemented in programming languages other than java.
 
 
-\subsection{Compatibility Verification} % (fold)
-\label{sec:compatibility_verification_design}
-
-Intuitively, compatibility verification determines whether
-all the edited elements in a producer service contract are compatible with the ones effectively
-used by the consumer services, and whether the new contract requirements are met
-by the system’s existing resources.
-
-\paragraph{Approach}
-The verification procedure examines both the producer contract and all consumer references to determine the safety of a deployment operation.
-Edited elements are considered compatible if the information supplied by prior elements is sufficient to meet the edited elements parameters.
-Contract requirements are fulfilled if there are enough computational resources to accommodate the service and if all the
-service dependencies are available and reachable in the system.
-
-\paragraph{Alternative}
-Instead of determining if a new contract version is compatible with all consumer references,
-we evaluate only whether the new contract is compatible with the prior versions that are still in use.
-If a new contract is missing a capability that was present in a prior version,
-the developers will need to verify if the capability is not being consumed
-and mark it as obsolete in the evolution manifest for the contract to be considered safe.
-This approach has the advantage of streamlining the verification process by eliminating the
-need for all contracts to be accessible by machine code in a standardized fashion.
-The downside is that it introduces human error in the verification of un-utilized service capabilities.
-
-\subsection{Tools} % (fold)
-\label{sec:tools}
-
-In distributed systems there is a lack of tools
-comparable to those used in centralized systems, for visualizing the impact of a change and effort required to implement it.
-In this section, we discuss how such tools could be implemented.
-
-\paragraph{Approach}
-Since all service contracts declare their dependencies on other services procedures, determining the impact of change in a procedure is as simple as
-looping over all active services contracts and verifying whether the changed procedure is being consumed.
-Then, using this information, a report indicating all affected services and other metadata may be created.
-We store service contracts in a version control system, with semantic versioning, where
-each major version represents incompatible contract changes and minor versions represent backward compatible contract changes.
-To discover the active services, we run a query against the container orchestration tool, which returns the deployed services.
-A tool like this may be easily created in a bash script and its results shown in an IDE.
-If kubernetes and git are utilized, the active services may be queried with the \textbf{kubectl} command line tool,
-and the service contracts can be fetched using the git repository urls and a standard naming convention for the service contracts.
-
-\paragraph{Alternative}
-The information about the active services and individual service contract can be translated into an ontology language and hosted in a centralized registry.
-The main advantage of this approach is that allows us to easily integrate the registry with a reasoning system capable of performing deductive inferences over the service's data, such as
-inferring the consumers of a service procedure given the procedure and service name or generating a graph structure that maps all participating services dependencies.
-This approach would allow us to obtain richer data and reduce the burden of the development of sophisticated tools.
-The drawback is that the update of some information might require the use of distribute transactions to avoid incoherent data,
-for example renewing the services that are participating in the system.
-
-\subsection{Evolution Specification} % (fold)
-\label{sec:evolution_specification}
-
-It is not always possible to implicitly deduce the evolutions in a contract when comparing a new version to a prior version.
-For example, renaming one field \textbf{A->B} is indistinguishable, from inserting a new field \textbf{B} and removing another field of the same type \textbf{A}.
-The developer must declare which evolution occurred explicitly.
-
-\paragraph{Approach}
-The evolutions are specified in a manifest file, complete with its own syntax and rules,
-which outlines how to adapt calls between two versions of the contract.
-In this file all mappings between elements in each version are explicitly defined.
-A mapping for one element can fall into one of three types:
-\begin{itemize}
-    \item \textbf{Default value}: The developer provides a default value for the element.
-    This mapping is only valid if the default value has the same type and format as the element.
-    \item \textbf{Link}: The developer indicates that element X on the previous contract is equivalent to element Y in the new contract.
-    This mapping is only valid if the two elements have the same type and format.
-    \item \textbf{Function}: The developer applies a function over Xn elements of previous contract and indicates that the result of the function is equivalent to element Y in the new contract.
-    This mapping is only valid if the function's output type and format are equal to element Y and if the function's arguments match the type and format of the provided Xn elements.
-\end{itemize}
-Renamed fields in contracts are supported with the use of links.
-The addition of new fields in contracts is supported with the use of default values.
-Complex contract changes, such as changing the format of a date are supported with the use of functions.
-
-\paragraph{Alternative}
-The evolution specification is defined in conjunction with the contract specification.
-Most web API specification languages already support default values and name aliases.
-With these two features it would be possible
-to support the following contract evolutions: renamed fields, addition of fields and removal of fields.
-For simple contract this alternative can seem appealing, but as the number of revisions and consumers in prior versions rises, this solution becomes impractical.
-This approach clutters the contract with information that is irrelevant to consumers, and makes the specification of complex contract changes more cumbersome.
-
-\subsection{Adapter Location} % (fold)
-\label{sec:adapter_location}
-
-The adaptation of messages is supported at runtime by a generated proxy component
-that dynamically adapts the data exchanged between services.
-The adapter can be deployed and intercept messages in different points through the exchange.
-
-\paragraph{Approach}
-The adapter is installed in a separate container but on the same node as the service container.
-Consumers direct their requests based on the expected version of the service using a routing rule.
-If the expected version matches the current service version, the request is answered directly by the service;
-otherwise, the request is redirected through the adapter.
-Since the adapter and the service are in the same node, the communication cost is expected to be comparable to the cost of inter-process message passing.
-The main benefit of this approach is that the adapter can be deployed alongside the service,
-which circumvents distributed transactions in deployments,
-because container orchestrations tools such as kubernetes allow the deployment of closely related containers as atomic units known as "pods".
-
-\paragraph{Alternative A.}
-The adapter code is embed in the service implementation.
-This approach is expected to have higher performance than the previous approach since
-the adapter would use function calls instead of inter-process calls, and because message serialization and de-serialization would be unnecessary.
-The downside of this approach is that it would entail the modification of the service's code, which is problematic because each service can be implemented in a different framework and programming language.
-
-\paragraph{Alternative B.}
-The adapter is installed in the nodes of all the service consumers.
-This approach is problematic because a service upgrade would entail the re-deployment of all consumers.
-If one of the re-deployments fails, the entire service upgrade would have to be cancelled;
-this is only achievable with the use of distributed transactions, which are inherently complex.
-The re-deployment of adapters can be avoided with the use of mobile code that is provided by the service in a dedicated endpoint.
-This could be accomplished in Java with the use of network class loaders.
-We find this approach ineffective because it provides no benefits and requires more resources than alternative approaches since,
-instead of one adapter, we would need N adapters, one for each of the service consumers.
-
-\subsection{Adapter Coverage} % (fold)
-\label{sec:adapter_polymorphism}
-
-The adapter can have a generic implementation that is able to adapt messages from any service, or it can
-have a direct implementation that can only manage the exchange of messages for one service.
-
-\paragraph{Approach}
-The adapter implementation is derived from a template implementation,
-that is completed with the substitution of template variables with code generated from a single evolution specification manifest file.
-The advantage of this approach is that the implementation will be more performant than generic approaches.
-
-\paragraph{Alternative}
-The adapter haves a generic implementation and determines how to adapt messages by inspecting specialized headers in the
-message that indicate the message type, service and version and by consulting the corresponding evolution manifest.
-The advantage of this approach is that a single adapter can convert messages from any service as long as the evolution manifests are supplied to the adapter beforehand.
-This approach will consume fewer computational resources, in scenarios where the number of messages that require adaptation is low and uniformly distributed across all services,
-because a single adapter can handle the load of all requests, whereas the other approach requires one adapter per service.
-The downside of this approach is that it requires modifying the service's implementation to add the message headers.
-The mentioned benefit is obviously lost if the adapter is embedded in every service's node.
-
-\subsection{Message Routing} % (fold)
-\label{sec:message_routing}
-
-Messages will need to reach either an application or an adapter, depending on the consumer expected contract, and the current producer contract.
-We can construct routing rules based on the incompatibility of two contracts, or the incompatibility of individual contract procedures.
-
-\paragraph{Approach}
-We route messages thorough the adapter if the expected contract of a consumer is not the current producer contract.
-When a producer service's contract is upgraded, all of its customers will begin diverting their calls to the adapter with the old version.
-The developers are notified, and must manually update all consumers if they wish for them to direct their calls to the producer service application instead of the adapter.
-The downside of this approach is that it requires immediate developer intervention if optimal performance and resource consumption is desired.
-
-\paragraph{Alternative A.}
-Each contract procedure includes the contract version in their endpoint path, in other words each service endpoint is versioned with the corresponding contract version.
-We direct all calls through a reverse proxy such as nginx, and we redirect requests based on custom routing rules that are injected on the reverse proxy.
-The routing rules are injected when a service with contract changes is deployed, in other words the injection is done in a DevOps pipeline stage after the service deployment.
-If no custom rules are submitted the expected behaviour is equal to the behaviour of the approach discussed above.
-This approach is counter-productive since it necessitates the installation of a reverse proxy, which use more resources and adds the same latency as the previous approach.
-
-\paragraph{Alternative B.}
-Instead of using reverse proxies, we use custom DNS rules to direct request.
-This approach is problematic because DNS rules can only be applied over the domain of requests, and we need to apply them based on the path of requests.
-We could create a DNS entry for each service procedure,
-where each entry contains a subdomain that indicates the service version and another subdomain that indicates the service procedure (eg. users.v3.getUser).
-This would achieve the desired behaviour,
-however it would force developers to change the service implementation and start referencing different services procedures by different domains, which could cause interference
-with other API tools that rely on service domains.
-
-\subsection{Adapter Management} % (fold)
-\label{sec:adapter_management}
-
-The management of adapters should be automated similarly to the management of services.
-In this section, we discuss how to conciliate the operations related to the management of adapters with the more common operations of service deployment and upgrade.
-
-\paragraph{Approach}
-During normal operation the adapters don't require any type of management other than monitoring,
-adapters components only need to be provisioned during the upgrade of service contracts.
-A contract upgrade is supported by the re-deployment of the impacted microservice, which is often managed via a continuous deployment pipeline.
-
-We propose to introduce the operations of contract compatibility verification, adapter generation, deployment,
-and removal as additional stages in typical continuous deployment pipelines.
-The generation of the adapter components could be preformed outside the deployment pipeline,
-this would increase the solution flexibility by allowing developers to manually extend adapters to cover unforeseen corner cases,
-however, it is preferable to generate the adapters in the pipeline so that adapter generation program has clearer view
-over the participating services in the system.
