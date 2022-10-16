@@ -15,12 +15,14 @@ Software architecture is one of the most important factor's that influences the 
 The subject of architecture is primarily concerned with the composition and design of the fundamental structures of a software system,
 with the goal of meeting functional requirements, while maximizing non-functional criteria, such as scalability, maintainability, extensibility, availability, and so on.
 
+\paragraph{}
+
 A software architectural model may be viewed as a macroscopic blueprint for the composition of a system elements.
 Element's typically fall into one of three overlapping categories: data elements, processing elements, and connecting elements. \cite{architecture}.
 The data elements contain the state of system (eg. databases, variables, files);
 The processing elements transform the data elements (eg. procedures, services, sub-systems);
 The connecting elements serve as the bridge that permits different processing elements to collaborate (e.g. procedure calls, shared data, network messages).
-Software architectural models are primarily distinguished by the capabilities of the connecting elements and by the encompassing layers used to segregate elements into different subsystems.
+Software architectural models are primarily distinguished by the capabilities of the connecting elements and by the encompassing layers used to segregate subsets of elements into different subsystems.
 This thesis aims to enhance the connecting elements used in microservice architectures in order to fulfill stricter extensibility and availability requirements.
 
 \paragraph{}
@@ -47,7 +49,7 @@ Service Oriented Architecture (SOA) \cite{7} is an alternative model that aims t
 improve the re-usability and maintainability of software by minimizing the coupling between independent system components.
 In SOA, components provide functionality to other components via network message passing, where each exchanged message adheres to a standardized contract.
 Microservices \cite{microservices} are a modern iteration of the SOA model,
-that reduces the excessive and imposing layers introduced by earlier generations of the SOA model.
+that reduces the excessive and imposing layers introduced in earlier generations of the model.
 
 \paragraph{}
 
@@ -72,14 +74,15 @@ The main challenge in developing applications based on microservices-based archi
 
 \paragraph{}
 
-In a monolithic application, interactions between different system components are conducted through function calls.
+In a monolithic system, interactions between different system components are conducted through function calls.
 In a distributed system, however, each individual component has to communicate with other components across the network,
 without the same guarantees.
 
-In a regular program, refactoring a function definition can be done quickly with the aid of an IDE.
-Distributed systems do not have equivalent tools to detect mismatches between endpoints and their consumers.
-Developers are left with the burden of manually tracking down and refactoring the system's dependencies across all consumers and producers;
-there is a lack of tools that alleviate this problem.
+\paragraph{}
+
+Modifying a function definition and all references in a monolithic application may be done quickly with the use of an IDE refactoring tools.
+Equivalent tools for detecting incompatibilities between endpoints and their consumers are scarce in distributed systems.
+Developers are left with the burden of manually tracking down and refactoring the system's dependencies across all consumers and producers.
 
 \paragraph{}
 
@@ -87,19 +90,21 @@ With a rising number of separate services and their interactions, contract admin
 Software engineering guidelines assume a scenario of frequent service implementation changes and few interface or contract modifications;
 in the context of iterative approaches to software development, such as agile, contracts are typically modified as frequently as implementation details.
 
+\paragraph{}
+
 Preserving the integrity of microservice architectures is a daunting task that can only be accomplished by the most diligent teams, for the following reasons:
 
-\paragraph{- The ramifications of changing a contract are discovered after the fact:}
+\paragraph{ The ramifications of changing a contract are discovered after the fact:}
 Services evolve independently, and contracts are rarely formally specified or documented.
 The only symptoms of a broken system are runtime errors or unexpected behaviors.
 The use of contract management tools, and a common contract specification is necessary to ensure the security of service-based architectures.
 
-\paragraph{- The safety of a deployment operation is unknown:}
-Established platforms like Kubernetes can't guarantee the security of deployments because they rely on service level meta-information (like version IDs) to manage them.
-A new model for such environments is required to ensure the safety of deployment tasks, one that uses generic meta-information from previously deployed services,
+\paragraph{ The safety of a deployment operation is unknown:}
+Established platforms like Kubernetes can't guarantee the security of deployments because they rely only on service level information (like version IDs) to manage them.
+A new model for such environments is required to ensure the safety of deployment tasks, one that uses generic information from previously deployed services,
 uses expanded type-based contracts, and employs a compatibility relation on service contracts.
 
-\paragraph{- A contract change, entails the redeployment and downtime of its consumers:}
+\paragraph{ A contract change, entails the redeployment and downtime of its consumers:}
 Modifications to a module's definition have an immediate impact on the entire system, by requiring the downtime of all consumer modules.
 Deployments of “compatible” modules should not disrupt the system soundness by imposing the redeployment of services.
 Instead, one service should be able to be replaced while the remainder of the system remains operational.
@@ -107,40 +112,40 @@ Instead, one service should be able to be replaced while the remainder of the sy
 \section{Contributions} % (fold)
 \label{sec:contributions}
 
-We present a microservice management system that aims to solve the problems stated above.
+The current  work  aims to promote contract evolution safety and to ensure that changes in producers contracts do not require the consumers upgrade and redeployment.
 
 \paragraph{}
 
-The challenge of insuring the safety of contract evolutions will be handled by defining and adopting an API description language, as well as implementing a schema
-registry that offers a pre-flight safety check procedure that verifies whether two service contracts are compatible before
-deployment.
-The compatibility mechanism is akin to typechecking procedures in compiled languages and is applied upon a
-pair of service contracts, which are typically two distinct versions of the same service. The aforementioned mechanism preserves
-a distributed system's correct behavior by rejecting additions or modifications that would threaten it and by informing the programmer
-of all the repercussions of the deployment, such as consumer services that are outdated.
+The challenge of insuring the safety of contract evolutions will be handled by defining and adopting an API description language, as well as implementing
+a pre-flight safety check procedure that verifies whether service contracts are compatible before deployment.
+The compatibility mechanism is akin to type-checking procedures in compiled languages and is applied upon a
+pair of service contracts.
+The aforementioned mechanism preserves a distributed system's correct behavior by rejecting additions or modifications that would threaten it and by informing the programmer
+of all the repercussions of the deployment, such as the consumer services that would be affected.
 
 \paragraph{}
 
 To ensure that changes in producers contracts do not require the consumers upgrade and redeployment, contract evolution
 will be supported at runtime by a generated proxy component that dynamically adapts the data exchanged between services.
-The proxy adapter is capable intercepting and evaluating all the outgoing and incoming TCP requests to determine whether
-they should be left unchanged or how they should be transformed using an adaptation protocol that extends the compatibility mechanism discussed above.
-We allow for the addition, deletion, renaming, and type migration of data fields in a producer module without disrupting or upgrading consumer services.
-More complex changes in data fields, such as altering the format of a date, will be permitted through the use of user-defined adaption functions.
-We also support the modifications on the signatures of WebAPIs, such as changing a path parameter in a HTTP endpoint to a query parameter.
-The contract translation specification between two compatible contracts can be audited and modified by a programmer before it is employed by an adapter.
+The proxy adapter is capable evaluating all the outgoing and incoming requests and determine whether
+they should be left unchanged or how they should be transformed.
+We allow for the addition, deletion, rename and migration of data fields in a producer module without disrupting or upgrading consumer services.
+More complex changes in data fields, such as type migration or altering the format of a refined type,
+will be permitted through the use of user-defined functions, that can be incorporated in the proxy adapter implementation.
+We also support modifications on the signatures of WebAPIs, such as changing a path parameter in an HTTP endpoint to a query parameter.
+The evolution specification between two compatible contracts is semi-automated and can be audited and modified by a programmer before it is employed by an adapter.
 
 \paragraph{}
 
-Our work will make the following contributions, which will be discussed in depth in Chapter 4:
+In summary, this work will provide:
 
 \begin{itemize}
     \item A compatibility verification on service contracts that determines whether or not messages may be exchanged without data loss;
     \item Definition of a core language for the specification of contract compatibility corrections;
-    \item Implementation of a robust type-directed adaptation protocol for service contracts;
-    \item Implementation of a service registry tasked with holding service contracts, tracking service dependencies;
-    and providing a lightweight preflight safety check procedure for deployment/un-deployment operations;
-    \item Implementation of a benchmark platform to compare the solution to existing ones.
+    \item Implementation of a robust type-safe adaptation protocol for service contracts;
+    \item Implementation of a management system tasked with holding service contracts, tracking service dependencies,
+    and providing a lightweight preflight safety check procedure for deployment/un-deployment operations
+    \item A benchmark platform to evaluate the solution.
 \end{itemize}
 
 \section{Document Scructure} % (fold)
@@ -148,5 +153,5 @@ Our work will make the following contributions, which will be discussed in depth
 
 The following sections of the document start with a review of the main the concepts,
 techniques and applications behind our approach (Chapter 2).
-Sequent sections, first introduce a summary of the key related work (Chapter 3), then we present the design of our system and discuss alternatives (Chapter 4),
-in (Chapter 5) we present the implementation and conclude with results in (Chapter 6).
+Sequent sections, first introduce a summary of the key related work (Chapter 3), then we present the design of the system and discuss alternatives (Chapter 4),
+in (Chapter 5) it is presented the implementation and conclude with results in (Chapter 6).
