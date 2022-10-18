@@ -11,14 +11,12 @@
 \chapter{Background}
 \label{cha:background}
 
-The technology underlying the development and deployment of microservices-based applications will be described in this section:
-
 \section{Microservices} % (fold)
 \label{sec:microservices}
 
 Microservices \cite{microservices, microservices2017tenets, microservicesTomorrow} are an architectural style in which software is developed using self-contained components that
 communicate with one another via standardized interfaces and lightweight mechanisms.
-These services segregate fine-grained business functionalities and can be independently deployed, scaled, and tested by automated mechanisms.
+These services segregate fine-grained business functionalities and can be independently tested, deployed, and scaled by automated mechanisms.
 There is virtually no centralized management, and each service may be written in a different programming language and employ a different data storage technology.
 
 \paragraph{}
@@ -32,12 +30,16 @@ and populates the views that are sent to the browser.
 
 \paragraph{}
 
-The server-side application is a monolith a single logical executable, in which all logic for handling requests runs as a single process,
+The server-side application is a monolith, a single logical executable, in which all logic for handling requests runs as a single process,
 different domains of the application are divided into classes, functions, and namespaces by utilizing the basic features of a programming language.
+
+\paragraph{}
 
 When large monolithic applications must scale while maintaining a high level of availability, they become a source of frustration:
 Scaling the server-side application involves scaling all the application functionalities, rather than the functionalities that require greater resources;
-Any small change made to the server-side application, involves building and re-deploying the entire monolith;
+Any small change made to the server-side application, involves building and re-deploying the entire monolith.
+
+\paragraph{}
 
 \begin{figure}[htbp]
     \centering
@@ -46,7 +48,8 @@ Any small change made to the server-side application, involves building and re-d
     \label{fig:monoliths and microservices}
 \end{figure}
 
-The requirements of system scalability, high availability, and continuous delivery are addressed in different microservice architectural characteristics.
+The requirements of system scalability, high availability, and continuous delivery are addressed in different microservice architectural characteristics:
+componentization, data management, communication strategy, transaction patterns and evolutionary design.
 
 \paragraph{Componentization}
 
@@ -54,8 +57,13 @@ In contrast to monoliths, which achieve componentization solely via the use of l
 microservices achieve componentization primarily through the division of different business domains and functionalities into distinct executables
 that are exposed as services.
 
+\paragraph{}
+
 While this componentization approach helps to enforce component's encapsulation via more explicit component interfaces,
 its primary benefit is that services become independently deployable.
+
+\paragraph{}
+
 This feature helps to fulfill the requirements of system scalability and high availability by
 making different components scalable across multiple nodes and limiting cascading errors via the replication and isolation of components.
 
@@ -77,10 +85,14 @@ and it was common to incorporate orchestration and transformation logic into the
 making the ''pipe smart''.
 This approach had several flaws, it was difficult to solve problems in production environments, and the tooling was complex and expensive.
 
+\paragraph{}
+
 The reverse approach has been adopted with microservices,
-where services own their domain-centric logic "smart endpoints" and transport messages via "dumb pipes".
+where services own their domain-centric logic ''smart endpoints'' and transport messages via ''dumb pipes''.
 The majority of communication between microservices is done via request/response-based communication or event-driven messaging.
 Because these two methods have such dissimilar properties, it's important to weigh their strengths, and the scenarios that call for each.
+
+\paragraph{}
 
 Request/response-based communication protocols are typically suited for synchronous settings,
 where the client contacts one receiver at time and needs the response before it can continue.
@@ -88,20 +100,24 @@ In this approach there is a clear control of the flow,
 there is a service that plays the role of orchestrator and determines the sequence of operations to be performed in other services.
 The HTTP and RPC protocols are the most widely adopted protocols that follow this approach.
 
+\paragraph{}
+
 Event-driven messaging communication protocols are suited for asynchronous settings,
 where the client publishes a message to multiple receivers and can process the responses at a later time.
 In this approach there is no orchestrator, each service knows their role and what to do based on events that occurred.
 The main disadvantage of this strategy is that consistency is not guaranteed when multiple services consume events and one of them fails.
 
+\paragraph{Distributed transaction patterns}
+
 TODO: include reference to distributed transaction patterns, and the channels that are used in each approach https://developers.redhat.com/articles/2021/09/21/distributed-transaction-patterns-microservices-compared#the_dual_write_problem
 
 \paragraph{Evolutionary Design}
-When decomposing a software system into components, we must decide how to divide the pieces.
+When decomposing a software system into components, it's important to decide how the pieces are divided.
 The concept of independent replacement and upgrade-ability are critical properties when designing a component.
-The disadvantage of incorporating components into services is that we must be concerned about changes to one service breaking its consumers.
+The disadvantage of incorporating components into services is that changes to one service will break its consumers.
 The conventional approach is to resolve this issue through the use of versioning.
 In the context of microservices, versioning entails the maintenance of multiple deployments of the same service in distinct versions.
-We can minimize the use of versioning by designing services in such a way that they are as tolerant as possible to supplier changes,
+It is possible to minimize the use of versioning by designing services in such a way that they are as tolerant as possible to supplier changes,
 utilizing techniques such as Domain-Driven Design (DDD) \cite{ddd}.
 DDD is a software design approach that decomposes a complex system into multiple autonomous bounded contexts,
 where all the software structure (e.g\ methods, classes, variables) match the business domain.
@@ -109,22 +125,25 @@ where all the software structure (e.g\ methods, classes, variables) match the bu
 \section{Microservice Lifecycle Management} % (fold)
 \label{sec:microservice_lifecycle_management}
 
-To run microservices in the cloud, we need two essential ingredients a method for packaging and isolating services,
+To run microservices in the cloud, it's needed two essential ingredients: a method for packaging and isolating services,
 and a management system capable of provisioning physical hardware to support them.
 
 \paragraph{}
 
 The isolation of services is accomplished through resource virtualization in one of two ways: containers or virtual machines (VM).
-
 Containers provide the most efficient approach because unlike VMs, containers share the host system’s kernel with other containers.
 VMs virtualize an entire machine down to the hardware layers, while containers only virtualize software layers above the operating system level.
 
-Docker \cite{docker} is the most popular container technology. It is built on top of the following technologies: Kernel namespaces, Cgroups, Copy-on-write File system.
+\paragraph{}
+
+Docker \cite{docker} is the most popular container technology. It is built on top of the following kernel systems:
 \begin{itemize}
     \item Namespaces: Isolate the kernel resources (e.g.\ processes, filesystem, users, network stacks) used by each container.
     \item Cgroups: Isolate the hardware resources used by each container.
     \item Copy-On-Write File system: Allows several containers to share common data.
 \end{itemize}
+
+\paragraph{}
 
 Additionally, Docker provides a mechanism for packaging code and its dependencies, referred to as container images.
 A container image is an executable package of software that contains all the components necessary to run an application: code, libraries, runtime and settings.
@@ -135,15 +154,15 @@ The management of services can be accomplished with the use container orchestrat
 Container orchestration eliminates many of the manual processes involved in the management of distributed systems.
 Some popular options used for the lifecycle management of services are Docker Swarm \cite{docker2016swarm} and Kubernetes \cite{kubernetes}.
 
-Kubernetes \cite{kubernetes} is an open-source container orchestration system that evolved from Google's Borg and Omega projects \cite{burns2016borg}.
-Kubernetes is an ambitious platform. It manages the deployment, management, scaling, and networking of containers of distributed systems across a wide range of environments
-and cloud providers.
+\paragraph{}
 
+Kubernetes \cite{kubernetes} is an open-source container orchestration system that evolved from Google's Borg and Omega projects \cite{burns2016borg}.
+It manages the deployment, management, scaling, and networking of containers of distributed systems across a wide range of environments
+and cloud providers.
 This means ensuring that all containers used to execute various workloads are scheduled to run on physical or virtual machines,
 while adhering to the deployment environment's and cluster configuration's constraints.
 Any containers that are dead, unresponsive, or otherwise unhealthy are automatically replaced.
 Additionally, Kubernetes also provides a control plane to monitor all running containers.
-
 Kubernetes accomplishes this through a well-defined, high-level architecture that encourages extensibility:
 
 \begin{itemize}
@@ -170,8 +189,8 @@ In comparison to Swarm, Kubernetes is more difficult to deploy and manage, howev
 The evolution of a microservice contracts while ensuring their soundness and
 avoiding heavy adaptation processes due to service redeploying is demonstrated to be possible by \citeauthor{seco2020robust} \cite{seco2020robust}.
 The proposed approach to microservice contract evolution \cite{seco2020robust} makes use of a global deployment manager component that is responsible for managing module references,
-as well as dynamically generated proxies that are capable of adapting messages exchanged between modules when contracts mismatch.
-The following example demonstrates the mechanism:
+as well, as dynamically generated proxies that are capable of adapting messages exchanged between modules when contracts mismatch.
+The following example demonstrates the mechanism.
 
 \paragraph{}
 
@@ -186,35 +205,44 @@ Consider the marketing system shown in Figure ~\ref{fig:evolution_of_modules} th
 These three simple modules combined, form a triangle of dependencies, complex enough to demonstrate the proposed mechanism.
 Please note that the Catalog module is a producer, whereas the Marketing module is a producer and a consumer.
 
+\paragraph{}
+
 Each module has a unique name, a collection of type and function definitions, and a set of type and function references.
 If a producer module exposes definitions, they can be used by other consumer modules via an explicit reference.
 Each programming element is accompanied by an immutable and unique key; for instance – the key of type ''Product'' is k1.
 These keys enable elements to be identified even after they have been renamed or reinstated.
 
-Initially, we have a system composed of a collection of services,
-each of which hosts an instance of one of the deployed modules shown in grey in Figure ~\ref{fig:evolution_of_modules}.
+\paragraph{}
+
+Initially, the system composed by a collection of services,
+each service is represented in grey in the first instance of the example depicted in Figure ~\ref{fig:evolution_of_modules}.
 The reference definitions indicate their interactions.
 
 \paragraph{}
 
-In a second phase, we develop version 2 of the Catalog and Marketing modules independently.
-In module Catalog, we rename the element ''Amount'' to ''Price'' and add the attribute ''Desc'', while in module Marketing, we rename ''Promote'' to ''Enhance''.
+In a second phase, it is developed version 2 of the Catalog and Marketing modules independently.
+In the Catalog module, the element ''Amount'' is renamed to ''Price'', and the attribute ''Desc'' is added, while in the Marketing module,
+the attribute ''Promote'' is renamed to ''Enhance''.
 The module BackOffice has not been modified at this point and will become out of sync with the other modules.
 In Figure ~\ref{fig:evolution_of_modules}, the newly added and modified elements are highlighted in red and blue, respectively.
 
 \paragraph{}
 
-In a third phase, Catalog version 3 is created, with the attribute ''Discount'' of the element ''Product'' removed.  (Figure ~\ref{fig:evolution_of_modules}).
+In a third phase, the Catalog module is upgraded to version 3, where the attribute ''Discount'' of the element ''Product'' is removed.  (Figure ~\ref{fig:evolution_of_modules}).
 This version cannot be deployed in conjunction with version 2 of Marketing, as the attribute is used by the function ''Enhance''.
 
-We can deploy both modules together if we modify the definition of ''Enhance'' to remove the use of the attribute ''Discount'', resulting in version 3 of Marketing.
-Additionally, we could deploy version 3 of Marketing first and then version 3 of Catalog, but not vice versa.
-Besides this, in the reference to catalog we are permitted to retain the attribute ''Discount'' in the definition of the type ''Product''.
-As long as the attribute is not used, correctness is guaranteed.
+\paragraph{}
+
+The both modules can be deployed together if the attribute ''Discount'' is removed in the definition of ''Enhance'', resulting in version 3 of Marketing module.
+Additionally, it can be deployed version 3 of Marketing first and then version 3 of Catalog, but not vice versa.
+Furthermore, it is permitted to retain the attribute "Discount" in the specification of the type "Product" in the reference to catalog.
+Correctness is guaranteed as long as the property is not utilized.
 In Figure ~\ref{fig:evolution_of_modules}, the elements that have been removed are highlighted in yellow.
 
+\paragraph{}
+
 As illustrated by the multiple versions of the modules,
-the proposed system is capable of overcoming differences in contract definitions by utilizing a communication protocol
+the system is capable of overcoming differences in contract definitions by utilizing a communication protocol
 that adapts automatically to the following types of changes:
 
 \begin{itemize}
@@ -226,11 +254,11 @@ that adapts automatically to the following types of changes:
 \end{itemize}
 
 Traditional approaches, such as HTTP, are insufficiently robust to handle these types of changes, effectively rendering them breaking changes.
-
 For instance, renaming functions results in the modification of remote URIs, and changing the name of an attribute may result in data loss.
-By contrast, with the presented approach, such changes are permitted without compromising module compatibility.
-
+By contrast, with this approach, such changes are permitted without compromising module compatibility.
 This adaptive approach enables gradual module deployment of the referenced modifications without halting the entire system, avoiding data loss and misinterpretations.
+
+\paragraph{}
 
 Experimental data \cite{seco2020robust} collected over a five-year development period on the evolution of three large software factories each containing over 1000 modules
 (a raw dataset containing 8889 production deployments with a total of 23986 signature changes)
@@ -240,25 +268,24 @@ indicates that this approach would be effective in an average of 57\% of deploym
 \label{sec:dev_ops}
 
 DevOps can be viewed as a collection of practices designed to accelerate the software development cycle and shorten the time between developing new features and deploying them to production.
-
 The term DevOps is derived from the words development and IT operations, and it refers to the combination and automation of the traditional responsibilities of both departments.
 
 \paragraph{}
 
 Traditionally the tasks of development, testing, and deployment were divided among different engineering teams.
 Different teams had different goals, and in the typical scenario, communication between teams was slow and inefficient.
-
 By automating repetitive operations, DevOps minimizes the need for team coordination and speeds up manual processes that would have taken days or at least several hours.
 Building automated pipelines that are executed after the developer changes the codebase is a common DevOps practice.
 
+\paragraph{}
+
 Pipelines are typically in charge of packaging, testing, and deploying code to testing or production environments.
 If any phase of the automated pipeline fails, the developer receives immediate feedback on which task failed, and the pipeline's execution is halted.
-
 An example of a typical build and release pipeline is shown in Figure ~\ref{fig:pipeline_example}.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=3in]{pipelineExample}
-    \caption{Pipeline Example}
+    \includegraphics[height=2.8in]{pipelineExample}
+    \caption{DevOps Pipeline Example}
     \label{fig:pipeline_example}
 \end{figure}
