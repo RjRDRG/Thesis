@@ -15,9 +15,9 @@
 \label{sec:microservices}
 
 Microservices \cite{microservices, microservices2017tenets, microservicesTomorrow} are an architectural style in which software is developed using self-contained components that
-communicate with one another via standardized interfaces and lightweight mechanisms.
+communicate with one another via standardized network interfaces.
 These services segregate fine-grained business functionalities and can be independently tested, deployed, and scaled by automated mechanisms.
-There is virtually no centralized management, and each service may be written in a different programming language and employ a different data storage technology.
+There is virtually no centralized management, each service may be written in a different programming language and employ a different data storage technology.
 
 \paragraph{}
 
@@ -35,11 +35,13 @@ different domains of the application are divided into classes, functions, and na
 
 \paragraph{}
 
-When large monolithic applications must scale while maintaining a high level of availability, they become a source of frustration:
-Scaling the server-side application involves scaling all the application functionalities, rather than the functionalities that require greater resources;
-Any small change made to the server-side application, involves building and re-deploying the entire monolith.
+Large monolithic software becomes a barrier when the underlying application must scale while maintaining a high level of availability.
+Scaling the server-side application involves scaling all the application functionalities, rather than the functionalities that require greater resources.
+Any small change involves building and re-deploying the entire monolith.
 
 \paragraph{}
+
+Several techniques are used in the microservice architecture to meet the requirements of system scalability and high availability.
 
 \begin{figure}[htbp]
     \centering
@@ -47,9 +49,6 @@ Any small change made to the server-side application, involves building and re-d
     \caption{Monoliths and Microservices \cite{microservices}}
     \label{fig:monoliths and microservices}
 \end{figure}
-
-The requirements of system scalability, high availability, and continuous delivery are addressed in different microservice architectural characteristics:
-componentization, data management, communication strategy, transaction patterns and evolutionary design.
 
 \paragraph{Componentization}
 
@@ -71,11 +70,15 @@ making different components scalable across multiple nodes and limiting cascadin
 
 While monolithic applications typically use a single logical database for persistent data, microservices provide greater flexibility, fault tolerance,
 and scalability by allowing each service to manage its own database, which can be a different instance of the same database technology or a completely different database system.
+
+\paragraph{}
+
 Decentralizing data responsibility across services has implications for the implementation of cross-domain operations affecting multiple resources.
 The common approach for dealing with the problem of consistency when updating multiple resources in a database system is to use transactions.
-Building and maintaining applications that employ distributed transactions is notoriously difficult; as a result,
-microservice architectures advocate for transaction-less service coordination while acknowledging
-that consistency will be only eventual and that divergence must be addressed with compensating operations.
+A transaction must preserve Atomicity, Consistency, Isolation, and Durability, commonly known as ACID properties.
+These properties are more difficult to fulfill in a distributed context than in a traditional database setting, hence developing and maintaining applications that use distributed transactions is notoriously complex.
+Microservice architectures advocate for transaction-less service coordination with eventual consistency.
+The divergence between different services is addressed with the use of compensating operations instead of transactions.
 
 \paragraph{Inter-process Communication Strategies}
 
@@ -83,14 +86,15 @@ that consistency will be only eventual and that divergence must be addressed wit
 Enterprise Service Buses (ESB) \cite{esb} were previously commonly used in service-oriented architecture (SOA) systems,
 and it was common to incorporate orchestration and transformation logic into the communication infrastructure,
 making the ''pipe smart''.
-This approach had several flaws, it was difficult to solve problems in production environments, and the tooling was complex and expensive.
+This approach had several flaws, the tooling was complex and expensive, and it was difficult to solve problems in production environments.
 
 \paragraph{}
 
 The reverse approach has been adopted with microservices,
 where services own their domain-centric logic ''smart endpoints'' and transport messages via ''dumb pipes''.
+
+\paragraph{Distributed transaction patterns}
 The majority of communication between microservices is done via request/response-based communication or event-driven messaging.
-Because these two methods have such dissimilar properties, it's important to weigh their strengths, and the scenarios that call for each.
 
 \paragraph{}
 
@@ -107,26 +111,26 @@ where the client publishes a message to multiple receivers and can process the r
 In this approach there is no orchestrator, each service knows their role and what to do based on events that occurred.
 The main disadvantage of this strategy is that consistency is not guaranteed when multiple services consume events and one of them fails.
 
-\paragraph{Distributed transaction patterns}
+\paragraph{Decomposition}
+When designing a software system, it's important to decide how the system is divided into distinct components.
+Independent replacement and upgrade-ability are key features to consider when developing a component.
+The problems caused by poor division of concerns are alleviated in the context of microservices, because a system is typically divided into many small components with a single responsibility,
+whereas in traditional architectures components have wider responsibilities.
 
-TODO: include reference to distributed transaction patterns, and the channels that are used in each approach https://developers.redhat.com/articles/2021/09/21/distributed-transaction-patterns-microservices-compared#the_dual_write_problem
+\paragraph{}
 
-\paragraph{Evolutionary Design}
-When decomposing a software system into components, it's important to decide how the pieces are divided.
-The concept of independent replacement and upgrade-ability are critical properties when designing a component.
-The disadvantage of incorporating components into services is that changes to one service will break its consumers.
-The conventional approach is to resolve this issue through the use of versioning.
-In the context of microservices, versioning entails the maintenance of multiple deployments of the same service in distinct versions.
-It is possible to minimize the use of versioning by designing services in such a way that they are as tolerant as possible to supplier changes,
-utilizing techniques such as Domain-Driven Design (DDD) \cite{ddd}.
+To reduce the risk of structural refactors, techniques such as Domain-Driven Design (DDD) \cite{ddd} are often used.
 DDD is a software design approach that decomposes a complex system into multiple autonomous bounded contexts,
 where all the software structure (e.g\ methods, classes, variables) match the business domain.
+If the business domain is well-defined, the requirements of independent replacement and upgrade-ability can be met by reflecting business correlations in the software structure.
 
-\section{Microservice Lifecycle Management} % (fold)
-\label{sec:microservice_lifecycle_management}
+\section{Software Provisioning} % (fold)
+\label{sec:software_provisioning}
 
-To run microservices in the cloud, it's needed two essential ingredients: a method for packaging and isolating services,
-and a management system capable of provisioning physical hardware to support them.
+Because monolithic systems scale vertically, they can be provisioned easily;
+however, because distributed applications scale horizontally, two fundamental ingredients are required to support their provisioning:
+a method for packaging and isolating services,
+and a management system capable of supplying physical hardware to support them.
 
 \paragraph{}
 
@@ -180,89 +184,7 @@ Kubernetes accomplishes this through a well-defined, high-level architecture tha
 
 Kubernetes is a more sophisticated container management system than Docker Swarm.
 Docker Swarm is only compatible with Docker, whereas Kubernetes is compatible with other container services.
-In comparison to Swarm, Kubernetes is more difficult to deploy and manage, however is said to be more scalable.
-
-
-\section{Contract Evolution in MicroService Architectures} % (fold)
-\label{sec:contract_evolution_in_microservice_architectures}
-
-The evolution of a microservice contracts while ensuring their soundness and
-avoiding heavy adaptation processes due to service redeploying is demonstrated to be possible by \citeauthor{seco2020robust} \cite{seco2020robust}.
-The proposed approach to microservice contract evolution \cite{seco2020robust} makes use of a global deployment manager component that is responsible for managing module references,
-as well, as dynamically generated proxies that are capable of adapting messages exchanged between modules when contracts mismatch.
-The following example demonstrates the mechanism.
-
-\paragraph{}
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=5in]{adapter_example}
-    \caption{Evolution of modules Catalog, Marketing, Backoffice \cite{seco2020robust}}
-    \label{fig:evolution_of_modules}
-\end{figure}
-
-Consider the marketing system shown in Figure ~\ref{fig:evolution_of_modules} that comprises three distinct modules: Catalog, Marketing, and BackOffice.
-These three simple modules combined, form a triangle of dependencies, complex enough to demonstrate the proposed mechanism.
-Please note that the Catalog module is a producer, whereas the Marketing module is a producer and a consumer.
-
-\paragraph{}
-
-Each module has a unique name, a collection of type and function definitions, and a set of type and function references.
-If a producer module exposes definitions, they can be used by other consumer modules via an explicit reference.
-Each programming element is accompanied by an immutable and unique key; for instance – the key of type ''Product'' is k1.
-These keys enable elements to be identified even after they have been renamed or reinstated.
-
-\paragraph{}
-
-Initially, the system composed by a collection of services,
-each service is represented in grey in the first instance of the example depicted in Figure ~\ref{fig:evolution_of_modules}.
-The reference definitions indicate their interactions.
-
-\paragraph{}
-
-In a second phase, it is developed version 2 of the Catalog and Marketing modules independently.
-In the Catalog module, the element ''Amount'' is renamed to ''Price'', and the attribute ''Desc'' is added, while in the Marketing module,
-the attribute ''Promote'' is renamed to ''Enhance''.
-The module BackOffice has not been modified at this point and will become out of sync with the other modules.
-In Figure ~\ref{fig:evolution_of_modules}, the newly added and modified elements are highlighted in red and blue, respectively.
-
-\paragraph{}
-
-In a third phase, the Catalog module is upgraded to version 3, where the attribute ''Discount'' of the element ''Product'' is removed.  (Figure ~\ref{fig:evolution_of_modules}).
-This version cannot be deployed in conjunction with version 2 of Marketing, as the attribute is used by the function ''Enhance''.
-
-\paragraph{}
-
-The both modules can be deployed together if the attribute ''Discount'' is removed in the definition of ''Enhance'', resulting in version 3 of Marketing module.
-Additionally, it can be deployed version 3 of Marketing first and then version 3 of Catalog, but not vice versa.
-Furthermore, it is permitted to retain the attribute "Discount" in the specification of the type "Product" in the reference to catalog.
-Correctness is guaranteed as long as the property is not utilized.
-In Figure ~\ref{fig:evolution_of_modules}, the elements that have been removed are highlighted in yellow.
-
-\paragraph{}
-
-As illustrated by the multiple versions of the modules,
-the system is capable of overcoming differences in contract definitions by utilizing a communication protocol
-that adapts automatically to the following types of changes:
-
-\begin{itemize}
-    \item \textbf{Adding new attributes to a type} As a result of the addition of the "Desc" attribute to Catalog, the data returned by this module will include values for this attribute.
-    Other modules will keep this data (as unknown attributes) to ensure that no data is lost.
-    \item \textbf{Renaming functions} The "Promote" function in Marketing module has been renamed "Enhance," which will affect the endpoints exposed by the service.
-    The proxy is dynamically built at runtime to use the actual endpoint name while issuing calls, eliminating the need to update and redeploy the service Backoffice.
-    \item \textbf{Eliminating unused attributes and functions} Unused elements do not require explicit adaptation.
-\end{itemize}
-
-Traditional approaches, such as HTTP, are insufficiently robust to handle these types of changes, effectively rendering them breaking changes.
-For instance, renaming functions results in the modification of remote URIs, and changing the name of an attribute may result in data loss.
-By contrast, with this approach, such changes are permitted without compromising module compatibility.
-This adaptive approach enables gradual module deployment of the referenced modifications without halting the entire system, avoiding data loss and misinterpretations.
-
-\paragraph{}
-
-Experimental data \cite{seco2020robust} collected over a five-year development period on the evolution of three large software factories each containing over 1000 modules
-(a raw dataset containing 8889 production deployments with a total of 23986 signature changes)
-indicates that this approach would be effective in an average of 57\% of deployments.
+In comparison to Swarm, Kubernetes is more difficult to deploy and manage, however it is more scalable.
 
 \section{DevOps} % (fold)
 \label{sec:dev_ops}
@@ -289,3 +211,14 @@ An example of a typical build and release pipeline is shown in Figure ~\ref{fig:
     \caption{DevOps Pipeline Example}
     \label{fig:pipeline_example}
 \end{figure}
+
+The pipeline is divided into two sections.
+The first section is concluded when new code passes all unit tests.
+To decrease iteration times of software development, the steps of the initial section might be conducted entirely on the developer computer.
+The second section entails in deploying the code into production.
+The code is initially deployed in live testing environments where it is constantly monitored.
+After passing all live testing phases, the code is considered as part of the system and is deployed into the production environment.
+
+
+
+

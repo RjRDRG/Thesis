@@ -11,10 +11,6 @@
 \chapter{Related Work}
 \label{cha:related_work}
 
-As mentioned in Section 1, this work will encompass the development of
-mechanisms for evaluating and managing the soundness of updates in RESTfull \cite{feng2009rest} service contracts.
-We now summarize the most important works of literature relating to the evolution of microservices and their APIs.
-
 \section{Web API Description Languages} % (fold)
 \label{sec:web_api_description_languages}
 
@@ -23,12 +19,9 @@ where developers may choose to stick with an earlier version that met their need
 the provider can discontinue a specific version and capability at any moment, changes are immediate and irreversible.
 This represents a heavy burden for developers of client modules as it causes an endless struggle to keep up
 with changes pushed by the web API providers; this load is exacerbated if the web API is inadequately documented.
-
 \paragraph{}
-
 Web API Description Languages (WADL) are domain-specific languages used to describe web service contracts in a standardized structure;
 also sometimes referred to as interface description languages (IDLs).
-
 These structured descriptions may be used to produce documentation for human programmers, that is easier to read than free-form documentation,
 because all the generated documentation adheres the formatting norms set by the used tool.
 Furthermore, description languages are often accurate enough to allow for the automatic generation of various software artifacts such as mock servers,
@@ -36,12 +29,12 @@ client code generation in different programming languages, load test scripts, an
 
 \paragraph{}
 
-The OpenAPI Specification (OAS) \cite{openAPI} is the most widely adopted Restful API Description Language;
+The OpenAPI Specification (OAS) \cite{openAPI} is the most widely adopted Http Description Language;
 it defines a standard language-agnostic interface that allows both computers and humans to comprehend the capabilities of a service.
-OpenApi allows a detailed description of the syntactic aspects of the data transferred in REST interactions, however it ignores important semantic aspects, such as the ability to relate
-different parts of the same data, to relate the input against the state of the service, and to relate the output against the input.
-
-For instance, OpenAPI does not allow developers to indicate that the type of representation conveyed in the response to a GET operation is dependent on the value of a query parameter.
+OpenApi allows a detailed description of the syntactic aspects of the data transferred, however it ignores semantic aspects, such as the ability to relate
+different parts of the same data, to relate the input against the state of the service, and the output against the input.
+For instance, OpenAPI does not allow developers to indicate that in the creation of a new contact, the nickname must be shorter
+than the full name.
 
 \paragraph{}
 
@@ -62,11 +55,8 @@ whereas $\Psi$, the post-condition, addresses the state resulting from the execu
 
 \paragraph{}
 
-Our solution will require the use on WADL for defining compatibility relations between service contracts,
-as well for the implementation of the adaptation protocol, which changes messages in accordance to an earlier contract.
-
-The OpenAPI specification is the most widely adopted WADL for RESTfull services and already supports refinement types, instead of designing yet another WADL,
-we aim to extend the OpenAPI specification to incorporate support for Pre- and Post-conditions and other needs of our approach.
+The use of on WADL will be useful foundation for defining compatibility relations between service contracts in the evolution description language
+presented further ahead in section \ref{sec:evolution_specification}.
 
 \section{Platform Independent Schema Representations} % (fold)
 \label{sec:platform_independent_schema_representations}
@@ -75,6 +65,8 @@ Schema representations are need when delivering serialized messages across the n
 For serialization, each language usually provides a corresponding library, such as Java serialization.
 In the setting of microservices, serialization libraries supplied by programming languages are typically not used to encode messages between services,
 because each service may be written in a different language. As a result, data consumers will be unable to comprehend data producers.
+
+\paragraph{}
 
 Cross-language serialization libraries, such as JSON, can solve this problem.
 However, formats such as JSON lack a strictly defined structure,
@@ -87,8 +79,10 @@ The benefit of having a schema is that it explicitly defines the data's structur
 There have been a few cross-language frameworks that require the data structure to be properly described via schemas.
 XML, Avro, Thrift, and Protocol Buffers \cite{8,9,10} are among them.
 
-Because the schema of the messages exchanged between services can already be described using the OpenAPI description language,
-solutions that describe the schema of messages such as Avro, ProtoBuf, Thrift, and XML will be redundant in our solution.
+\paragraph{}
+
+Schema representation languages will be useful in the specification of service contracts
+presented further ahead in section \ref{sec:contract_specification}.
 
 \section{Schema Registry} % (fold)
 \label{sec:schema_registry}
@@ -118,47 +112,36 @@ All field values are appended back to back, in the same order as they appear in 
 \end{figure}
 
 The deserializer knows which bytes belong to which field by comparing both the consumer and producer schemas and by matching fields by their names.
-
 Another system that makes use of schema registries, is the Java RMI \cite{12},
 a Java API that supports remote procedure calls (RPC) with distributed garbage-collection.
-
 The Java RMI makes use of a schema registry to enable clients to obtain a references (stubs) to a remote objects.
 The RMI registry is only used for locating the first object that a client needs, each reply from the registry provides
 support for finding other objects.
 
 \paragraph{}
 
-Our approach will need the use of a service registry, which will enhance the capabilities of a schema registry by storing not just schemas but also service-to-service dependencies.
+Registries can be used to store not only service schemas but also service-to-service dependencies, and other meta-information about services, the benefits and drawbacks of their use will be
+assessed in section \ref{sec:tools}.
 
 \section{Service Evolution Approaches} % (fold)
 \label{sec:service_evolution_approaches}
 
-Due to various factors services can not keep their stability
-permanently, evolution occurs throughout their entire life cycle.
-
 Controlling and supporting the evolution of services is a significant technological research endeavor.
-\citeauthor{webServiceEvolution} propose five standards for evaluating existing methods for evolving Web services;
-these standards, and some methods are also applicable in a micro-service setting, as microservices can be viewed as web services:
+\citeauthor{webServiceEvolution} \cite{webServiceEvolution} propose five standards for evaluating existing methods for evolving Web services.
+These standards and some methods are also applicable in a micro-service setting:
 
-\paragraph{Granularity of evolution}
-Granularity refers to the unit on which the evolution is based.
-Coarse-grained evolution strategies support the evolution of general interface properties,
-whereas fine-grained evolution strategies support the evolution individual basic properties, such as the type of parameter in a method.
+\begin{itemize}
+    \item \textbf{Granularity of evolution -} Granularity refers to the unit on which the evolution is based.
+    Coarse-grained evolution strategies support the evolution of general interface properties,
+    whereas fine-grained evolution strategies support the evolution individual basic properties, such as the type of parameter in a method.
+    \item \textbf{Terminal of evolution -} The term refers to whether the end result of a changed service affects the producer, the consumer, or both.
+    \item \textbf{Type of evolution -} Evolutionary methods can be divided into two broad categories: semantic and architectural.
+    Architectural methods typically support changes in the composition of components, whereas semantic methods are primarily based on the semantic extension of contracts.
+    \item \textbf{Scalability -} This standard assesses an evolutionary method's applicability and generality in different contexts.
+    \item \textbf{Maintainability -} This standard assesses the difficulty of maintaining system's that employ the relevant evolutionary method.
+\end{itemize}
 
-\paragraph{Terminal of evolution}
-The term refers to whether the end result of a changed service affects the producer, the consumer, or both.
-
-\paragraph{Type of evolution}
-Evolutionary methods can be divided into two broad categories: semantic and architectural.
-Architectural methods typically evolve changes to the composition of components, whereas semantic methods are primarily based on the semantic extension of contracts.
-
-\paragraph{Scalability}
-This standard assesses an evolutionary method's applicability and generality in different contexts.
-
-\paragraph{Maintainability}
-This standard assesses the difficulty of maintaining system's that employ the relevant evolutionary method.
-
-\paragraph{}
+Below we summarize the approaches used to support the evolution of microservices, along with their strengths and shortcomings in regard to the standards outlined above.
 
 \subsection{Hand-off Period} % (fold)
 \label{sec:hand_off_period}
@@ -171,13 +154,14 @@ because it necessitates high maintainability and partitions available resources 
 \subsection{Deprecated Endpoints} % (fold)
 \label{sec:deprecated_endpoints}
 
-Alternatively its possible to support backwards compatibility without distinct deployments, by including in the new service contract the endpoints of the prior contracts
+Alternatively it's possible to support backwards compatibility without distinct deployments, by including in the new service contract the endpoints of the prior contracts
 that are still in use.
 When a breaking contract change occurs, rather than supporting the change by modifying the impacted endpoint implementation,
 we preserve the old endpoint and implement the new contract version in a completely separate endpoint.
 Contract changes that only affect HTTP parameters can easily be accommodated under this approach; however contract changes that affect
 request body schemas are problematic because it would be necessary to write distinct serialization and de-serialization rules for each version of the schema.
-This approach can add significant amount of effort to the development team because each breaking change requires all the serialization rules to be rebuilt.
+This approach can add significant amount of effort to the development team because each breaking change requires all the serialization rules to be rebuilt,
+in order to support the format of revised schema.
 Schemas with multiple serialization rules also tend to become unreadable.
 Furthermore, this approach doesn't offer any safety guarantees;
 a developer might easily make the error of deleting a serialization rule that is still in use.
@@ -190,12 +174,14 @@ These protocols support the evolution of schemas via resolution rules and declar
 where the old version of the software can deal with the new version of the service’s syntax.
 However, the schema evolution support in these protocols is limited \cite{11}.
 The following are the common limitations of the aforementioned protocols:
+
 \begin{itemize}
     \item To ensure backwards compatibility, newly added fields must be optional.
     \item The only fields that can be removed to maintain forward compatibility are optional fields.
-    \item Its not possible to change a field type or its format freely, field types can only be promoted to more embracing types (e.g int->float).
+    \item It's not possible to change a field type or its format freely, field types can only be promoted to more embracing types (e.g int->float).
     \item Renaming fields is supported through the use of aliases that cannot be re-used by other fields in the same scope.
 \end{itemize}
+
 Backward compatibility is only required in request schemas, while forward compatibility is only required in response schemas.
 In other words the current producer implementation must be able to interpret request messages from outdated consumers, and outdated consumers
 must be able to interpret response messages from the new producer implementation.
@@ -204,9 +190,10 @@ Schemas that are used both in request and response messages most support forward
 \paragraph{}
 
 The need for optional fields in the above cases is due to a lack of information on the message receiver, typically this information is supplied with the use of default values.
-
 All fields that are optional exclusively because of resolution rules should be treated as required when a consumer and producer agree on the schema version, and the default value should not be utilized, since there is no absence of information in this case.
 To simply put it, the system should enforce required fields when the consumer and producer agree on the schema, and only use default values when the consumer and producer disagree.
+
+\paragraph{}
 
 The aforementioned protocols do not differentiate between the two cases; instead, their resolution rules solely operate over the syntax of schemas and are agnostic to the version of the consumer and producer's schema.
 In order to enforce required fields in the former case,
@@ -216,8 +203,8 @@ for messages with more properties, particularly those with nested objects, the v
 
 \paragraph{}
 
-The aforementioned frameworks include built-in support for event-driven and RPC communication methods,
-however, if a HTTP communication approach is adopted, these frameworks will be unable to manage changes in the signature of endpoints
+Most serialization protocols include built-in support for the evolution of contracts based on event-driven and RPC communication methods,
+however, if an HTTP communication approach is adopted, these protocols will be unable to manage changes in the signature of endpoints
 (e.g.\ changing the method of HTTP endpoint's from GET to POST); only changes in record schemas will be managed in this case.
 To support the evolution of endpoint signatures, this approach will need to be supplemented the deprecation of endpoints discussed above.
 To decrease the complexity of contract evolutions, we believe it is beneficial to handle both the evolution of schemas, and the evolution of endpoint signatures in a single integrated approach.
@@ -227,18 +214,20 @@ To decrease the complexity of contract evolutions, we believe it is beneficial t
 
 The chain of adapters is a design strategy for supporting web services in the face of independently developed unsupervised clients while preserving strict backwards compatibility.
 This approach decomposes long update/rollback transactions into smaller, independent transactions.
-
-This technique is discussed in depth in the work \cite{13}. The key concepts of the approach are presented below.
+This technique is discussed in depth by \citeauthor{13} \cite{13}. The key concepts of the approach are presented below.
 
 \paragraph{}
 
-When a new service API is published, the old API is not decommissioned;
-instead, it is made available in a different namespace.
-In a RESTful system, this often entails supporting operations in different versions;
+TODO
+
+TODO
+
+TODO
+
+When a service API is changed, the prior API is not decommissioned; instead, it is made available in a different endpoint.
 Endpoints belonging to the API in v1.0 can be made accessible via the path \texttt{http://example.system/v1},
 whereas endpoints belonging to the API in v2.0 are accessible via the path \texttt{http://example.system/v2}.
-
-The previous API implementations are replaced by adapters that redirect all calls to the next API version implementation and also translate data structures as necessary.
+The previous implementations are replaced by adapters that redirect all calls to the next API version implementation and also translate data structures as necessary.
 
 \paragraph{}
 
@@ -287,11 +276,86 @@ With this approach, changes to definitions in a module do not have an immediate 
 For instance, if two services agree on a definition for a given endpoint,
 their existing implementations will continue to function even if that endpoint definition evolves over time.
 
+\section{Contract Evolution in MicroService Architectures} % (fold)
+\label{sec:contract_evolution_in_microservice_architectures}
+
+The evolution of a microservice contracts while ensuring their soundness and
+avoiding heavy adaptation processes due to service redeploying is demonstrated to be possible by \citeauthor{seco2020robust} \cite{seco2020robust}.
+The proposed approach to microservice contract evolution \cite{seco2020robust} makes use of a global deployment manager component that is responsible for managing module references,
+as well, as dynamically generated proxies that are capable of adapting messages exchanged between modules when contracts mismatch.
+The following example demonstrates the mechanism.
+
+\paragraph{}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=5in]{adapter_example}
+    \caption{Evolution of modules Catalog, Marketing, Backoffice \cite{seco2020robust}}
+    \label{fig:evolution_of_modules}
+\end{figure}
+
+Consider the marketing system shown in Figure ~\ref{fig:evolution_of_modules} that comprises three distinct modules: Catalog, Marketing, and BackOffice.
+These three simple modules combined, form a triangle of dependencies, complex enough to demonstrate the proposed mechanism.
+Please note that the Catalog module is a producer, whereas the Marketing module is a producer and a consumer.
+
+\paragraph{}
+
+Each module has a unique name, a collection of type and function definitions, and a set of type and function references.
+If a producer module exposes definitions, they can be used by other consumer modules via an explicit reference.
+Each programming element is accompanied by an immutable and unique key; for instance – the key of type ''Product'' is k1.
+These keys enable elements to be identified even after they have been renamed or reinstated.
+
+\paragraph{}
+
+Initially, the system composed by a collection of services,
+each service is represented in grey in the first instance of the example depicted in Figure ~\ref{fig:evolution_of_modules}.
+The reference definitions indicate their interactions.
+
+\paragraph{}
+
+In a second phase, it is developed version 2 of the Catalog and Marketing modules independently.
+In the Catalog module, the element ''Amount'' is renamed to ''Price'', and the attribute ''Desc'' is added, while in the Marketing module,
+the attribute ''Promote'' is renamed to ''Enhance''.
+The module BackOffice has not been modified at this point and will become out of sync with the other modules.
+In Figure ~\ref{fig:evolution_of_modules}, the newly added and modified elements are highlighted in red and blue, respectively.
+
+\paragraph{}
+
+In a third phase, the Catalog module is upgraded to version 3, where the attribute ''Discount'' of the element ''Product'' is removed.  (Figure ~\ref{fig:evolution_of_modules}).
+This version cannot be deployed in conjunction with version 2 of Marketing, as the attribute is used by the function ''Enhance''.
+
+\paragraph{}
+
+The both modules can be deployed together if the attribute ''Discount'' is removed in the definition of ''Enhance'', resulting in version 3 of Marketing module.
+Additionally, it can be deployed version 3 of Marketing first and then version 3 of Catalog, but not vice versa.
+Furthermore, it is permitted to retain the attribute "Discount" in the specification of the type "Product" in the reference to catalog.
+Correctness is guaranteed as long as the property is not utilized.
+In Figure ~\ref{fig:evolution_of_modules}, the elements that have been removed are highlighted in yellow.
+
+\paragraph{}
+
+As illustrated by the multiple versions of the modules,
+the system is capable of overcoming differences in contract definitions by utilizing a communication protocol
+that adapts automatically to the following types of changes:
+
+\begin{itemize}
+    \item \textbf{Adding new attributes to a type} As a result of the addition of the "Desc" attribute to Catalog, the data returned by this module will include values for this attribute.
+    Other modules will keep this data (as unknown attributes) to ensure that no data is lost.
+    \item \textbf{Renaming functions} The "Promote" function in Marketing module has been renamed "Enhance," which will affect the endpoints exposed by the service.
+    The proxy is dynamically built at runtime to use the actual endpoint name while issuing calls, eliminating the need to update and redeploy the service Backoffice.
+    \item \textbf{Eliminating unused attributes and functions} Unused elements do not require explicit adaptation.
+\end{itemize}
+
+Traditional approaches, are insufficiently robust to handle these types of changes, effectively rendering them breaking changes.
+For instance, renaming functions results in the modification of remote URIs, and changing the name of an attribute may result in data loss.
+By contrast, with this approach, such changes are permitted without compromising module compatibility.
+This adaptive approach enables gradual module deployment of the referenced modifications without halting the entire system, avoiding data loss and misinterpretations.
+
 \section{Service Integration Adapters} % (fold)
 \label{sec:service_integration_adapters}
 
-There has been substantial investigation on the adaptability of services in the context of service-oriented architectures.
-Although SOA \cite{7} and Microservices \cite{microservices} are similar in that they both use a separation approach based on services,
+There has been substantial investigation on the adaptability of services in the context of service-oriented architectures \cite{adaptersWebServices} .
+Although SOA and Microservices are similar in that they both use a separation approach based on services,
 these two designs differ in several important ways, most notably in that microservices are loosely coupled whereas SOA services are tightly tied due to common data storage between services.
 As a result, adaptability in SOA is focused on service integration and replace-ability rather than evolution.
 
@@ -299,7 +363,6 @@ As a result, adaptability in SOA is focused on service integration and replace-a
 
 In the setting of SOA, adapters are used to wrap the heterogeneous services that communicate with distinct protocols and data formats,
 in order to make them homogeneous and integrated them more easily.
-
 These adapters presume that data adaptation has already been established by developers at an upper layer,
 their primary concern is integrating services with distinct communication protocols and mismatches between operations that have the
 same functionality but different signatures (e.g\ parameters name, order, type).
