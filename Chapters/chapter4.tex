@@ -147,6 +147,42 @@ seeing the impact of a service failure across the system, and the resulting casc
 This approach delivers richer data and reduces the burden in the development of other API management tools,
 however, this approach falls outside the scope of this thesis and has not been explored.
 
+\subsection{Supported Contract Changes} % (fold)
+\label{sec:supported_contract_changes}
+
+An HTTP contract is made up of procedures, each of which contains one request message and up to N response messages.
+Response messages consist of a status code and parameters.
+Different response messages cannot share the same status code.
+The parameters of a response message can be placed in one of three locations: headers, cookies, and body.
+Request messages are composed by an endpoint and parameters.
+The endpoint is comprised by an HTTP method, a domain, and a sequence of path segments.
+The parameters of a request message can be placed in two additional locations: path and query.
+Parameters placed on headers, cookies, path or query locations cannot have object or collection types.
+
+\paragraph{}
+
+All the possible contract changes are listed below:
+\begin{itemize}
+    \item Adding a field
+    \item Deleting a field
+    \item Renaming a field
+    \item Migrating a field into a different location (eg. converting a path parameter into a field in the request's body schema )
+    \item Changing the type of field (eg. turning a integer field into a string )
+    \item Changing the format of a field (eg. modifying the format of a date in a string )
+    \item Splitting a field into N different fields (eg. dividing a name field into first and last name )
+    \item Changing the path of an endpoint
+    \item Changing the Http method of an endpoint
+    \item Changing the status code of a response
+    \item Splitting a procedure into N procedures
+    \item Merging N procedures into a single procedure
+\end{itemize}
+
+    "Message Split Mismatch"
+    In order to keep the adapter implementation as lightweight as possible, it is preferable to maintain the old endpoint operational but marked as deprecated, and provide the new endpoints in conjunction with the old endpoint.
+
+    "Message Merge Mismatch"
+    It is preferable to keep the old endpoints operational but marked as deprecated, and provided the new endpoint in conjunction with the old endpoints.
+
 \subsection{Evolution Specification} % (fold)
 \label{sec:evolution_specification}
 
@@ -270,7 +306,7 @@ which will use roughly the same computational resources and add the same latency
 The management of adapters should be automated similarly to the management of services.
 In this section, we discuss how to conciliate the operations related to the management of adapters with the more common operations of service deployment and upgrade.
 
-\paragraph{Approach}
+\paragraph{Approach:}
 During normal operation the adapters don't require any type of management other than monitoring,
 adapters components only need to be provisioned during the upgrade of service contracts.
 A contract upgrade is supported by the re-deployment of the impacted microservice, which is often managed via a continuous deployment pipeline.
@@ -281,12 +317,3 @@ The generation of the adapter components could be preformed outside the deployme
 this would increase the solution flexibility by allowing developers to manually extend adapters to cover unforeseen corner cases,
 however, it is preferable to generate the adapters in the pipeline so that adapter generation program has clearer view
 over the participating services in the system.
-
-\subsection{Supported Changes} % (fold)
-\label{sec:supported_changes}
-
-"Message Split Mismatch"
-In order to keep the adapter implementation as lightweight as possible, it is preferable to maintain the old endpoint operational but marked as deprecated, and provide the new endpoints in conjunction with the old endpoint.
-
-"Message Merge Mismatch"
-It is preferable to keep the old endpoints operational but marked as deprecated, and provided the new endpoint in conjunction with the old endpoints.
