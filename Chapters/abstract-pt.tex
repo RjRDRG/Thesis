@@ -8,22 +8,27 @@
 
 \typeout{NT FILE abstrac-pt.tex}%
 
-Em contraste com sistemas tradicionais, as arquiteturas de microsserviços permitem grande
-escalabilidade, disponibilidade e entrega separando os elementos de um grande projeto em entidades independentes ligadas através de uma rede (serviços), porém não oferecem
-mecanismos de segurança para evolução e descontinuação de funcionalidades fornecidas pelos serviços.
+Em contraste com sistemas tradicionais monoliticos, as arquiteturas de microsserviços
+permitem grande escalabilidade, disponibilidade e capacidade de entrega, separando os
+elementos de um grande projeto em entidades independentes ligadas através de uma rede
+serviços. Como os serviços estão ligados uns aos outros através das suas interfaces, só
+podem evoluir separadamente se os seus contratos se mantiverem consistentes. No
+entanto, existe uma escassez de mecanismos para evoluir e descontinuar as
+funcionalidades dos serviços em segurança.
 
-Alterar a definição de um elemento em um programa convencional pode ser feito rapidamente com o auxílio de ferramentas automatizadas.
-Os sistemas distribuídos não possuem ferramentas comparáveis às utilizadas em sistemas centralizados.
-Na ausência de ferramentas que amenizem este problema,
-os desenvolvedores tem que rastrear e resolver manualmente os problemas causados por atualizações não controladas.
+Nos sistemas tradicionais monoliticos, a alteração da definição de um elemento pode ser
+realizada rapidamente com a ajuda de ferramentas automatizadas (tais como kits de
+ferramentas de refactoring IDE). Em sistemas distribuídos, existe falta de ferramentas
+comparáveis às utilizadas em sistemas centralizados, os programadores ficam normalmente
+sobrecarregados com a resolução manual de problemas causados por atualizações e pela
+validação do correcto funcionamento do sistema através de testes empíricos.
 
-Enquanto que as abordagens tradicionais garantem que os microsserviços obcedem a sua especificação, atráves da validação do seu comportamento por meio de testes empíricos,
-a nossa proposta procura complementar a abordagem convencional fornecendo mecanismos que suportam a validação das operações de deployment e a evolução das interfaces de microsserviços.
-
-Apresentamos um sistema de administração de microsserviços que verifica a segurança de modificações nas interfaces de serviços
-e permite a evolução de interfaces compatíveis por meio de componentes proxy gerados em tempo de execução
-que adaptam dinamicamente os dados trocados entre serviços ao formato esperado pelo código de serviço estático,
-aliviando assim o developer da necessidade de adaptar manualmente serviços novos ou existentes.
+O trabalho desenvolvido nesta tese procura complementar a abordagem convencional,
+fornecendo mecanismos que suportam a validação das operações de deployment. É
+apresentado um sistema de gestão de microsserviços que verifica a segurança das
+modificações das interfaces de serviço e a evolução dos contratos. A abordagem utiliza proxies,
+que convertem dinamicamente os dados enviados entre serviços ao formato esperado pelo
+código de serviço estático, minimizando a intervenção manual do programador.
 
 \begin{keywords}
     microsserviços, evolução de software, compatibilidade de serviços

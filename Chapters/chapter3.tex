@@ -33,7 +33,7 @@ The OpenAPI Specification (OAS) \cite{openAPI} is the most widely adopted Http D
 it defines a standard language-agnostic interface that allows both computers and humans to comprehend the capabilities of a service.
 OpenApi allows a detailed description of the syntactic aspects of the data transferred, however it ignores semantic aspects, such as the ability to relate
 different parts of the same data, to relate the input against the state of the service, and the output against the input.
-For instance, OpenAPI does not allow developers to indicate that in the creation of a new contact, the nickname must be shorter
+For instance, OpenAPI does not allow developers to indicate that in the creation of a new user, the nickname must be shorter
 than the full name.
 
 \paragraph{}
@@ -55,33 +55,45 @@ whereas $\Psi$, the post-condition, addresses the state resulting from the execu
 
 \paragraph{}
 
-The use of on WADL will be useful foundation for defining compatibility relations between service contracts in the evolution description language
+Web-api description languages will be useful foundation for defining compatibility relations between service contracts in the evolution description language
 presented further ahead in section \ref{sec:evolution_specification}.
 
-\section{Platform Independent Schema Representations} % (fold)
-\label{sec:platform_independent_schema_representations}
+\section{Schema Representation Languages} % (fold)
+\label{sec:schema_representation_languages}
 
-Schema representations are need when delivering serialized messages across the network or storing data with durability.
-For serialization, each language usually provides a corresponding library, such as Java serialization.
-In the setting of microservices, serialization libraries supplied by programming languages are typically not used to encode messages between services,
-because each service may be written in a different language. As a result, data consumers will be unable to comprehend data producers.
+Schema representation languages are used to specify the structure and semantics of data and are utilized in scenarios where data must be sent across a network or stored with durability.
+Each programming language typically provides a serialization library that serializes data in a native binary format.
+In the setting of microservices, serialization libraries supplied by programming languages are often not used as schema representation languages,
+because each service may be written in a different programming language.
+Data consumers will be unable to comprehend producers if they use mismatching data representations.
 
 \paragraph{}
 
 Cross-language serialization libraries, such as JSON, can solve this problem.
-However, formats such as JSON lack a strictly defined structure,
-making data consumption more difficult due to poor type-safety guarantees, and the ability for fields to be unilaterally added or withdrawn at any moment without the consumers' knowledge.
-What's missing is a schema for data exchange between producers and consumers, akin to an API contract.
+However, cross-language formats typically don't have the same level of expressiveness as the programming languages that employ them,
+making data consumption more difficult due to poor type-safety guarantees.
+For example, whereas Java offers distinct data types that differentiate integers from floating point values, JSON regards them as the same data type.
+In the above case, if no further documentation is supplied, consumers will be constrained to adopt the more embracing data type "float" in order to avoid runtime errors.
 
 \paragraph{}
 
-The benefit of having a schema is that it explicitly defines the data's structure, type, and meaning.
-There have been a few cross-language frameworks that require the data structure to be properly described via schemas.
-XML, Avro, Thrift, and Protocol Buffers \cite{8,9,10} are among them.
+JSON doesn't require schemas to be explicitly written, they are typically inferred from the structure of objects in a programming language that represent the received and sent messages.
+Without an explicit schema definition and versioning strategy, fields can be unilaterally added or withdrawn at any moment without the consumers' knowledge.
 
 \paragraph{}
 
-Schema representation languages will be useful in the specification of service contracts
+There have been cross-language serialization protocols that require the data schemas to be explicitly defined.
+Avro, Thrift, and Protocol Buffers \cite{8,9,10} are among them.
+The benefit of having an explicit and versioned schema is that it makes the system more robust to schema evolutions, and
+enables messages to be sent with minimal size.
+The encoding of a message only requires the inclusion of the message data, and the schema version.
+A service can be made aware of a message complete schema prior to receiving it via a schema registry.
+The inclusion of information about each field's data type and name is redundant,
+and it is only useful if the message is meant to be human-readable in an environment where the message schema is inaccessible.
+
+\paragraph{}
+
+Schema representation languages are a part of the specification of service contracts
 presented further ahead in section \ref{sec:contract_specification}.
 
 \section{Schema Registry} % (fold)
@@ -89,20 +101,15 @@ presented further ahead in section \ref{sec:contract_specification}.
 
 A schema registry, as the name implies, is a repository for schemas.
 It stores a versioned history of schemas and provides an interface for retrieving, registering, as well as checking the compliance of schemas.
-It is essentially a CRUD (Create, Read, Update, Delete) application with a RESTful API and persistent storage for schema definitions, where each schema is given a unique ID.
+It is essentially a CRUD (Create, Read, Update, Delete) application with persistent storage for schema definitions, where each schema is given a unique ID.
 
 \paragraph{}
 
-Schema registries are commonly used in situations where data consumers need to know the structure of the data written by producers at runtime.
-A producer could send its schema to consumers along with the response to a request;
-however, this is usually a bad idea because it would result in duplicating functionality across all services, making the system more difficult to maintain.
-
-\paragraph{}
-
-One framework that makes use of this system is Avro \cite{8}, a data serialization framework developed within Apache's Hadoop project.
-Avro requires a schema registry because the serialized byte sequence of each record does not include field metadata such as the field name or a tag, but only the field value.
+One framework that employs schema registries is Avro \cite{8}, a data serialization framework developed within Apache's Hadoop project.
+Avro requires a schema registry because the encoding of data records does not include data about the record structure such as field names or data types.
+Only the data values of a record are appended back to back in the serialized byte sequence, as seen in figure \ref{fig:avro}.
+The deserializer knows which bytes belong to which field by comparing both the consumer and producer schemas.
 This allows for a more compact serialization method, but it requires data consumers to understand the structure of the data written by producers.
-All field values are appended back to back, in the same order as they appear in the schema as seen in figure \ref{fig:avro}.
 
 \begin{figure}[htbp]
     \centering
@@ -111,11 +118,12 @@ All field values are appended back to back, in the same order as they appear in 
     \label{fig:avro}
 \end{figure}
 
-The deserializer knows which bytes belong to which field by comparing both the consumer and producer schemas and by matching fields by their names.
+\paragraph{}
+
 Another system that makes use of schema registries, is the Java RMI \cite{12},
 a Java API that supports remote procedure calls (RPC) with distributed garbage-collection.
 The Java RMI makes use of a schema registry to enable clients to obtain a references (stubs) to a remote objects.
-The RMI registry is only used for locating the first object that a client needs, each reply from the registry provides
+In the RMI the registry is only used for locating the first object that a client needs, each reply from the registry provides
 support for finding other objects.
 
 \paragraph{}
@@ -141,27 +149,31 @@ These standards and some methods are also applicable in a micro-service setting:
     \item \textbf{Maintainability -} This standard assesses the difficulty of maintaining system's that employ the relevant evolutionary method.
 \end{itemize}
 
-Below we summarize the approaches used to support the evolution of microservices, along with their strengths and shortcomings in regard to the standards outlined above.
+Below we offer a summary of the common approaches used to support the evolution of microservices,
+along with their strengths and shortcomings in regard to the standards outlined above.
 
 \subsection{Hand-off Period} % (fold)
 \label{sec:hand_off_period}
 
-The conventional approach for evolving microservices is to keep the various deployments of the different versions of a service implementation available with a hand-off period,
-and to explicitly redirect requests to the supported version.
+The conventional approach for evolving microservices is to keep deployments of service versions that are still being consumed available with a hand-off period,
+and to route requests to the service deployment that has the appropriate version.
 This approach has been proven to be pragmatic, but exceedingly expensive,
 because it necessitates high maintainability and partitions available resources among continually shifting subsets of consumers.
 
 \subsection{Deprecated Endpoints} % (fold)
 \label{sec:deprecated_endpoints}
 
-Alternatively it's possible to support backwards compatibility without distinct deployments, by including in the new service contract the endpoints of the prior contracts
-that are still in use.
-When a breaking contract change occurs, rather than supporting the change by modifying the impacted endpoint implementation,
-we preserve the old endpoint and implement the new contract version in a completely separate endpoint.
-Contract changes that only affect HTTP parameters can easily be accommodated under this approach; however contract changes that affect
+Alternatively it's possible to support backwards compatibility without distinct deployments,
+by including in the new service contract the endpoints of the prior service versions that are still in use.
+When a breaking change occurs in a contract evolution, we preserve the old endpoint and implement the new endpoint separately.
+The old endpoint is not modified and is still accessible via a similar but distinct path.
+
+\paragraph{}
+
+Contract changes that only affect HTTP parameters can easily be accommodated under this approach, however, contract changes that affect
 request body schemas are problematic because it would be necessary to write distinct serialization and de-serialization rules for each version of the schema.
 This approach can add significant amount of effort to the development team because each breaking change requires all the serialization rules to be rebuilt,
-in order to support the format of revised schema.
+in order to support the format of the new revised schemas.
 Schemas with multiple serialization rules also tend to become unreadable.
 Furthermore, this approach doesn't offer any safety guarantees;
 a developer might easily make the error of deleting a serialization rule that is still in use.
@@ -173,7 +185,7 @@ The previous approach can be complemented with the use of sophisticated serializ
 These protocols support the evolution of schemas via resolution rules and declarative semantics,
 where the old version of the software can deal with the new version of the service’s syntax.
 However, the schema evolution support in these protocols is limited \cite{11}.
-The following are the common limitations of the aforementioned protocols:
+The common limitations of the aforementioned protocols are presented bellow:
 
 \begin{itemize}
     \item To ensure backwards compatibility, newly added fields must be optional.
@@ -182,16 +194,18 @@ The following are the common limitations of the aforementioned protocols:
     \item Renaming fields is supported through the use of aliases that cannot be re-used by other fields in the same scope.
 \end{itemize}
 
-Backward compatibility is only required in request schemas, while forward compatibility is only required in response schemas.
+In the context of microservices, backward compatibility is only required in request schemas, while forward compatibility is only required in response schemas.
 In other words the current producer implementation must be able to interpret request messages from outdated consumers, and outdated consumers
-must be able to interpret response messages from the new producer implementation.
+must be able to interpret response messages from the current producer implementation.
 Schemas that are used both in request and response messages most support forward and backward compatibility.
 
 \paragraph{}
 
-The need for optional fields in the above cases is due to a lack of information on the message receiver, typically this information is supplied with the use of default values.
-All fields that are optional exclusively because of resolution rules should be treated as required when a consumer and producer agree on the schema version, and the default value should not be utilized, since there is no absence of information in this case.
-To simply put it, the system should enforce required fields when the consumer and producer agree on the schema, and only use default values when the consumer and producer disagree.
+Optional fields are imposed in the above cases due to missing information in messages.
+If a field is required, its value can be supplied through static default values.
+All fields that are optional exclusively because of limitations in resolution rules should be treated as required when a consumer and producer agree on the same schema version.
+Since there is no absence of information, the default value should not be used in this case.
+To simply put it, the system should enforce required fields when the consumer and producer agree on the same schema, and only use static default values when the consumer and producer disagree.
 
 \paragraph{}
 
@@ -204,77 +218,77 @@ for messages with more properties, particularly those with nested objects, the v
 \paragraph{}
 
 Most serialization protocols include built-in support for the evolution of contracts based on event-driven and RPC communication methods,
-however, if an HTTP communication approach is adopted, these protocols will be unable to manage changes in the signature of endpoints
+however, if the HTTP communication protocol is adopted, the aforementioned serialization protocols will be unable to manage changes in the signature of endpoints
 (e.g.\ changing the method of HTTP endpoint's from GET to POST); only changes in record schemas will be managed in this case.
 To support the evolution of endpoint signatures, this approach will need to be supplemented the deprecation of endpoints discussed above.
-To decrease the complexity of contract evolutions, we believe it is beneficial to handle both the evolution of schemas, and the evolution of endpoint signatures in a single integrated approach.
+To decrease the complexity of contract evolutions, we believe it is beneficial to handle both the evolution of schemas, and the evolution of Web API's in a single integrated approach.
 
 \subsection{Chain of adapters} % (fold)
 \label{sec:chain_of_adapters}
 
-The chain of adapters is a design strategy for supporting web services in the face of independently developed unsupervised clients while preserving strict backwards compatibility.
+The chain of adapters is a design strategy for supporting web services in the face of independently developed and unsupervised external consumers while preserving strict backwards compatibility.
 This approach decomposes long update/rollback transactions into smaller, independent transactions.
-This technique is discussed in depth by \citeauthor{13} \cite{13}. The key concepts of the approach are presented below.
+This technique is discussed in depth by \citeauthor{13} \cite{13}.
+The key concepts of the approach are presented bellow.
 
 \paragraph{}
 
-TODO
-
-TODO
-
-TODO
-
-When a service API is changed, the prior API is not decommissioned; instead, it is made available in a different endpoint.
-Endpoints belonging to the API in v1.0 can be made accessible via the path \texttt{http://example.system/v1},
-whereas endpoints belonging to the API in v2.0 are accessible via the path \texttt{http://example.system/v2}.
-The previous implementations are replaced by adapters that redirect all calls to the next API version implementation and also translate data structures as necessary.
-
-\paragraph{}
-
-Updating a service's API in this manner requires the programmer to do two additional steps:
-\begin{itemize}
-    \item Duplicate all modified endpoints in service contract into a different namespace.
-    \item Implement an adapter that translates the endpoints in version vi->vi+1.
-\end{itemize}
-
-The same web service that supports the revised service endpoints also supports the older endpoints that require adapters.
-It is not necessary to deploy the web service in several versions.
-
-When a consumer is using version v1, and the producer is using version v4, the endpoints that provide the service
-in version v1 use the adapters v1 \textrightarrow v2, v2 \textrightarrow v3, and v3 \textrightarrow v4 to translate the operation before forwarding it to the endpoint in the current version.
 The service's backwards compatibility is ensured by the composition of adapters in a chain, as seen in figure \ref{fig:chain}.
+When a service API is changed, the prior implementation is decommissioned, however the affected endpoints of prior API are made available in a distinct path's.
+The previous implementations are replaced by adapters that translate the requests data and format as necessary, and that redirect requests to the current implementation.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=1.5in]{chain}
+    \includegraphics[height=2.0in]{chain}
     \caption{Chain of Adapters structure
     after n versions have been published }
     \label{fig:chain}
 \end{figure}
 
+\paragraph{}
+
+Updating a service's API in this manner requires the developer to do two additional tasks:
+\begin{itemize}
+    \item Duplicate all modified endpoints in service contract into a different path.
+    \item Manually implement an adapter that translates the endpoints in version vi->vi+1.
+\end{itemize}
+The adapters code is included in the web service implementation that supports the revised service endpoints.
+The adapters are not deployed separately, only the most up to date versions of service implementation is deployed and made available.
+
+\paragraph{}
+
+When an outdated consumer in version vi communicates with a producer in version vi+2, the endpoints that provide the service
+in version vi use the adapters vi \textrightarrow vi+1, vi+1 \textrightarrow vi+2 to translate the operation before forwarding it to the endpoint in the current version.
+
+\paragraph{}
+
+This approach offers a high degree of granularity because all types of contract evolutions can be supported under it.
+The adapter's implementation are tailored to solve specific contract evolutions, allowing the developer to select the most appropriate evolution strategy and method.
+However, it is difficult to maintain a system using this approach due to burden imposed by the additional tasks described above.
+
 \subsection{Lazy Proxy Adapter} % (fold)
 \label{sec:proxy_adapter}
 
 In this strategy the knowledge of a microservice’s
-interfaces is used to create a lightweight proxy capable of dynamically adapting the messages exchanged between services to match them with the static service code.
+interfaces is used to automatically create a lightweight proxy capable of dynamically adapting the messages exchanged between services to match them with the static service code.
 The adapter proxy intercepts messages from consumers and adapts the message to the new specification before they reach the producer.
-Consumer services are initially deployed without the adapter proxy. Proxies are installed and updated on demand using a lazy instantiation method, that builds and deploys the adapter proxy when the first communication between corresponding services occurs.
+Consumer services are initially deployed without the adapter proxy.
+Proxies are installed and updated on demand using a lazy instantiation method, that builds and deploys the adapter proxy when the first communication between corresponding services occurs.
 \citeauthor{seco2020robust} and \citeauthor{santosregent} investigate this approach \cite{seco2020robust, santosregent}.
 
 \paragraph{}
 
 The proxy creation mechanism makes use of the available meta-information
 to automatically update the proxy components as needed.
-
 In essence, every communication contains information about the agreed-upon version, the handshake protocol uses this information to determine if a proxy update is required or not.
 The lazy instantiation method improves the maintainability of the system by
 simplifying deployment operations.
 
 \paragraph{}
 
-With this approach, changes to definitions in a module do not have an immediate effect on the whole system, because they do not require the redeployment of consumers.
-For instance, if two services agree on a definition for a given endpoint,
-their existing implementations will continue to function even if that endpoint definition evolves over time.
+This approach improves the maintainability of system by sacrificing part of the granularity on the supported evolutions in the automatic generation of proxy adapter components.
+However, with this approach external consumers cannot be served, since changes to a service contract affect its consumers.
+The proxy adapter components cannot be easily installed in unsupervised consumers.
 
 \section{Contract Evolution in MicroService Architectures} % (fold)
 \label{sec:contract_evolution_in_microservice_architectures}
@@ -326,7 +340,7 @@ This version cannot be deployed in conjunction with version 2 of Marketing, as t
 
 \paragraph{}
 
-The both modules can be deployed together if the attribute ''Discount'' is removed in the definition of ''Enhance'', resulting in version 3 of Marketing module.
+Both modules can be deployed together if the attribute ''Discount'' is removed in the definition of ''Enhance'', resulting in version 3 of Marketing module.
 Additionally, it can be deployed version 3 of Marketing first and then version 3 of Catalog, but not vice versa.
 Furthermore, it is permitted to retain the attribute "Discount" in the specification of the type "Product" in the reference to catalog.
 Correctness is guaranteed as long as the property is not utilized.
@@ -334,9 +348,8 @@ In Figure ~\ref{fig:evolution_of_modules}, the elements that have been removed a
 
 \paragraph{}
 
-As illustrated by the multiple versions of the modules,
-the system is capable of overcoming differences in contract definitions by utilizing a communication protocol
-that adapts automatically to the following types of changes:
+As illustrated,
+the system is capable of overcoming differences in contract definitions with the following evolutions:
 
 \begin{itemize}
     \item \textbf{Adding new attributes to a type} As a result of the addition of the "Desc" attribute to Catalog, the data returned by this module will include values for this attribute.
@@ -372,30 +385,30 @@ same functionality but different signatures (e.g\ parameters name, order, type).
 \citeauthor{adaptersWebServices} \cite{adaptersWebServices} present a taxonomy of all conceivable mismatches as well as remedies to each type in the context of SOA.
 Some of the defined mismatches remain important in the context of microservice evolution:
 
-\paragraph{Message Split Mismatch}
-This type of differences occurs when the protocol P requires a single message to achieve certain functionality,
-while in protocol PR the same behavior is achieved by receiving several messages.
+\begin{itemize}
+    \item \textbf{Message Split Mismatch:} This type occurs when the protocol P requires a single message to achieve certain functionality,
+    while in protocol PR the same behavior is achieved by receiving several messages.
+    \item \textbf{Message Merge Mismatch:} This type occurs when protocol P needs to receive several messages for achieving certain
+    functionality while protocol PR requires one message to achieve the same functionality.
+    \item \textbf{Differences at the Operation Level:} This type occurs when the operation O of service S imposes constraints on input parameters,
+    which are less restrictive than those of operation O input parameters in service SR (e.g., differences in value ranges).
+\end{itemize}
 
-\paragraph{Message Merge Mismatch}
-This type of differences occurs when protocol P needs to receive several messages for achieving certain
-functionality while protocol PR requires one message to achieve the same functionality.
-
-\paragraph{Differences at the Operation Level}
-This type of mismatch occurs when the operation O of service S imposes constraints on input parameters,
-which are less restrictive than those of operation O input parameters in service SR (e.g., differences in value ranges).
+The ''Message Split Mismatch'' can be handled through an adapter, however doing so
+would require the adapter to use distributed transactions in order to handle independent failures in each contacted service.
 
 \paragraph{}
 
-The "Message Split Mismatch" can be handled through an adapter, however doing so
-would require the adapter to use \textbf{distributed transactions} in order to handle independent message failures.
+The ''Message Merge Mismatch'' can also be solved with an adapter, but the adapter must be stateful because it must store request messages before they can be merged and sent through the new endpoint.
 
-The "Message Merge Mismatch" can also be solved via an adapter, but this
-would require the adapter to become \textbf{stateful}, since it would need store all messages before they could merged and sent through the new endpoint.
+\paragraph{}
 
-The two first types of mismatches can be handled in the context of microservice evolution without the use of adapters.
-Essentially, the old endpoints are kept operational but marked as deprecated until there are no more consumers using them, and the new endpoints are provided in parallel.
+The first two types of mismatches can be handled in the context of microservice evolution without the aforementioned complications,
+by essentially keeping the old endpoints operational but marked as deprecated until  there are no more consumers using them, and by providing the new endpoints in parallel.
 
-The latter form of mismatch "Differences at the Operation Level" has an impact on microservice evolution only if service contracts allow refined types.
+\paragraph{}
+
+The latter form of mismatch ''Differences at the Operation Level'' has an impact on microservice evolution if service contracts allow refined types.
 In other words, when constraints in input parameter are validated in a layer above the application layer.
 If validation is conducted in a lower layer, the mismatch can be easily resolved by modifying the application's implementation while keeping the service contract untouched.
 
@@ -405,9 +418,10 @@ If validation is conducted in a lower layer, the mismatch can be easily resolved
 Deployment strategies are techniques that aim to provide means to upgrade a service,
 while discontinuing the previous implementation without incurring downtime.
 
+\paragraph{}
+
 These strategies will be beneficial in the context of our solution since all service updates will evolve the immediate termination of the prior implementation,
 as it is no longer required to keep several versions available to offer backwards compatibility in service contracts.
-The service registry will aid in the application of these strategies, since it is responsible for managing service deployments and un-deployments.
 
 \paragraph{}
 
@@ -428,46 +442,41 @@ This technique can be performed in either of the above approaches.
 
 \paragraph{}
 
-A rolling deployment is an alternative strategy that gradually replaces instances of an service previous version with instances of the new version.
+A rolling deployment is an alternative strategy that gradually replaces instances of a service previous version with instances of the new version.
 Before scaling down the old components, a rolling deployment normally waits for additional pods to become available through a readiness check.
 If a significant problem arises, the rolling deployment is halted.
-
-\paragraph{}
-
-Our solution will use the rolling deployment strategy because it provides the best availability guarantees
-and is natively supported by Kubernetes, the microservice orchestration tool that has been adopted.
+This strategy ensures the highest availability while using the fewest resources.
+In comparison to other strategies, the additional resources allocated during the deployment process are minimal.
 
 \section{API Management Tools} % (fold)
 \label{sec:api_management_tools}
 
 API management is the process of overseeing API functions like API creation, description, testing, analysis, publication, securing, and monitoring.
-All of these API management requirements can only be met with the assistance of tools, this is where API management tools enter the picture.
+All of these API management requirements can only be met with the assistance of tools.
 
 \paragraph{}
 
-Microsoft Azure's API Management platform (AAMP) is a tool that provides some of the above functionalities in a manner that is similar to that of our solution.
-In this platform, programmers are allowed to manually define transformations that should be performed on all responses from a microservice [].
-The primary distinction is that Azure API Management transformations are intended to be specified by the programmer in policy statements,
-whereas our transformations can be applied automatically without the intervention of developers.
-
+Microsoft Azure's API Management Platform (AAMP) is an example of a system that provides tool's with the functionalities mentioned above.
+For example, in this platform, programmers are allowed to specify transformations in policy statements, that are performed on all responses from a microservice.
 The main use case of these transformations in AAMP is the integration of legacy backends by modernizing their APIs and making them accessible from cloud services, without the risk of migration.
+This tool inspired our approach, which aims to allow similar transformations to be specified in both request and response messages.
 
 \paragraph{}
 
 In AAMP all requests from client applications are routed through the API gateway, which then forwards them to the appropriate backend services.
-The API gateway, like our adapter proxy, acts as a facade to the backend services,
+The API gateway, acts as a facade to the backend services,
 allowing API providers to abstract API implementations and evolve backend architecture without impacting API consumers.
-The AAMP's responsibilities and functionalities include:
+The AAMP's other responsibilities and functionalities include:
 
 \begin{itemize}
     \item Accepting API calls and routing them to configured backends;
     \item Verifying API keys, JWT tokens, certificates, and other credentials;
     \item Enforcing usage quotas and rate limits;
-    \item Transforming requests and responses as specified in policy statements;
     \item Caching responses to improve response latency and minimize the load on backend services;
     \item Emitting traces for monitoring, reporting, and troubleshooting;
     \item Collecting API usage metrics
 \end{itemize}
 
-
-We aim to include some of the aforementioned features in our service registry implementation, particularly the collection of usage metrics.
+Most of the aforementioned features are supported by the Kubernetes ecosystem and its extensions.
+Our approach can be viewed as API management tool that solely focus on the evolution of API's,
+we aim to make it compatible with existing API management tools in the Kubernetes ecosystem that cover other functionalities.

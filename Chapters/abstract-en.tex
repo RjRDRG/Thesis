@@ -8,20 +8,25 @@
 
 \typeout{NT FILE abstrac-en.tex}%
 
-In contrast to traditional system designs, microservice architectures provide greater
-scalability, availability, and delivery by separating the elements of a large project into independent entities linked through a network of services, however there is a scarcity
-of mechanisms for safely evolving and discontinuing functionalities of services.
+In contrast to monolithic system designs, microservice architectures provide greater scalability,
+availability, and delivery by separating the elements of a large project into independent
+entities linked through a network of services.
+Because services are tied to one another via their interfaces, they can only evolve separately if their contracts remain consistent.
+There is a scarcity of mechanisms for safely evolving and discontinuing functionalities of services.
 
-Changing the definition of an element in a regular program can be accomplished quickly with the aid developer tools, such as IDE refactoring toolkits.
-In distributed systems there is a lack of tools comparable to those used in centralized systems,
-developers are left with the burden of manually tracking down and resolving problems caused by uncontrolled updates.
+In monolithic system design's, changing the definition of an element can be accomplished
+quickly with the aid of developer tools, such as IDE refactoring toolkits.
+In distributed systems there is a lack of tools comparable to those used in centralized systems, developers are left
+with the burden of manually tracking down and resolving problems caused by uncontrolled updates.
+To ensure that microservices are working properly the general approach is to validate their behaviour through empirical tests.
 
-Whereas traditional approaches ensure that microservices are behaving properly by validating their behavior through empirical tests,
-our solution seeks to supplement the conventional approach by providing mechanisms that support the validation of deployment operations, and the evolution of microservice interfaces.
-
-We present a microservice management system that verifies the safety of modifications to service interfaces
-and allows for the evolution of service contracts by using runtime-generated proxies that dynamically convert the data sent between services to the format expected by static code,
-thereby relieving the developer of the need to manually adapt either new or existing services.
+This thesis aims to supplement the conventional approach by providing mechanisms that
+support the automatic validation of deployment operations, and the evolution of microservice interfaces.
+It´s presented a microservice management system that verifies the safety of modifications to
+service interfaces and that enables the evolution of service contracts without impacting consumer services.
+The system use runtime-generated proxies, that dynamically convert the data sent between services to the format
+expected by static code, and thereby relieving the developer of the need to manually adapt
+existing services.
 
 % Palavras-chave do resumo em Inglês
 \begin{keywords}

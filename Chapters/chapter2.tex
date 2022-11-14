@@ -171,7 +171,7 @@ Kubernetes accomplishes this through a well-defined, high-level architecture tha
 
 \begin{itemize}
     \item Pod: Encapsulates an application's container (or multiple containers),
-    storage resources, haves a unique network IP address, and provides configuration options for the container(s).
+    storage resources, has a unique network IP address, and provides configuration options for the container(s).
     \item Service: Is an abstraction that defines a logical set of Pods as well as a policy for accessing them.
     \item Volume: Is a directory which is accessible to the
     Containers in a Pod.
@@ -203,21 +203,29 @@ Building automated pipelines that are executed after the developer changes the c
 
 Pipelines are typically in charge of packaging, testing, and deploying code to testing or production environments.
 If any phase of the automated pipeline fails, the developer receives immediate feedback on which task failed, and the pipeline's execution is halted.
-An example of a typical build and release pipeline is shown in Figure ~\ref{fig:pipeline_example}.
+An example of a typical continuous deployment (CD) pipeline is shown in Figure ~\ref{fig:pipeline_example}.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=2.8in]{pipelineExample}
-    \caption{DevOps Pipeline Example}
+    \caption{CD Pipeline Example}
     \label{fig:pipeline_example}
 \end{figure}
 
-The pipeline is divided into two sections.
-The first section is concluded when new code passes all unit tests.
-To decrease iteration times of software development, the steps of the initial section might be conducted entirely on the developer computer.
-The second section entails in deploying the code into production.
+The pipeline is divided into two sub-sections the build and release pipelines.
+To reduce the iteration time of software development,
+the steps of the build pipeline can be conducted first on the developer computer and then repeated and verified on the external pipeline.
+The release pipeline entails the deployment of code into production.
 The code is initially deployed in live testing environments where it is constantly monitored.
 After passing all live testing phases, the code is considered as part of the system and is deployed into the production environment.
+
+\paragraph{}
+
+There are less complex pipeline architectures that automate fewer tasks.
+A continuous integration (CI) pipeline is a subset of continuous deployment pipeline,
+that only defines a strategy for continuously integrating and merging code from multiple sources.
+Continuous delivery pipeline is an extension of CI, that enables the automation of deployments to a staging environment where the software is tested in sequential phases.
+A continuous deployment pipeline goes a step further by defining a strategy for automating the deployment and scaling of software in a production environment.
 
 
 
