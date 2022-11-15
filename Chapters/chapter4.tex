@@ -42,7 +42,7 @@ Four criteria were considered when evaluating each approach:
 \textbf{Performance} the overhead associated with approach.
 
 In the prototype's design, it was prioritized utility above performance because:
-in the common case, it is expected for most service's to communicate via up-to-date contracts, service functionalities will only need adaptation during a transitory period;
+in the common case, it is expected for most service's to communicate via up-to-date contracts, messages will only need adaptation during a transitory period;
 the performance overhead remains roughly static under diverse contract changes, as it is largely attributable to communication costs.
 It was also prioritized flexibility and effectiveness above other criteria because if an approach isn't applicable or effective under a scenario,
 then it will be necessary to adopt hybrid approaches, which will have a detrimental effect on the utility of the entire solution.
@@ -60,16 +60,14 @@ Orchestration relies on request-response protocols while choreography relies on 
 \paragraph{Approach:}
 It was chosen to design the system around the orchestration pattern and the HTTP protocol,
 because most applications require a web presence and microservice systems that
-rely on choreography still require the HTTP request-response protocol to have a web presence.
+rely on choreography still require the HTTP request-response protocol to support external consumers.
 
 \paragraph{Alternatives:}
 If choreography was adopted, the approach would need to support an additional communication protocol with different a contract structure and syntax.
-It is complex to implement a generic approach that supports all types of communication protocol's, because different protocol's can have different communication strategies.
-It is preferable to extend the solution with modules designed to support specific protocol's.
-
+It is complex to implement a generic approach that can support multiple types of communication protocol's.
 Other event-driven and request-response protocols, such as RPC, have contracts with a simplified
-syntax and structure, there are already a number of tools that support the evolution of contracts
-under these protocols, albeit with some limitations.
+syntax and structure.
+There are already a number of tools that support the evolution of contracts under these protocols, albeit with some limitations.
 
 \subsection{Contract Specification} % (fold)
 \label{sec:contract_specification}
@@ -77,30 +75,28 @@ under these protocols, albeit with some limitations.
 It is required that each microservice’s interface be
 described in a high-level language which abstracts away implementation details, because it is common
 for microservices to be implemented under different frameworks and programming languages.
-Contract specifications are used to clearly define and document the capabilities of a service, its inter-service dependencies and the necessary computational resources to support its operation.
+Additionally the contract specification of a service also includes information about its dependencies, and the necessary computational resources to support its operation.
 
 \paragraph{Approach:}
-The capabilities of a service where specified using the conventional approach of a Web API description language.
-Since it may be problematic to disclose service dependencies and computational requirements to external unsupervised consumers,
-a separate manifest with a distinct description language is used to define and document this information.
+The contract is composed by two distinct manifests.
+In the first manifest the capabilities of a service are specified using the conventional approach of a Web API description language.
+In the second manifest the service dependencies and computational requirements are documented with a distinct description language.
+The contract is divided into multiple manifests, because external consumers are only interested on the documentation of the capabilities of a service,
+and because it may be problematic to disclose information about computational requirements.
 
-The definition of the dependencies is done from the perspective of services.
-In other words, the dependencies between service procedures are not documented, only the dependencies between services.
-If the dependencies of each procedure individually are mapped, it's possible to detect procedures that are un-used internally by other services.
-With this method, the installation of unnecessary adapters can be avoided in cases where only unreferenced or unused procedures are updated;
-this case is expected to be very uncommon, and having unused procedures in a microservice is undesirable due to API bloat,
-so the documentation is not worth the effort, specifying dependencies at the service level is sufficient.
+To reduce the documentation effort only the dependencies between services are document, the dependencies between procedures are not specified (eg. Service A in version 1.0 depends on service B in version 2.0).
+One drawback of not documenting dependencies at the procedure level is that it is not possible to detect procedures that are unused by other services.
+The installation of adapters is unnecessary in cases where only unused procedures are updated in contract.
+This case is expected to be rare, and having unused procedures in a microservice is undesirable due to API bloat.
+The specification of inter-service dependencies is sufficient to ensure the safety of deployment operations.
+The documentation of inter-procedure dependencies can be useful in API management tools,
+these dependencies can be discovered indirectly via the alternative approach presented below.
 
 \paragraph{Alternatives:}
-Services dependencies can be determined indirectly by automatically inspecting request logs between services.
+Inter-procedure dependencies can be determined automatically by inspecting request logs between services.
 The advantage of this approach is the reduced documentation effort, but it comes at a cost because
-it is no longer possible to validate the safety of service deployments, since the dependencies of a service are unknown when it is deployed or upgraded;
-it is only possible to validate the safety of the removal of services after they have been running over a long enough period,
-and even then there could be very rare calls between services that are not mapped by this method, these calls would make removals unsafe.
-Un-needed adapters would also have to be removed manually by developers or through an automated inactivity-based warning system.
-
-This approach could be employed with a different goal: mapping procedure dependencies.
-When a breaking change occurs, this information can be used to discover impacted procedures, rather than just the impacted services.
+it is no longer possible to validate the safety of service deployments, since the dependencies of a service are unknown when it is deployed.
+With this approach it is only possible to validate the safety of the removal of services that have been running over a long enough period of time.
 
 \subsection{Compatibility Verification} % (fold)
 \label{sec:compatibility_verification_design}
@@ -118,9 +114,9 @@ service dependencies are available and reachable in the system.
 
 \paragraph{Alternative}
 Instead of determining if a new contract version is compatible with all consumer references,
-it is evaluated only whether the new contract is compatible with the prior versions that are still in use.
-If a new contract is missing a capability that was present in a prior version,
-the developers will need to verify if the capability is not being consumed
+it is evaluated only whether the new contract is compatible with the prior contract versions that are still being consumed.
+If a new contract is missing a procedure that was present in a prior version,
+the developers will need to verify if the procedure is not being consumed
 and mark it as obsolete in the evolution manifest for the contract to be considered safe.
 This approach has the advantage of streamlining the verification process by eliminating the
 need for all contracts to be accessible by machine code in a standardized fashion.
@@ -134,8 +130,8 @@ comparable to those used in centralized systems, for visualizing the impact of a
 In this section, we discuss how such tools could be implemented.
 
 \paragraph{Approach:}
-Since all service contracts declare their dependencies on other services, determining the impact of change in a procedure is as simple as
-looping over all active services contracts and verifying whether the changed service is being consumed.
+Since all service contracts declare their dependencies on other services, determining the impact of change can be done by
+looping over all the contracts of the active services and verifying whether the changed service is being consumed.
 Service contracts are stored in a version control system, with semantic versioning, where
 each major version represents incompatible contract changes and minor versions represent backwards compatible contract changes.
 The active services are discovered by querying the deployed services in the container orchestration tool.
@@ -150,38 +146,57 @@ however, this approach falls outside the scope of this thesis and has not been e
 \subsection{Supported Contract Changes} % (fold)
 \label{sec:supported_contract_changes}
 
-An HTTP contract is made up of procedures, each of which contains one request message and up to N response messages.
+An HTTP contract is composed by procedures, each of which contains one request message and up to N response messages.
+
+\paragraph{}
+
 Response messages consist of a status code and parameters.
 Different response messages cannot share the same status code.
 The parameters of a response message can be placed in one of three locations: headers, cookies, and body.
-Request messages are composed by an endpoint and parameters.
+
+\paragraph{}
+
+Request messages, on the other hand, are composed by an endpoint and parameters.
 The endpoint is comprised by an HTTP method, a domain, and a sequence of path segments.
 The parameters of a request message can be placed in two additional locations: path and query.
 Parameters placed on headers, cookies, path or query locations cannot have object or collection types.
 
 \paragraph{}
 
-All the possible contract changes are listed below:
+All the contract features listed above can be subject to change as the contract evolves.
+Multiple types of changes can also occur simultaneously in the same contract evolution.
+Below we present a taxonomy of all conceivable HTTP contract changes:
+
 \begin{itemize}
-    \item Adding a field
-    \item Deleting a field
-    \item Renaming a field
-    \item Migrating a field into a different location (eg. converting a path parameter into a field in the request's body schema )
-    \item Changing the type of field (eg. turning a integer field into a string )
-    \item Changing the format of a field (eg. modifying the format of a date in a string )
-    \item Splitting a field into N different fields (eg. dividing a name field into first and last name )
+    \setlength\itemsep{0em}
+    \item Adding a parameter
+    \item Deleting a parameter
+    \item Renaming a parameter
+    \item Migrating a parameter into a different location (eg. converting a path parameter into a new field in the request's body schema )
+    \item Changing the type of parameter (eg. turning a integer field into a string )
+    \item Changing the format of a parameter (eg. modifying the format of a date )
+    \item Splitting a parameter into N different parameter (eg. dividing a name field into first and last name )
+    \item Merging parameters into a single parameter
     \item Changing the path of an endpoint
     \item Changing the Http method of an endpoint
     \item Changing the status code of a response
-    \item Splitting a procedure into N procedures
+    \item Adding a new response message to a procedure
+    \item Removing a response message from a procedure
+    \item Splitting a procedure into N different procedures
     \item Merging N procedures into a single procedure
+    \item Adding a new procedure
+    \item Removing a procedure
 \end{itemize}
 
-    "Message Split Mismatch"
-    In order to keep the adapter implementation as lightweight as possible, it is preferable to maintain the old endpoint operational but marked as deprecated, and provide the new endpoints in conjunction with the old endpoint.
+\paragraph{Approach:}
+Of all the stated contract changes, the only evolutions that aren't directly supported are "merging/splitting procedures".
+These evolution types can be converted into an equivalent evolution that keeps the affected procedures in the contract but marks them as deprecated while adding the new procedures.
 
-    "Message Merge Mismatch"
-    It is preferable to keep the old endpoints operational but marked as deprecated, and provided the new endpoint in conjunction with the old endpoints.
+\paragraph{}
+Supporting the division of a procedure into multiple procedures is complex because the adapter would have to use distributed transactions to handle the independent failures of each new procedure.
+Combining multiple procedures into a single procedure is also costly because the adapter must be stateful and session based to support this change.
+The requests of the affected procedures would need to be stored in the adapter before they could be merged and sent through the new endpoint.
+Furthermore, these two types of evolution are cumbersome to be documented in a description language, because the language would need to relate procedures in an N->1 and 1->N relationships.
 
 \subsection{Evolution Specification} % (fold)
 \label{sec:evolution_specification}
@@ -231,7 +246,7 @@ otherwise, the request is redirected through the adapter.
 Since the adapter and the service are in the same node, the communication cost is expected to be comparable to the cost of inter-process message passing.
 The main benefit of this approach is that the adapter can be deployed alongside the service,
 which circumvents distributed transactions in deployments,
-because container orchestrations tools such as kubernetes allow the deployment of closely related containers as atomic units known as "pods".
+because container orchestrations tools such as Kubernetes allow the deployment of closely related containers as atomic units known as "pods".
 
 \paragraph{Alternatives:}
 The generated adapter code can be embedded in the service implementation.
@@ -248,17 +263,17 @@ this is only achievable with the use of distributed transactions, which are inhe
 The re-deployment of consumers pods due to the installation of adapters can be avoided with the use of mobile code that is provided by the producer in a dedicated endpoint
 (for example, this could be accomplished in Java with the use of network class loaders).
 This approach is ineffective because it provides no benefits and requires more resources than the alternatives, since
-instead of one adapter, N adapters would be needed, one for each consumer.
+instead of one adapter, N adapters would be needed, one in each consumer.
 
 \subsection{Adapter Coverage} % (fold)
 \label{sec:adapter_polymorphism}
 
 The adapter can have a generic implementation that is able to adapt messages from any service, or it can
-have a direct implementation that can only manage the adaptation of messages in one service.
+have a direct implementation that can only manage the adaptation of messages for one service.
 
 \paragraph{Approach:}
 The adapter implementation is derived from a template implementation,
-that is completed with the substitution of template variables with code generated from evolution specification manifest file.
+that is completed with code generated from evolution specification manifest file.
 The advantage of this approach is that the implementation will be more performant than generic approaches.
 
 \paragraph{Alternatives:}
@@ -277,21 +292,21 @@ Messages will need to reach either an application or an adapter, depending on th
 
 \paragraph{Approach:}
 The application and adapter servers of a microservice are accessible internally inside a cluster via distinct Kubernetes services.
-A Kubernetes service, is an abstraction that defines a policy for accessing a logical set of containers under a single address.
+A Kubernetes service, is an abstraction that defines a policy for accessing a logical set of containers under a single network address.
 For each version of a service contract a distinct Kubernetes service is created with the corresponding service name and contract version.
 The address of each Kubernetes service is discoverable via an internal DNS server.
-When a microservice is updated, all it's Kubernetes services are updated with the new addresses of application and adapter containers.
+When a microservice is upgraded, it's Kubernetes services are refreshed with the new addresses of the application and adapter containers.
 The Kubernetes service that previously pointed to the application containers, will now point to the adapter containers, and
-a new Kubernetes service will be created to support the new contract.
+a new Kubernetes service is created to support the new contract.
 All consumers of the previous contract will begin forwarding their requests to the adapter container's rather than the application containers.
-Consumers that only use procedures that weren't affected in the contract evolution don't need to direct their calls through the adapter.
+Consumers that only use unaffected procedures in the contract evolution don't need to direct their calls through the adapter.
 If optimal performance and resource consumption is desired,
-such consumer services will have to be updated and redeployed with the new producer DNS name.
+such consumer services will have to be updated and redeployed with the new producer DNS name, in order for their calls to be redirected to the application servers.
 The redeployment of consumers in the former case can be avoided, if consumers participate in the contract evolution process.
 The adapter server includes a header in responses that contains the address of the application server, and that indicates if a request required adaptation.
 If the request didn't require modifications, consumer services begin to forward the request to the application server instead of the adapter.
 With this approach consumer services are no longer unaware of the existence of proxy adapters,
-and will need to use different addresses when calling different procedures of the same producer service.
+and will need to use different addresses when calling different procedures of the same producer.
 
 \paragraph{Alternatives:}
 A reverse proxy like nginx could be used to route only the messages that require adaptation through the adapter.

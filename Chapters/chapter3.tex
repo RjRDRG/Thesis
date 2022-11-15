@@ -31,6 +31,17 @@ client code generation in different programming languages, load test scripts, an
 
 The OpenAPI Specification (OAS) \cite{openAPI} is the most widely adopted Http Description Language;
 it defines a standard language-agnostic interface that allows both computers and humans to comprehend the capabilities of a service.
+The OpenAPI initiative is on a continuous effort to develop API tooling on top of their specification, some of the supported tools of version 3.0 range from:
+
+\begin{itemize}
+    \setlength\itemsep{0em}
+    \item Auto Generators: Tools that parse code and turn it into an OpenAPI Specification document
+    \item Mock Servers: Fake servers that take description document as input, then route incoming HTTP requests to example responses or dynamically generates examples.
+    \item Data Validators: Verifies if API requests and responses are lining up with the API description.
+    \item Security: Tools that can look out for attack vectors by inspecting OpenAPI descriptions.
+    \item Converters: Various tools to convert to and from OpenAPI and other API description formats.
+\end{itemize}
+
 OpenApi allows a detailed description of the syntactic aspects of the data transferred, however it ignores semantic aspects, such as the ability to relate
 different parts of the same data, to relate the input against the state of the service, and the output against the input.
 For instance, OpenAPI does not allow developers to indicate that in the creation of a new user, the nickname must be shorter

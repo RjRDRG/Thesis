@@ -85,52 +85,39 @@ The modules that enable each novel stage will be discussed in detail in the foll
 \section{Contract Representation} % (fold)
 \label{sec:contract_representation}
 
-The functionalities of web service's can be expressed with the
-use Web Api Description Languages (WADL).
-
-The OpenAPI specification is the most widely adopted WADL for RESTfull services and already supports refinement types, instead of designing yet another WADL,
-we aim to extend the OpenAPI specification to incorporate support for Pre- and Post-conditions and other needs of our approach.
-
 The OpenAPI specification is the most
-widely adopted WADL for HTTP services, instead of designing yet another WADL, we
-adopted the OpenAPI specification to support the needs of our implementation.
-The OpenAPI initiative is on a continuous effort to develop API tooling on top of their specification, some of the supported tools of version 3.0 range from:
-
-\begin{itemize}
-    \item Auto Generators: Tools that parse code and turn it into an OpenAPI Specification document
-    \item Mock Servers: Fake servers that take description document as input, then route incoming HTTP requests to example responses or dynamically generates examples.
-    \item Data Validators: Verifies if API requests and responses are lining up with the API description.
-    \item Security: Tools that can look out for attack vectors by inspecting OpenAPI descriptions.
-    \item Converters: Various tools to convert to and from OpenAPI and other API description formats.
-\end{itemize}
-
-Designing a WADL tailored for this problem would be counterproductive because many teams already rely on the aforementioned tools,
+widely adopted WADL for HTTP services, instead of designing yet another WADL, it was
+adopted the OpenAPI specification to support the needs of the implementation.
+Designing a WADL tailored for this problem would be counterproductive because teams rely on other tools,
 and supporting an additional WADL would require the development of an extensive converter tool
 that would need to be constantly maintained in order to support changes in new versions of the OpenApi and the new WADL specification's.
 
-To represent records in messages, we chose the Json format, because of its simplicity and widespread adoption.
-Json is a human-readable data-interchange format,
-there are more performant formats that have binary representation,
+\paragraph{}
+
+To represent records in messages, it was chosen the JSON format, because of its simplicity and widespread adoption.
+There are more performant formats that have a binary representation,
 however such formats are usually not supported by front-end frameworks and for the purpose of this prototype
 we are not interested in measuring the performance of different object serialization protocols, since
-there are already sources that provide comparisons in this regard between XML, Json, Protobuf, Thrift and other popular formats \cite{serializationBenchmark}.
+there are already sources that provide comparisons in this regard between XML, JSON, Protobuf, Thrift and other popular formats \cite{serializationBenchmark}.
+
+\paragraph{}
 
 The schema of JSON records must also be described,
 the OpenAPI specification supports the description of records
 in conjunction with the signature of HTTP endpoints.
-Other Json schema specification languages, such as the Json-Schema project
+Other JSON schema specification languages, such as the JSON-Schema project
 exist, but using languages other than OpenApi would necessitate decoupling the specification of schemas from the specification
-of http endpoints, which would require additional effort on the part of the developing team to maintain the cross-references
+of HTTP endpoints, which would require additional effort on the part of the developing team to maintain the cross-references
 between each specification manifest, and their versions.
+
+\paragraph{}
 
 A snippet of a "Pet Store" OpenApi contract can be seen in Figure ~\ref{fig:open_contract}.
 In this example we can view the specification of a JSON schema for a Pet data object,
 as well the specification for an HTTP endpoint.
 OpenApi allows properties to be defined robustly with specification of not only their type but also their format, as shown in line 31.
 
-The types and formats of properties are standardized between object schemas and http parameters;
-properties have the following data types: string, number, integer, boolean, array, and object;
-while property formats are free-form, however there are established conventions for the most common formats.
+\paragraph{}
 
 The types and formats of properties are standardized between object schemas and http parameters;
 properties have the following data types: string, number, integer, boolean, array, and object;
@@ -139,29 +126,30 @@ while property formats are free-form, there are established conventions for the 
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=6in]{openContract}
-    \caption{OpenAPI Contract}
+    \caption{OpenAPI Contract Example}
     \label{fig:open_contract}
 \end{figure}
 
 \newpage
 
-The definition of the dependencies of a service is done using Helm.
-Helm is package manager for Kubernetes that allows developers and operators to more easily package, configure, and deploy applications and services onto Kubernetes clusters.
-A Chart is a Helm package, composed of a collection of files that describe a related set of Kubernetes resources.
+The specification of the dependencies of a service was done using Helm \textbf{[TODO: reference]}.
+Helm is package manager for Kubernetes that allows developers to more easily package, configure, and deploy applications and services onto Kubernetes clusters.
+A chart is a Helm package, composed of a collection of files that describe a related set of Kubernetes resources.
 The most significant components of a Chart are the:
 \begin{itemize}
-    \item The Chart.yaml that allows the definition of the Chart dependencies and other meta-information about the application such as its name and version.
-    \item The Template's directory that contains incomplete Kubernetes manifests "Templates" such as Services, Deployments, DaemonSets, Namespaces and so on.
-    \item The Values.yaml that contains key-value pairs used to complete the definition of each template, this values can be overridden later when the chart is deployed, the file is used to define the default values.
+    \item The Chart.yaml, that allows the definition of the Chart dependencies and other meta-information about the application such as its name and version.
+    \item The Template's directory, that contains incomplete Kubernetes manifests "Templates" such as Services, Deployments, DaemonSets, Namespaces and so on.
+    \item The Values.yaml, that contains key-value pairs used to complete the definition of each template, this values can be overridden later when the chart is deployed, the file is used to define the default values.
 \end{itemize}
-A single Chart might be used to deploy something simple, like a single kubernetes pod, or something complex, like a complete web app stack with HTTP servers, databases, caches, and so on.
-The typical approach is to define an individual Chart for each distinct microservice, so that they can be upgraded individually.
-If a single Chart is used to deploy multiple services it is no longer possible to represent accurately the dependencies of each service
+A single chart might be used to deploy something simple, like a single kubernetes pod, or something complex, like a complete web app stack with HTTP servers, databases, caches, and so on.
+The typical approach is to define an individual chart for each distinct microservice, so that they can be upgraded individually.
+If a single chart is used to deploy multiple services it is no longer possible to represent accurately the dependencies of each service
 in the chart definition, because the chart syntax doesn't allow the individual definition of the dependencies of each service, it only allows the declaration of the dependencies of the deployment as a whole.
 
+\paragraph{}
+
 An example of the definition of service dependencies can be seen in Figure ~\ref{fig:serviceDepedencies}.
-The dependencies of a service are mapped indirectly, each dependency point to a Helm Chart that is implicitly associated with one service.
-Helm Charts can be hosted on local or remote repositories.
+The dependencies of a service are mapped indirectly, each dependency point to a Helm chart that is implicitly associated with one service.
 
 \begin{figure}[htbp]
     \centering
@@ -172,9 +160,9 @@ Helm Charts can be hosted on local or remote repositories.
 
 \newpage
 
-The declaration of resources consumed by a service is defined in Chart template files,
-for each deployment template we define the resources consumed by its containers by
-defining the minimum amount of cpu and memory resources (represented on the requests key) and by setting a limit on these resources (represented on the limits key).
+The declaration of resources consumed by a service is defined in chart template files.
+For each deployment template it was defined the resources consumed by its containers by
+setting the minimum amount of cpu and memory resources (represented on the requests key) and by setting a limit on these resources (represented on the limits key).
 An example of the definition of a service resources can be seen in Figure ~\ref{fig:serviceResources}.
 
 \begin{figure}[htbp]
@@ -184,26 +172,22 @@ An example of the definition of a service resources can be seen in Figure ~\ref{
     \label{fig:serviceResources}
 \end{figure}
 
-\newpage
-
 \section{Contract Interpretation} % (fold)
 \label{sec:contract_interpretation}
 
-The interpretation of contract specification is done in the Parser module.
+The interpretation of contract specification is done in a dedicated module named "Parser".
 This module is meant to be used as Java library by other modules,
 it interprets contracts written in OpenApi format and provides a read-only Java interface
 that is agnostic to the original specification format.
-All the forthcoming modules operate under this interface not the OpenApi format.
-Although we adopted the OpenApi format our solution is not dependent on it, this module provides a decoupling point.
+
+\paragraph{}
+
+The implementation of the Parser module uses the swagger-parser project \textbf{[TODO: reference]} to convert OpenApi contracts into a Java POJO representation, that is accessible via a simplified read-only interface.
+All the forthcoming modules operate under this interface not under the OpenApi format.
+Although it was adopted the OpenApi format the solution is not dependent on it, this module provides a decoupling point.
 This enables the specification of different contract to be written in different or even mixed WADL,
-as long as the parser module is extended to support the new WADL's.
-
-The actual parsing of OpenApi contracts is supported by the swagger-parser project, \textbf{[TODO: reference]}
-which validates and parses OpenAPI definitions in JSON or YAML format into a Java POJO representation.
-
+as long as the Parser module is extended to support the new WADL's.
 The interpretation of service resources and dependencies written in Helm charts is also supported by the Parser module under a separate interface.
-The SnakeYAML library \textbf{[TODO: reference]} was used to parse the Charts.yaml and template files, into a Java class that implements a read-only Java interface.
-The following are also decoupled from the Helm and Kubernetes API's they rely only on the read-only interfaces.
 
 \newpage
 
@@ -213,17 +197,19 @@ The following are also decoupled from the Helm and Kubernetes API's they rely on
 The evolution of contracts is represented in a custom description language.
 The description only maps the details about the changed procedures of a service,
 it is not necessary to map the evolutions in service dependencies and resource requirements because they can be inferred by comparing the last two contract versions.
-The description language is hierarchical, and contains array elements.
+The description language is hierarchical and uses array elements.
 The following Figure ~\ref{fig:evolution_yal} represents its structure, and Figure ~\ref{fig:evolution_example} gives an example.
 Array elements are depicted by the [.] notation.
+
+\paragraph{}
 
 As previously mentioned in the design chapter, resolutions can have one of three distinct types
 DefaultValues, Link or Function.
 The type of resolution is represented in the first segment of a resolution, while the second segment represents the resolution itself.
-
 Link resolutions have the following format "link={Parameter Location}|{Parameter Name}", the parameter of the prior contract must be of the same type and format.
-
 Default value resolutions have the following format "default=#Value", the value that must be of the same type and format.
+
+\paragraph{}
 
 Function resolutions are written as one line Java expressions that can use parameters of the previous contract, the
 parameters are referenced by their location and name (eg. function= {{json|firstName}} + {{json|lastName}} ).
@@ -231,7 +217,7 @@ These references are replaced in the adapter implementation by their real value.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=4.3in]{EvoExample}
+    \includegraphics[height=4.2in]{EvoExample}
     \caption{Evolution Specification Example}
     \label{fig:evolution_example}
 \end{figure}
@@ -248,38 +234,45 @@ These references are replaced in the adapter implementation by their real value.
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=2.5in]{editor2}
-    \caption{Evolution Editor}
-    \label{fig:editor2}
+    \caption{Evolution editor, procedure mappings}
+    \label{fig:editor1}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=4.5in]{editor1}
-    \caption{Evolution Editor}
-    \label{fig:editor1}
+    \caption{Evolution editor, parameter mappings}
+    \label{fig:editor2}
 \end{figure}
 
 \newpage
 
-To minimize the documentation effort we developed a GUI editor for the specification of evolutions.
-The GUI editor was implemented as an IDE Plugin, the current implementation supports the Intellij IDE.
+To minimize the documentation effort it was developed a GUI editor for the facilitates the specification of evolutions.
+Figures ~\ref{fig:editor1} and ~\ref{fig:editor2} show the editor.
+The GUI editor was implemented as an IDE Plugin, the current implementation supports the Intellij integrated development environment.
+
+\paragraph{}
+
 The editor compares two contract versions,
-and automatically maps all the parameters that haven't changed from one version to the other, the
-developer is left with the task of explicitly mapping the remaining procedures.
+and automatically maps all the elements that haven't changed from one version to the other, the
+developer is left with the task of explicitly mapping the remaining elements.
+
+\paragraph{}
+
 The editor starts by requesting the developer to map endpoints in the new contract to endpoints in the old contract,
 afterwards the developer must edit each of the endpoint messages and specify a resolution for all the parameters that changed
 in a contract, unresolved parameters are highlighted in red.
 The right column holds the resolutions that were already mapped and uppermost left column allows the developer to write rules
 for each unresolved parameter.
-The developer can select leaf parameters in the hierarchy, or we can choose intermediate properties.
+The developer can select leaf parameters in the hierarchy, or can choose intermediate properties.
 If he chooses an intermediate property and inputs resolution rule all child parameters are also resolved.
-After all parameters are resolved the developer can submit the specification, and
-the editor outputs an evolution spec with the same description language presented in the beginning of this section.
+After all parameters are resolved the developer submits the resolutions, and
+the editor outputs an evolution specification file with the same description language presented in the beginning of this section.
 
 \section{Compatiblity Verification} % (fold)
 \label{sec:compatiblity_verification}
 
-The compatibility verification process is done by the verifier module.
+The compatibility verification process is done by a dedicated module named "Verifier".
 This module was implemented in java as command-line application.
 The module verifies if the provided evolution specification is valid.
 It starts by checking if all the new contract procedures, messages and parameters are present in the specification,
@@ -287,6 +280,7 @@ then it verifies if all the resolutions for each parameter are valid.
 Resolutions can be invalid due to four reasons:
 
 \begin{itemize}
+    \setlength\itemsep{0em}
     \item Invalid syntax in resolution expressions
     \item References parameters that don't exist in the previous contract
     \item Uses functions that are not supported
@@ -294,26 +288,27 @@ Resolutions can be invalid due to four reasons:
 \end{itemize}
 
 The present implementation of the Verifier module does not test whether the cluster has adequate computational resources to provision the service or whether all service dependencies are alive and reachable.
+These functionalities were not implemented since the Helm deployment process already performs these verifications prior to the deployment of a service.
+Nonetheless, including these verifications in the Verifier module would be useful in order for the solution to be decoupled from Helm.
 
-These functionalities were not implemented since the Helm deployment process already performs these verifications prior to the deployment of a service;
-nonetheless, including these verifications in the Verifier module would be useful in order for the solution to be decoupled from Helm.
+\textbf{TODO: pseudo codigo}
 
 \newpage
 
 \section{Adapter Generation} % (fold)
 \label{sec:adapter_generation}
 
-The generation of the adapter module is done by the adapter module.
+The generation of the proxy adapter code is done in a dedicated module named "Generator".
 The adapter is generated by populating a template implementation with the information provided in evolution specs.
-The adapter must be able to support all prior versions that are still in use, and adapt to the last version, in other words
+The adapter must be able to support all prior versions that are still in use, and adapt to the last version, in other words,
 a single adapter is used to support the adaptation of multiple versions to the current version.
 
-The evolution specifications only provide information on how to adapt messages from contiguous versions (eg. v1->v2),
-the information necessary to adapt messages from discontinuous versions is obtained by chaining the evolution specifications and
+The evolution specifications only provide information on how to adapt messages from contiguous versions (eg. v1->v2).
+The information necessary to adapt messages from discontinuous versions is obtained by chaining the evolution specifications and
 merging their resolutions (e.g merge[v1->v2, v2->v3] = v1->v3).
 
-This module begins by querying the active versions of the target service with the kubectl command-line tool.
-Kubectl is tool that interfaces with kubernetes clusters and can be used to inspect and manage cluster resources.
+This module begins by querying the active versions of the target service with the Kubectl command-line tool.
+Kubectl is a tool that interfaces with Kubernetes clusters and can be used to inspect and manage cluster resources.
 After determining the active service versions, this module retrieves all evolution specifications up to the oldest version that is still active,
 and then combines them so that all specifications link to the current version. Figure ~\ref{fig:merge} exemplifies the merge process.
 
@@ -324,21 +319,28 @@ and then combines them so that all specifications link to the current version. F
     \label{fig:merge}
 \end{figure}
 
-The generated adapter contains one endpoint for each of the procedures in each version.
-Identical procedures in different versions are distinguished by versioning their endpoint paths.
+A single proxy adapter supports the adaptation of messages for multiple versions of the same service contract.
+The implementation exposes each version of the contract adaptation procedures in a distinct port.
+A Kubernetes service is created for accessing each of the adapter ports.
 It is also possible to version procedures with header parameters,
 but the generated adapter code must be more complex because a single endpoint must be able to adapt messages from multiple versions.
 
 \section{Adapter} % (fold)
 \label{sec:adapter}
 
-The adaption approach is straightforward: for each endpoint the
+The adaption approach consists on: for each endpoint the
 adapter re-constructs the entire request from zero and populates the parameter resolutions with the information of the original request.
-The implementation of "Function" resolutions is simple since the expressions are written in java and only have one line;
-they may be injected directly into the template implementation, and the parameter references are then replaced with the parameters themselves.
+The "Function" resolutions are written as one-line java expressions.
+The resolutions are injected directly into the template implementation of the adapter, and the parameter references in the resolution are then replaced with the parameters themselves.
 
-The adapter's current template implementation does not allow HTTPS, however this may easily be added.
+\textbf{TODO: pseudo codigo}
+
+\paragraph{}
+
+The adapter's current template implementation does not support HTTPS, however this can be added.
 Because TLS is mandatory in HTTP 1.2, the implementation only supports HTTP 1.1.
+
+\paragraph{}
 
 The adapter was built with Spring Boot and an Apache Tomcat/9.0.65 http server, the base image of the adapter docker container is an "openjdk:11-nanoserver".
 In order to prevent the JVM from calling garbage collector frequently and reallocating the heap memory while Tomcat is trying to serve requests,
