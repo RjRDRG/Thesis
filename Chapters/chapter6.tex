@@ -58,10 +58,10 @@ It periodically sends HTTP scrape requests, the response to these requests is pa
 Prometheus provides a query language that allows the metrics to be aggregated by events, components or metadata.
 The gathered metrics can be consulted by external tools or directly visualized in this platform via dashboards.
 
-\paragraph{- Artillery} \textbf{TODO: reference}
+\paragraph{- Artillery} \cite{artillery}
 is an open-source performance and reliability testing suite for developers and system administrators.
 
-\paragraph{- Jenkins} \textbf{TODO: reference}
+\paragraph{- Jenkins} \cite{jenkins}
 is a free and open automation server.
 It aids in the automation of portions of software development such as building, testing, and deploying, allowing for continuous integration and continuous delivery.
 
@@ -94,7 +94,7 @@ All the parameters in the body's schema of this procedure were renamed.
 To inject load in the experiments, 10 workers of the artillery load testing tool were used,
 the workers are executed remotely in the cluster and were spread in 6 nodes.
 The workers are supported by Kubernetes pods that are monitored by a common job.
-The workers are installed and removed from cluster using the artillery-operator project \textbf{TODO: ref}, that enables
+The workers are installed and removed from cluster using the Artillery-operator project \cite{artilleryoperator}, that enables
 the creation and execution of distributed Artillery load tests from a Kubernetes cluster, at scale.
 The architecture of this tool is depicted in Figure \ref{fig:artilleryoperator}.
 In each experiment all the resources of previous experiments were deleted and a new job and namespace were created in the
@@ -103,7 +103,7 @@ The experiments were carried out sequentially with a 5-minute break in between.
 
 \begin{figure}[htbp]
     \centering
-    \centerline{\includegraphics[height=3.5in]{artillery-operator-architecture}}
+    \centerline{\includegraphics[height=3.6in]{artillery-operator-architecture}}
     \caption{Artillery Operator Architecture TODO improve image}
     \label{fig:artilleryoperator}
 \end{figure}
