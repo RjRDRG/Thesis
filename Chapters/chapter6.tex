@@ -21,7 +21,7 @@ to support repeatable microservices research (Figure \ref{fig:benchmark}).
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=4.1in]{benchmark_requirements}
+    \centerline{\includegraphics[height=4.1in]{benchmark_requirements}}
     \caption{Benchmark Requirements \cite{microservices2017benchmark}}
     \label{fig:benchmark}
 \end{figure}
@@ -40,7 +40,7 @@ The architecture of the benchmark platform can be seen in Figure \ref{fig:canvas
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=6.2in]{canvas}
+    \centerline{\includegraphics[height=6.2in]{canvas}}
     \caption{Benchmark platform components}
     \label{fig:canvas}
 \end{figure}
@@ -94,7 +94,7 @@ All the parameters in the body's schema of this procedure were renamed.
 To inject load in the experiments, 10 workers of the artillery load testing tool were used,
 the workers are executed remotely in the cluster and were spread in 6 nodes.
 The workers are supported by Kubernetes pods that are monitored by a common job.
-The workers are installed and removed from cluster using the Artillery-Operator-Project \textbf{TODO: ref}, that enables
+The workers are installed and removed from cluster using the artillery-operator project \textbf{TODO: ref}, that enables
 the creation and execution of distributed Artillery load tests from a Kubernetes cluster, at scale.
 The architecture of this tool is depicted in Figure \ref{fig:artilleryoperator}.
 In each experiment all the resources of previous experiments were deleted and a new job and namespace were created in the
@@ -103,7 +103,7 @@ The experiments were carried out sequentially with a 5-minute break in between.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=3.5in]{artillery-operator-architecture}
+    \centerline{\includegraphics[height=3.5in]{artillery-operator-architecture}}
     \caption{Artillery Operator Architecture TODO improve image}
     \label{fig:artilleryoperator}
 \end{figure}
@@ -144,7 +144,7 @@ The primary goal of this experiment was to assess the overhead of the adapter in
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=2.4in]{pointExperiment}
+    \centerline{\includegraphics[height=2.4in]{pointExperiment}}
     \caption{Point-to-point experiment}
     \label{fig:point}
 \end{figure}
@@ -162,7 +162,7 @@ The overhead was calculated by processing the averages of the measured CPU resou
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=3in]{Results/PtP/Cpu-PtP}
+    \centerline{\includegraphics[height=3.5in]{Results/PtP/Cpu-PtP}}
     \caption{Adapter CPU overhead in the point-to-point experiment - 100 bytes (payload size)}
     \label{fig:cpuPtp}
 \end{figure}
@@ -196,14 +196,14 @@ As can be seen in Figure \ref{fig:memCostPtp}, the used memory of the adapter gr
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=3.2in]{Results/PtP/Memory-PtP}
+    \centerline{\includegraphics[height=3.4in]{Results/PtP/Memory-PtP}}
     \caption{Adapter memory overhead in the point-to-point experiment - 100 bytes (payload size)}
     \label{fig:memPtp}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=3.2in]{Results/PtP/MemoryCost_PtP}
+    \centerline{\includegraphics[height=3.4in]{Results/PtP/MemoryCost_PtP}}
     \caption{Adapter memory cost in the point-to-point experiment - 100 bytes (payload size)}
     \label{fig:memCostPtp}
 \end{figure}
@@ -215,7 +215,7 @@ The overhead was calculated by processing the averages of the measured latency i
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=3.4in]{Results/PtP/Latency-PtP}
+    \centerline{\includegraphics[height=3.5in]{Results/PtP/Latency-PtP}}
     \caption{Adapter latency cost in the point-to-point experiment - 100 bytes (payload size)}
     \label{fig:latPtP}
 \end{figure}
@@ -241,14 +241,14 @@ In future work this experiment should be repeated for larger payload sizes, up t
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=3.4in]{Results/PtP_Size/Cpu-PtP_Size}
+    \centerline{\includegraphics[height=3.5in]{Results/PtP_Size/Cpu-PtP_Size}}
     \caption{Adapter CPU cost in the point-to-point experiment - 480 request/s (arrival rate)}
     \label{fig:payloadCpuPtP}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=3in]{Results/PtP_Size/Latency-PtP_Size}
+    \centerline{\includegraphics[height=3.5in]{Results/PtP_Size/Latency-PtP_Size}}
     \caption{Adapter Latency cost in the point-to-point experiment - 480 request/s (arrival rate)}
     \label{fig:payloadLatPtP}
 \end{figure}
@@ -262,7 +262,7 @@ The primary goal of this experiment was to see if the adapter overhead is signif
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=1.8in]{routingExperiment}
+    \centerline{\includegraphics[height=1.8in]{routingExperiment}}
     \caption{Weighted point to point experiment}
     \label{fig:routExp}
 \end{figure}
@@ -274,7 +274,7 @@ cpu cores utilized by the adapter and demo applications.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=3in]{Results/R/Cpu-R}
+    \centerline{\includegraphics[height=3.3in]{Results/R/Cpu-R}}
     \caption{CPU used in the routing experiment - 480 request/s (arrival rate) 100 bytes (payload size)}
     \label{fig:routCpu}
 \end{figure}
@@ -304,7 +304,7 @@ The utilized memory of the adapter and demo applications in this experiment is d
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=3in]{Results/R/Memory-R}
+    \centerline{\includegraphics[height=3.3in]{Results/R/Memory-R}}
     \caption{Memory used in the routing experiment - 480 request/s (arrival rate) 100 bytes (payload size)}
     \label{fig:routMem}
 \end{figure}
@@ -322,7 +322,7 @@ In the other data points, the latency remains relatively constant, this mainly d
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=3in]{Results/R/Latency-R}
+    \centerline{\includegraphics[height=3.3in]{Results/R/Latency-R}}
     \caption{Request latency in the routing experiment - 480 request/s (arrival rate) 100 bytes (payload size)}
     \label{fig:routLatency}
 \end{figure}
@@ -335,7 +335,7 @@ The topology is represent in Figure \ref{fig:biPart}.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=2.4in]{bipartExperiment}
+    \centerline{\includegraphics[height=2.7in]{bipartExperiment}}
     \caption{Bi-partition experiment}
     \label{fig:biPart}
 \end{figure}
@@ -351,22 +351,22 @@ The outcomes of the ''point-to-point'' and ''bi-partition'' experiments are equi
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=3in]{Results/Bp/Cpu-Bp}
-    \caption{Adapter CPU overhead in the bi-partition experiment \\\hspace{\textwidth} 100 bytes (payload size)}
+    \centerline{\includegraphics[height=3.5in]{Results/Bp/Cpu-Bp}}
+    \caption{Adapter CPU overhead in the bi-partition experiment - 100 bytes (payload size)}
     \label{fig:biPartCPU}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=3in]{Results/Bp/Memory-Bp}
-    \caption{Adapter memory overhead in the bi-partition experiment \\\hspace{\textwidth} 100 bytes (payload size)}
+    \centerline{\includegraphics[height=3.5in]{Results/Bp/Memory-Bp}}
+    \caption{Adapter memory overhead in the bi-partition experiment - 100 bytes (payload size)}
     \label{fig:biPartMem}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=3in]{Results/Bp/Latency-Bp}
-    \caption{Adapter latency overhead in the bi-partition experiment \\\hspace{\textwidth} 100 bytes (payload size)}
+    \centerline{\includegraphics[height=3.5in]{Results/Bp/Latency-Bp}}
+    \caption{Adapter latency overhead in the bi-partition experiment - 100 bytes (payload size)}
     \label{fig:biPartLatency}
 \end{figure}
 
