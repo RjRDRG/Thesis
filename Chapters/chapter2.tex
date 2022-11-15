@@ -41,7 +41,7 @@ Any small change involves building and re-deploying the entire monolith.
 
 \paragraph{}
 
-Several techniques are used in the microservice architecture to meet the requirements of system scalability and high availability.
+Several techniques are used in the microservice architecture to meet the requirements of system scalability and high availability, namely:
 
 \begin{figure}[htbp]
     \centering
@@ -50,7 +50,7 @@ Several techniques are used in the microservice architecture to meet the require
     \label{fig:monoliths and microservices}
 \end{figure}
 
-\paragraph{Componentization}
+\paragraph{- Componentization -}
 
 In contrast to monoliths, which achieve componentization solely via the use of libraries and programming language capabilities,
 microservices achieve componentization primarily through the division of different business domains and functionalities into distinct executables
@@ -66,7 +66,7 @@ its primary benefit is that services become independently deployable.
 This feature helps to fulfill the requirements of system scalability and high availability by
 making different components scalable across multiple nodes and limiting cascading errors via the replication and isolation of components.
 
-\paragraph{Decentralized Data Management}
+\paragraph{- Decentralized Data Management -}
 
 While monolithic applications typically use a single logical database for persistent data, microservices provide greater flexibility, fault tolerance,
 and scalability by allowing each service to manage its own database, which can be a different instance of the same database technology or a completely different database system.
@@ -80,7 +80,7 @@ These properties are more difficult to fulfill in a distributed context than in 
 Microservice architectures advocate for transaction-less service coordination with eventual consistency.
 The divergence between different services is addressed with the use of compensating operations instead of transactions.
 
-\paragraph{Inter-process Communication Strategies}
+\paragraph{- Communication Channel -}
 
 \citeauthor{microservices}, a well-known author in the context of microservices, promotes the use of ''smart endpoints'' and ''dumb pipes'' for microservices communication.
 Enterprise Service Buses (ESB) \cite{esb} were previously commonly used in service-oriented architecture (SOA) systems,
@@ -93,7 +93,7 @@ This approach had several flaws, the tooling was complex and expensive, and it w
 The reverse approach has been adopted with microservices,
 where services own their domain-centric logic ''smart endpoints'' and transport messages via ''dumb pipes''.
 
-\paragraph{Distributed transaction patterns}
+\paragraph{- Communication Strategies -}
 The majority of communication between microservices is done via request/response-based communication or event-driven messaging.
 
 \paragraph{}
@@ -127,10 +127,9 @@ If the business domain is well-defined, the requirements of independent replacem
 \section{Software Provisioning} % (fold)
 \label{sec:software_provisioning}
 
-Because monolithic systems scale vertically, they can be provisioned easily;
-however, because distributed applications scale horizontally, two fundamental ingredients are required to support their provisioning:
-a method for packaging and isolating services,
-and a management system capable of supplying physical hardware to support them.
+To provision distributed systems two fundamental ingredients are required:
+a method for packaging and isolating services;
+a system capable of managing physical hardware to support services.
 
 \paragraph{}
 
@@ -207,7 +206,7 @@ An example of a typical continuous deployment (CD) pipeline is shown in Figure ~
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=2.8in]{pipelineExample}
+    \includegraphics[height=2.9in]{pipelineExample}
     \caption{CD Pipeline Example}
     \label{fig:pipeline_example}
 \end{figure}
@@ -222,10 +221,10 @@ After passing all live testing phases, the code is considered as part of the sys
 \paragraph{}
 
 There are less complex pipeline architectures that automate fewer tasks.
-A continuous integration (CI) pipeline is a subset of continuous deployment pipeline,
-that only defines a strategy for continuously integrating and merging code from multiple sources.
+A continuous integration (CI) pipeline contains a subset of the tasks of CD pipeline.
+It only defines a strategy for continuously integrating and merging code from multiple sources.
 Continuous delivery pipeline is an extension of CI, that enables the automation of deployments to a staging environment where the software is tested in sequential phases.
-A continuous deployment pipeline goes a step further by defining a strategy for automating the deployment and scaling of software in a production environment.
+A continuous deployment (CD) pipeline goes a step further by defining a strategy for automating the deployment and scaling of software in a production environment.
 
 
 

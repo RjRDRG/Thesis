@@ -134,7 +134,7 @@ average of the reported 30 periods.
 \label{sec:experiments}
 
 Four experiments were carried out in order to test the implementation of the prototype:
-the point-to-point experiment, the weighted point-to-point experiment, the bi-partition experiment, and the live contract upgrade experiment.
+the point-to-point experiment, the weighted point-to-point experiment, the bi-partition experiment, and the live contract evolution experiment.
 The experiments are detailed below.
 
 \subsection{Point to Point Experiment}
@@ -316,35 +316,38 @@ The results obtained confirm the expectation.
 \paragraph{}
 
 Figure ~\ref{fig:routLatency} shows the request latency as the proportion of adapted requests increases.
-It is expected that the latency will steadily increase as the proportion of requests routed through the adapter increases, because of the same reasons previously stated.
-When we compare the first and last data points in Figure ~\ref{fig:routCpu}, we can see that the latency has doubled as expected.
-In the other data points, the latency remains relatively constant, this mainly due to the error introduced by the short test duration, we intend to repeat this test with a longer time window.
+It is expected that the latency will steadily increase, because of the same reasons previously stated.
+When comparing the first and last data points, we can see that the latency has doubled as expected.
+In the other data points, the latency remains relatively constant, this mainly due to the error introduced by the short test duration.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=3in]{Results/R/Latency-R}
-    \caption{Request latency in the routing experiment \\\hspace{\textwidth} 480 request/s (arrival rate) 100 bytes (payload size)}
+    \caption{Request latency in the routing experiment - 480 request/s (arrival rate) 100 bytes (payload size)}
     \label{fig:routLatency}
 \end{figure}
 
-\newpage
+\subsection{Bi-partition Experiment}
+
+The goal of the experiment was to see if the conclusions obtained from the point-to-point experiment are also applicable in scenarios with multiple microservices.
+The experiment is composed by two disjoint sets of microservices, where the first set receives request from the artillery workers and forward the requests to the second of microservices.
+The topology is represent in Figure ~\ref{fig:biPart}.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=2.4in]{bipartExperiment}
-    \caption{bi-partition experiment}
+    \caption{Bi-partition experiment}
     \label{fig:biPart}
 \end{figure}
 
-\paragraph{Bi-partition}
+\paragraph{}
 
-The topology of this experiment is represent in Figure ~\ref{fig:biPart}.
-This experiment is composed by two disjoint sets of microservices, where the first set receives request from the artillery workers and forward the requests to the second of microservices.
-We first established a baseline of comparison by doing the tests without the adapter.
-Then we upgraded all the microservices in the second set and added adapters to support communication across the disjoint sets.
-The goal of this experiment was to see if the conclusions obtained from the point-to-point experiment are also applicable in scenarios with multiple microservices.
+First, it was established a baseline of comparison by doing the tests without the adapter,
+then, it was upgraded all the microservices in the second set and added adapters to support communication across the disjoint sets.
 
-The outcomes of the "point-to-point" and "bi-partition" experiments are equivalent, as seen in the Figures ~\ref{fig:biPartCPU}, ~\ref{fig:biPartMem} and ~\ref{fig:biPartLatency}.
+\paragraph{}
+
+The outcomes of the ''point-to-point'' and ''bi-partition'' experiments are equivalent, as seen in the Figures ~\ref{fig:biPartCPU}, ~\ref{fig:biPartMem} and ~\ref{fig:biPartLatency}.
 
 \begin{figure}[htbp]
     \centering
@@ -366,3 +369,7 @@ The outcomes of the "point-to-point" and "bi-partition" experiments are equivale
     \caption{Adapter latency overhead in the bi-partition experiment \\\hspace{\textwidth} 100 bytes (payload size)}
     \label{fig:biPartLatency}
 \end{figure}
+
+\subsection{Live Contract Evolution Experiment}
+
+\textbf{TODO}

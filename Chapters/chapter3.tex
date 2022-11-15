@@ -14,12 +14,15 @@
 \section{Web API Description Languages} % (fold)
 \label{sec:web_api_description_languages}
 
-Web service development has risen dramatically in recent years;  unlike statically linked library APIs,
+Web service development has risen dramatically in recent years,  unlike statically linked library APIs,
 where developers may choose to stick with an earlier version that met their needs, with web APIs,
 the provider can discontinue a specific version and capability at any moment, changes are immediate and irreversible.
 This represents a heavy burden for developers of client modules as it causes an endless struggle to keep up
-with changes pushed by the web API providers; this load is exacerbated if the web API is inadequately documented.
+with changes pushed by the web API providers.
+This load is exacerbated if the web API is inadequately documented.
+
 \paragraph{}
+
 Web API Description Languages (WADL) are domain-specific languages used to describe web service contracts in a standardized structure;
 also sometimes referred to as interface description languages (IDLs).
 These structured descriptions may be used to produce documentation for human programmers, that is easier to read than free-form documentation,
@@ -160,7 +163,7 @@ These standards and some methods are also applicable in a micro-service setting:
     \item \textbf{Maintainability -} This standard assesses the difficulty of maintaining system's that employ the relevant evolutionary method.
 \end{itemize}
 
-Below we offer a summary of the common approaches used to support the evolution of microservices,
+Below, it is presented a summary of the common approaches used to support the evolution of microservices,
 along with their strengths and shortcomings in regard to the standards outlined above.
 
 \subsection{Hand-off Period} % (fold)
@@ -186,7 +189,7 @@ request body schemas are problematic because it would be necessary to write dist
 This approach can add significant amount of effort to the development team because each breaking change requires all the serialization rules to be rebuilt,
 in order to support the format of the new revised schemas.
 Schemas with multiple serialization rules also tend to become unreadable.
-Furthermore, this approach doesn't offer any safety guarantees;
+Furthermore, this approach doesn't offer any safety guarantees,
 a developer might easily make the error of deleting a serialization rule that is still in use.
 
 \subsection{Schema Resolution Rules} % (fold)
@@ -232,7 +235,7 @@ Most serialization protocols include built-in support for the evolution of contr
 however, if the HTTP communication protocol is adopted, the aforementioned serialization protocols will be unable to manage changes in the signature of endpoints
 (e.g.\ changing the method of HTTP endpoint's from GET to POST); only changes in record schemas will be managed in this case.
 To support the evolution of endpoint signatures, this approach will need to be supplemented the deprecation of endpoints discussed above.
-To decrease the complexity of contract evolutions, we believe it is beneficial to handle both the evolution of schemas, and the evolution of Web API's in a single integrated approach.
+To decrease the complexity of contract evolutions, it is beneficial to handle both the evolution of schemas, and the evolution of Web API's in a single integrated approach.
 
 \subsection{Chain of adapters} % (fold)
 \label{sec:chain_of_adapters}
@@ -250,13 +253,11 @@ The previous implementations are replaced by adapters that translate the request
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=2.0in]{chain}
+    \includegraphics[height=2.2in]{chain}
     \caption{Chain of Adapters structure
     after n versions have been published }
     \label{fig:chain}
 \end{figure}
-
-\paragraph{}
 
 Updating a service's API in this manner requires the developer to do two additional tasks:
 \begin{itemize}
@@ -310,14 +311,14 @@ The proposed approach to microservice contract evolution \cite{seco2020robust} m
 as well, as dynamically generated proxies that are capable of adapting messages exchanged between modules when contracts mismatch.
 The following example demonstrates the mechanism.
 
-\paragraph{}
-
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=5in]{adapter_example}
     \caption{Evolution of modules Catalog, Marketing, Backoffice \cite{seco2020robust}}
     \label{fig:evolution_of_modules}
 \end{figure}
+
+\paragraph{}
 
 Consider the marketing system shown in Figure ~\ref{fig:evolution_of_modules} that comprises three distinct modules: Catalog, Marketing, and BackOffice.
 These three simple modules combined, form a triangle of dependencies, complex enough to demonstrate the proposed mechanism.
@@ -431,7 +432,7 @@ while discontinuing the previous implementation without incurring downtime.
 
 \paragraph{}
 
-These strategies will be beneficial in the context of our solution since all service updates will evolve the immediate termination of the prior implementation,
+These strategies will be beneficial in the context of the proposed solution since all service updates will evolve the immediate termination of the prior implementation,
 as it is no longer required to keep several versions available to offer backwards compatibility in service contracts.
 
 \paragraph{}
@@ -470,7 +471,7 @@ All of these API management requirements can only be met with the assistance of 
 Microsoft Azure's API Management Platform (AAMP) is an example of a system that provides tool's with the functionalities mentioned above.
 For example, in this platform, programmers are allowed to specify transformations in policy statements, that are performed on all responses from a microservice.
 The main use case of these transformations in AAMP is the integration of legacy backends by modernizing their APIs and making them accessible from cloud services, without the risk of migration.
-This tool inspired our approach, which aims to allow similar transformations to be specified in both request and response messages.
+This tool inspired the proposed approach, which aims to allow similar transformations to be specified in both request and response messages.
 
 \paragraph{}
 
@@ -489,5 +490,5 @@ The AAMP's other responsibilities and functionalities include:
 \end{itemize}
 
 Most of the aforementioned features are supported by the Kubernetes ecosystem and its extensions.
-Our approach can be viewed as API management tool that solely focus on the evolution of API's,
+The proposed approach can be viewed as API management tool that solely focus on the evolution of API's,
 we aim to make it compatible with existing API management tools in the Kubernetes ecosystem that cover other functionalities.
