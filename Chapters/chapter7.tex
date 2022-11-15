@@ -28,7 +28,7 @@ which enables its compatibility with other management tools.
 The proposed solution requires the documentation of the services capabilities, dependencies and consumed computational resources.
 These aspects were documented using conventional description languages (eg. OpenAPI contracts and Helm charts).
 The only additional documentation necessary is the specification of contract evolutions, which is minimized
-via an IDE tool that automatically identifies unmodified service procedures and possible contract evolutions (section ~\ref{sec:evolution_representation}).
+via an IDE tool that automatically identifies unmodified service procedures and possible contract evolutions (section \ref{sec:evolution_representation}).
 
 \paragraph{}
 
@@ -62,5 +62,13 @@ The current implementation supports the specification of function resolutions vi
 the adoption of a formal language would make the compatibility verification process more robust and enable the adapter to be implemented in programming languages other than Java.
 
 \textbf{TODO: ontology}
+
+Information collected about the active services and dependencies between
+procedures can be translated into an ontology language and stored in a registry. The main
+advantage of this approach is that the registry can be integrated with a reasoning system
+capable of performing deductive inferences, such as seeing the impact of a service failure
+across the system, and the resulting cascading failures. This approach delivers richer data
+and reduces the burden in the development of other API management tools, however,
+this approach falls outside the scope of this thesis and has not been explored.
 
 

@@ -11,15 +11,9 @@
 \chapter{Implementation}
 \label{cha:implementation}
 
-In this chapter, we present the implementation of our system.
-We begin by offering an overview of system's architecture,
-before delving into the implementation of each module in depth.
-
 \section{Architecture} % (fold)
 \label{sec:architecture}
-
-
-The system was built using a modular approach;
+The system was built using a modular approach,
 each module is entirely self-contained, making it simple to expand or replace system functionality.
 The system architecture is split into two distinct areas: the runtime, and the pipeline.
 The runtime architecture comprises all essential components to the system liveness,
@@ -29,25 +23,9 @@ whereas the pipeline architecture covers all components needed during the system
 \label{sec:runtime_architecture}
 
 The runtime environment is supported by Kubernetes,
-a simplified configuration with three microservices is depicted in Figure ~\ref{fig:runtime},
-in this example, we have one micro-service that has undergone three major API changes the accounts micro-service, and
-two micro-services that rely on it, the inventory micro-service that was updated to account for the changes, and the shipping micro-service which is two versions behind.
-
-In Kubernetes a microservice is internally accessible through the Service abstraction;
-a Service defines a policy for accessing a logical set of Pods via a load balancer with a
-unique IP address that can be discovered thorough an environment variable, or an DNS name.
-The containers of a pod are selected in services policies by attributing names to their exposed ports and assigning the same name on the target port of the service policy.
-In adapter containers we expose one port for each of the supported versions and name each port with the respective version.
-
-We define one service for each major version that is still being consumed, as shown in Figure ~\ref{fig:runtime},
-older versions are supported by the adapter, while the most up to date version is directly supported by the microservice app.
-A consumer accesses a producer app via the service that haves the same version as the one that it's expected in the static code.
-When a microservice app is upgraded via a rolling update \footnote{A rolling update gradually replaces old replicas with new replicas},
-the services never become unavailable, they point either to the adapter containers or the application containers, depending on whether the affected pods finished the upgrade process,
-whereas in the traditional approach all consumers would need to be upgraded in tandem with consumed services in order to avoid downtime.
-
-The only novel module introduced in the runtime environment is the proxy adapter;
-the forthcoming modules are either developer tools or are invoked on stages of the DevOps pipeline.
+a simplified configuration with three microservices is depicted in Figure \ref{fig:runtime}.
+In this example, one micro-service has undergone three major API changes (the accounts micro-service).
+The inventory micro-service, which is dependent on the previous service, has been updated to reflect the changes, but the shipping micro-service has not been updated and is two versions behind.
 
 \begin{figure}[htbp]
     \centering
@@ -56,22 +34,43 @@ the forthcoming modules are either developer tools or are invoked on stages of t
     \label{fig:runtime}
 \end{figure}
 
+In Kubernetes a microservice is internally accessible through the Service abstraction.
+a Service defines a policy for accessing a logical set of Pods via a load balancer with a
+unique IP address that can be discovered thorough an environment variable, or an DNS name.
+The containers of a pod are selected in services policies by attributing names to their exposed ports and assigning the same name on the target port of the service policy.
+In adapter containers, one port is exposed for each of the supported contract versions and named with the version number.
+
+\paragraph{}
+
+It is defined one service for each contract version that is still being consumed, as shown in Figure \ref{fig:runtime}.
+Older versions are supported by the adapter, while the most up to date version is directly supported by the microservice app.
+A consumer accesses a producer app via the service that has the same version as the one specified in its code.
+
+\paragraph{}
+
+When a microservice app is upgraded via a rolling update \footnote{A rolling update gradually replaces old replicas with new replicas},
+the services never become unavailable:
+they point either to the adapter containers or the application containers, depending on whether the affected pods finished the upgrade process.
+Whereas in the traditional approach all consumers would need to be upgraded in tandem with consumed services in order to avoid downtime.
+
+\paragraph{}
+
+The only novel module introduced in the runtime environment is the proxy adapter;
+the forthcoming modules are either developer tools or are invoked on stages of the DevOps pipeline.
+
 \subsection{DevOps Pipeline Architecture} % (fold)
 \label{sec:devops_pipeline_architecture}
 
-A proof-of-concept deployment pipeline as developed, its architecture is depicted in Figure ~\ref{fig:pipeline}.
-The nodes on the left side of the graph represent the pipeline;
-development stages are represented in green, while operational stages are represented in red.
+A proof-of-concept deployment pipeline was developed, its architecture is depicted in Figure \ref{fig:pipeline}.
+The nodes on the left side of the graph represent the pipeline.
+The development stages are represented in green, while operational stages are represented in red.
 The other nodes on the graph's reflect the resources used in each stage.
 External resources are depicted in blue, while the novel modules developed in this thesis are depicted in black.
-Two novel stages were introduced in the development phase: the writing of service contracts, and the specification of contract evolutions.
-These two stages are skipped if a service only underwent changes that did not affect its API or dependencies.
-We also introduced two novel stages in the development phase:
-the verification of the service compatibility with the rest of the system, and the generation of adapter component.
 
-The pipeline was developed using the Jenkins pipeline suite, each of the novel stages is supported by a distinct Java application that is pulled from version control
-and executed directly on the pipeline, whereas the other stages are supported natively by the Jenkins suite toolkit.
-The modules that enable each novel stage will be discussed in detail in the following section.
+\paragraph{}
+
+Two novel stages were introduced in the development pipeline section: the writing of service contracts, and the specification of contract evolutions.
+These two stages are skipped if a service only underwent changes that did not affect its API or dependencies.
 
 \begin{figure}[htbp]
     \centering
@@ -80,7 +79,14 @@ The modules that enable each novel stage will be discussed in detail in the foll
     \label{fig:pipeline}
 \end{figure}
 
-\newpage
+It was also introduced two novel stages in the operational pipeline section:
+the verification of the service compatibility with the rest of the system, and the generation of adapter component.
+
+\paragraph{}
+
+The pipeline was developed using the Jenkins pipeline suite, each of the novel stages is supported by a distinct Java application that is pulled from version control
+and executed directly on the pipeline, whereas the other stages are supported natively by the Jenkins suite toolkit.
+The modules that enable each novel stage will be discussed in detail in the following sections.
 
 \section{Contract Representation} % (fold)
 \label{sec:contract_representation}
@@ -96,8 +102,8 @@ that would need to be constantly maintained in order to support changes in new v
 
 To represent records in messages, it was chosen the JSON format, because of its simplicity and widespread adoption.
 There are more performant formats that have a binary representation,
-however such formats are usually not supported by front-end frameworks and for the purpose of this prototype
-we are not interested in measuring the performance of different object serialization protocols, since
+however such formats are typically not supported by front-end frameworks, and for the purpose of this prototype
+it is not important to measure the performance of different object serialization protocols, since
 there are already sources that provide comparisons in this regard between XML, JSON, Protobuf, Thrift and other popular formats \cite{serializationBenchmark}.
 
 \paragraph{}
@@ -105,23 +111,23 @@ there are already sources that provide comparisons in this regard between XML, J
 The schema of JSON records must also be described,
 the OpenAPI specification supports the description of records
 in conjunction with the signature of HTTP endpoints.
-Other JSON schema specification languages, such as the JSON-Schema project
-exist, but using languages other than OpenApi would necessitate decoupling the specification of schemas from the specification
-of HTTP endpoints, which would require additional effort on the part of the developing team to maintain the cross-references
+Other JSON schema specification languages exist, such as the JSON-Schema-Project \textbf{TODO: ref}.
+Using a language other than OpenApi, however, would necessitate decoupling the specification of schemas from the specification of HTTP endpoints.
+This would require additional effort on the part of the developing team to maintain the cross-references
 between each specification manifest, and their versions.
 
 \paragraph{}
 
-A snippet of a "Pet Store" OpenApi contract can be seen in Figure ~\ref{fig:open_contract}.
+A snippet of a ''Pet Store'' OpenApi contract can be seen in Figure \ref{fig:open_contract}.
 In this example we can view the specification of a JSON schema for a Pet data object,
 as well the specification for an HTTP endpoint.
 OpenApi allows properties to be defined robustly with specification of not only their type but also their format, as shown in line 31.
 
 \paragraph{}
 
-The types and formats of properties are standardized between object schemas and http parameters;
-properties have the following data types: string, number, integer, boolean, array, and object;
-while property formats are free-form, there are established conventions for the most common types.
+The types and formats of properties are standardized between object schemas and http parameters.
+Properties have the following data types: string, number, integer, boolean, array, and object.
+Property formats are free-form, yet there are established conventions for the most commonly used formats.
 
 \begin{figure}[htbp]
     \centering
@@ -148,7 +154,7 @@ in the chart definition, because the chart syntax doesn't allow the individual d
 
 \paragraph{}
 
-An example of the definition of service dependencies can be seen in Figure ~\ref{fig:serviceDepedencies}.
+An example of the definition of service dependencies can be seen in Figure \ref{fig:serviceDepedencies}.
 The dependencies of a service are mapped indirectly, each dependency point to a Helm chart that is implicitly associated with one service.
 
 \begin{figure}[htbp]
@@ -163,7 +169,7 @@ The dependencies of a service are mapped indirectly, each dependency point to a 
 The declaration of resources consumed by a service is defined in chart template files.
 For each deployment template it was defined the resources consumed by its containers by
 setting the minimum amount of cpu and memory resources (represented on the requests key) and by setting a limit on these resources (represented on the limits key).
-An example of the definition of a service resources can be seen in Figure ~\ref{fig:serviceResources}.
+An example of the definition of a service resources can be seen in Figure \ref{fig:serviceResources}.
 
 \begin{figure}[htbp]
     \centering
@@ -198,7 +204,7 @@ The evolution of contracts is represented in a custom description language.
 The description only maps the details about the changed procedures of a service,
 it is not necessary to map the evolutions in service dependencies and resource requirements because they can be inferred by comparing the last two contract versions.
 The description language is hierarchical and uses array elements.
-The following Figure ~\ref{fig:evolution_yal} represents its structure, and Figure ~\ref{fig:evolution_example} gives an example.
+The following Figure \ref{fig:evolution_yal} represents its structure, and Figure \ref{fig:evolution_example} gives an example.
 Array elements are depicted by the [.] notation.
 
 \paragraph{}
@@ -248,7 +254,7 @@ These references are replaced in the adapter implementation by their real value.
 \newpage
 
 To minimize the documentation effort it was developed a GUI editor for the facilitates the specification of evolutions.
-Figures ~\ref{fig:editor1} and ~\ref{fig:editor2} show the editor.
+Figures \ref{fig:editor1} and \ref{fig:editor2} show the editor.
 The GUI editor was implemented as an IDE Plugin, the current implementation supports the Intellij integrated development environment.
 
 \paragraph{}
@@ -310,7 +316,7 @@ merging their resolutions (e.g merge[v1->v2, v2->v3] = v1->v3).
 This module begins by querying the active versions of the target service with the Kubectl command-line tool.
 Kubectl is a tool that interfaces with Kubernetes clusters and can be used to inspect and manage cluster resources.
 After determining the active service versions, this module retrieves all evolution specifications up to the oldest version that is still active,
-and then combines them so that all specifications link to the current version. Figure ~\ref{fig:merge} exemplifies the merge process.
+and then combines them so that all specifications link to the current version. Figure \ref{fig:merge} exemplifies the merge process.
 
 \begin{figure}[htbp]
     \centering

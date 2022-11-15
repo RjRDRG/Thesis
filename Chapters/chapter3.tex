@@ -320,7 +320,7 @@ The following example demonstrates the mechanism.
 
 \paragraph{}
 
-Consider the marketing system shown in Figure ~\ref{fig:evolution_of_modules} that comprises three distinct modules: Catalog, Marketing, and BackOffice.
+Consider the marketing system shown in Figure \ref{fig:evolution_of_modules} that comprises three distinct modules: Catalog, Marketing, and BackOffice.
 These three simple modules combined, form a triangle of dependencies, complex enough to demonstrate the proposed mechanism.
 Please note that the Catalog module is a producer, whereas the Marketing module is a producer and a consumer.
 
@@ -334,7 +334,7 @@ These keys enable elements to be identified even after they have been renamed or
 \paragraph{}
 
 Initially, the system composed by a collection of services,
-each service is represented in grey in the first instance of the example depicted in Figure ~\ref{fig:evolution_of_modules}.
+each service is represented in grey in the first instance of the example depicted in Figure \ref{fig:evolution_of_modules}.
 The reference definitions indicate their interactions.
 
 \paragraph{}
@@ -343,11 +343,11 @@ In a second phase, it is developed version 2 of the Catalog and Marketing module
 In the Catalog module, the element ''Amount'' is renamed to ''Price'', and the attribute ''Desc'' is added, while in the Marketing module,
 the attribute ''Promote'' is renamed to ''Enhance''.
 The module BackOffice has not been modified at this point and will become out of sync with the other modules.
-In Figure ~\ref{fig:evolution_of_modules}, the newly added and modified elements are highlighted in red and blue, respectively.
+In Figure \ref{fig:evolution_of_modules}, the newly added and modified elements are highlighted in red and blue, respectively.
 
 \paragraph{}
 
-In a third phase, the Catalog module is upgraded to version 3, where the attribute ''Discount'' of the element ''Product'' is removed.  (Figure ~\ref{fig:evolution_of_modules}).
+In a third phase, the Catalog module is upgraded to version 3, where the attribute ''Discount'' of the element ''Product'' is removed.  (Figure \ref{fig:evolution_of_modules}).
 This version cannot be deployed in conjunction with version 2 of Marketing, as the attribute is used by the function ''Enhance''.
 
 \paragraph{}
@@ -356,7 +356,7 @@ Both modules can be deployed together if the attribute ''Discount'' is removed i
 Additionally, it can be deployed version 3 of Marketing first and then version 3 of Catalog, but not vice versa.
 Furthermore, it is permitted to retain the attribute "Discount" in the specification of the type "Product" in the reference to catalog.
 Correctness is guaranteed as long as the property is not utilized.
-In Figure ~\ref{fig:evolution_of_modules}, the elements that have been removed are highlighted in yellow.
+In Figure \ref{fig:evolution_of_modules}, the elements that have been removed are highlighted in yellow.
 
 \paragraph{}
 

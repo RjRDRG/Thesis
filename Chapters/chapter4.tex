@@ -11,18 +11,14 @@
 \chapter{System Design}
 \label{cha:design}
 
-In this chapter, we present the design of our system and discuss alternatives to the decisions we took in our implementation.
-We dedicate the first half of this chapter to define the goals that guided the design of the system,
-the remainder of the chapter will be used to discuss each design aspect in turn.
-
 \section{Discussion} % (fold)
 \label{sec:discussion}
 
-Recall that the problem we are trying to solve is how to make the process of updating contracts in
+Recall that the problem at hand is how to make the process of updating contracts in
 microservice-based systems more robust, in the sense that it should be harder to deploy a service that could
 potentially break the system soundness.
 There are many approaches to solve this problem, each with its own set of compromises.
-The requirements that guided the design of system, are outlined below by their priority:
+The requirements that guided the design of the system, are outlined below by their priority:
 
 \begin{itemize}
     \item No downtime when upgrading service contracts
@@ -40,6 +36,8 @@ Four criteria were considered when evaluating each approach:
 \textbf{Effectiveness} the efficiency of an approach at solving a problem;
 \textbf{Utility} the effort required to adopt and maintain the approach;
 \textbf{Performance} the overhead associated with approach.
+
+\paragraph{}
 
 In the prototype's design, it was prioritized utility above performance because:
 in the common case, it is expected for most service's to communicate via up-to-date contracts, messages will only need adaptation during a transitory period;
@@ -127,7 +125,7 @@ The downside is that it introduces human error in the verification of un-utilize
 
 In distributed systems there is a lack of tools
 comparable to those used in centralized systems, for visualizing the impact of a change and effort required to implement it.
-In this section, we discuss how such tools could be implemented.
+In this section, it is discussed how such tools could be implemented.
 
 \paragraph{Approach:}
 Since all service contracts declare their dependencies on other services, determining the impact of change can be done by
@@ -152,20 +150,20 @@ An HTTP contract is composed by procedures, each of which contains one request m
 
 Response messages consist of a status code and parameters.
 Different response messages cannot share the same status code.
-The parameters of a response message can be placed in one of three locations: headers, cookies, and body.
+The parameters of a response message can be placed in one of three locations: headers, cookies, or body.
 
 \paragraph{}
 
 Request messages, on the other hand, are composed by an endpoint and parameters.
 The endpoint is comprised by an HTTP method, a domain, and a sequence of path segments.
-The parameters of a request message can be placed in two additional locations: path and query.
+The parameters of a request message can be placed in two additional locations: path or query.
 Parameters placed on headers, cookies, path or query locations cannot have object or collection types.
 
 \paragraph{}
 
 All the contract features listed above can be subject to change as the contract evolves.
 Multiple types of changes can also occur simultaneously in the same contract evolution.
-Below we present a taxonomy of all conceivable HTTP contract changes:
+A taxonomy of all conceivable HTTP contract changes is presented bellow:
 
 \begin{itemize}
     \setlength\itemsep{0em}
@@ -190,7 +188,7 @@ Below we present a taxonomy of all conceivable HTTP contract changes:
 
 \paragraph{Approach:}
 Of all the stated contract changes, the only evolutions that aren't directly supported are "merging/splitting procedures".
-These evolution types can be converted into an equivalent evolution that keeps the affected procedures in the contract but marks them as deprecated while adding the new procedures.
+These evolution types can be converted into an equivalent evolution that keeps the affected procedures in the contract but marks them as deprecated, while adding the new procedures.
 
 \paragraph{}
 Supporting the division of a procedure into multiple procedures is complex because the adapter would have to use distributed transactions to handle the independent failures of each new procedure.
@@ -295,13 +293,22 @@ The application and adapter servers of a microservice are accessible internally 
 A Kubernetes service, is an abstraction that defines a policy for accessing a logical set of containers under a single network address.
 For each version of a service contract a distinct Kubernetes service is created with the corresponding service name and contract version.
 The address of each Kubernetes service is discoverable via an internal DNS server.
+
+\paragraph{}
+
 When a microservice is upgraded, it's Kubernetes services are refreshed with the new addresses of the application and adapter containers.
 The Kubernetes service that previously pointed to the application containers, will now point to the adapter containers, and
 a new Kubernetes service is created to support the new contract.
 All consumers of the previous contract will begin forwarding their requests to the adapter container's rather than the application containers.
+
+\paragraph{}
+
 Consumers that only use unaffected procedures in the contract evolution don't need to direct their calls through the adapter.
 If optimal performance and resource consumption is desired,
 such consumer services will have to be updated and redeployed with the new producer DNS name, in order for their calls to be redirected to the application servers.
+
+\paragraph{}
+
 The redeployment of consumers in the former case can be avoided, if consumers participate in the contract evolution process.
 The adapter server includes a header in responses that contains the address of the application server, and that indicates if a request required adaptation.
 If the request didn't require modifications, consumer services begin to forward the request to the application server instead of the adapter.
@@ -319,15 +326,17 @@ which will use roughly the same computational resources and add the same latency
 \label{sec:adapter_management}
 
 The management of adapters should be automated similarly to the management of services.
-In this section, we discuss how to conciliate the operations related to the management of adapters with the more common operations of service deployment and upgrade.
+In this section, it is discussed how to conciliate the operations related to the management of adapters with the more common operations of service deployment and upgrade.
 
 \paragraph{Approach:}
 During normal operation the adapters don't require any type of management other than monitoring,
 adapters components only need to be provisioned during the upgrade of service contracts.
 A contract upgrade is supported by the re-deployment of the impacted microservice, which is often managed via a continuous deployment pipeline.
 
-We propose to introduce the operations of contract compatibility verification, adapter generation, deployment,
-and removal as additional stages in typical continuous deployment pipelines.
+\paragraph{}
+
+The operations of contract compatibility verification, adapter generation, deployment,
+and removal are introduced as additional stages in typical continuous deployment pipelines.
 The generation of the adapter components could be preformed outside the deployment pipeline,
 this would increase the solution flexibility by allowing developers to manually extend adapters to cover unforeseen corner cases,
 however, it is preferable to generate the adapters in the pipeline so that adapter generation program has clearer view

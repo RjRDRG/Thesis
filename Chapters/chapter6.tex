@@ -17,7 +17,7 @@
 It was constructed a benchmark platform to compare our solution to existing ones.
 This section discusses the proposed benchmark platform's requirements and design.
 \citeauthor{microservices2017benchmark} \cite{microservices2017benchmark} propose an initial set of requirements
-to support repeatable microservices research (Figure ~\ref{fig:benchmark}).
+to support repeatable microservices research (Figure \ref{fig:benchmark}).
 
 \begin{figure}[htbp]
     \centering
@@ -36,7 +36,7 @@ In addition to the requirements listed above, it was considered that the followi
     \item Users must be able to specify how and when each service should evolve via a configuration file or directly through a terminal.
 \end{itemize}
 
-The architecture of the benchmark platform can be seen in Figure ~\ref{fig:canvas}.
+The architecture of the benchmark platform can be seen in Figure \ref{fig:canvas}.
 
 \begin{figure}[htbp]
     \centering
@@ -49,11 +49,11 @@ The architecture of the benchmark platform can be seen in Figure ~\ref{fig:canva
 
 The architecture components, and their applications are described below:
 
-\paragraph{- Kubernetes ~\cite{kubernetes}} is the test environment.
+\paragraph{- Kubernetes \cite{kubernetes}} is the test environment.
 It hosts the services holding the solutions implementations.
 The loading testing scripts are also managed via services in Kubernetes.
 
-\paragraph{- Promotheus ~\cite{turnbull2018monitoring}} is a pull-based monitoring system.
+\paragraph{- Promotheus \cite{turnbull2018monitoring}} is a pull-based monitoring system.
 It periodically sends HTTP scrape requests, the response to these requests is parsed in storage along with the metrics for the scrape itself.
 Prometheus provides a query language that allows the metrics to be aggregated by events, components or metadata.
 The gathered metrics can be consulted by external tools or directly visualized in this platform via dashboards.
@@ -96,7 +96,7 @@ the workers are executed remotely in the cluster and were spread in 6 nodes.
 The workers are supported by Kubernetes pods that are monitored by a common job.
 The workers are installed and removed from cluster using the Artillery-Operator-Project \textbf{TODO: ref}, that enables
 the creation and execution of distributed Artillery load tests from a Kubernetes cluster, at scale.
-The architecture of this tool is depicted in Figure ~\ref{fig:artilleryoperator}.
+The architecture of this tool is depicted in Figure \ref{fig:artilleryoperator}.
 In each experiment all the resources of previous experiments were deleted and a new job and namespace were created in the
 cluster to avoid contamination in the metrics extracted.
 The experiments were carried out sequentially with a 5-minute break in between.
@@ -139,7 +139,7 @@ The experiments are detailed below.
 
 \subsection{Point to Point Experiment}
 
-The topology of this experiment is represent in Figure ~\ref{fig:point}.
+The topology of this experiment is represent in Figure \ref{fig:point}.
 The primary goal of this experiment was to assess the overhead of the adapter in terms of latency and computational resources.
 
 \begin{figure}[htbp]
@@ -157,7 +157,7 @@ by doing the tests without the adapter, and then, the adapter was introduced and
 \paragraph{}
 
 The measured cpu overhead of the adapter over a
-range of request rates is depicted in Figure ~\ref{fig:cpuPtp}.
+range of request rates is depicted in Figure \ref{fig:cpuPtp}.
 The overhead was calculated by processing the averages of the measured CPU resources in the baseline and adapter tests, and then by dividing the two averages.
 
 \begin{figure}[htbp]
@@ -175,7 +175,7 @@ The tested microservices were implemented with the same frameworks as the adapte
 
 \paragraph{}
 
-As can be seen in the results shown Figure ~\ref{fig:cpuPtp} the measured overhead doesn't fall to far outside our expectations, with the exception of the first data point.
+As can be seen in the results shown Figure \ref{fig:cpuPtp} the measured overhead doesn't fall to far outside our expectations, with the exception of the first data point.
 The overhead 84\% is explainable by the configuration of the containers:
 the adapter and demo application containers were initialized in Kubernetes with a default of 100 millicpu (10\% of tested cpu core),
 this cpu resources far exceed the capacity necessary to support a request rate 60 requests/second,
@@ -184,15 +184,15 @@ the overhead was inferior to 100\% because the scheduled cpu resources in the ex
 
 \paragraph{}
 
-Figure ~\ref{fig:memPtp} shows the measured memory overhead of the adapter over a
+Figure \ref{fig:memPtp} shows the measured memory overhead of the adapter over a
 range of request rates.
 The overhead was calculated by processing the averages of the measured memory resources in the baseline and adapter tests, and then by dividing the two averages.
 
 \paragraph{}
 
-The average cost of 190\% in Figure ~\ref{fig:memPtp} is understandable because: although being stateless, the adapter stores two transient messages in memory for each request, the request message and the adapted request message;
+The average cost of 190\% in Figure \ref{fig:memPtp} is understandable because: although being stateless, the adapter stores two transient messages in memory for each request, the request message and the adapted request message;
 the demo application only keeps one request in memory, it stands to reason that the adapter memory cost is roughly double of the demo application.
-As can be seen in Figure ~\ref{fig:memCostPtp}, the used memory of the adapter grows linearly with the request rate, as it was expected.
+As can be seen in Figure \ref{fig:memCostPtp}, the used memory of the adapter grows linearly with the request rate, as it was expected.
 
 \begin{figure}[htbp]
     \centering
@@ -210,7 +210,7 @@ As can be seen in Figure ~\ref{fig:memCostPtp}, the used memory of the adapter g
 
 \newpage
 
-The latency overhead of the adapter in the point-to-point experiment is depicted in Figure ~\ref{fig:latPtP}.
+The latency overhead of the adapter in the point-to-point experiment is depicted in Figure \ref{fig:latPtP}.
 The overhead was calculated by processing the averages of the measured latency in the baseline and adapter tests, and then by dividing the two averages.
 
 \begin{figure}[htbp]
@@ -221,13 +221,13 @@ The overhead was calculated by processing the averages of the measured latency i
 \end{figure}
 
 It is expected for the overhead to be less or equal to 150\%, because the latency overhead is largely attributable to communication costs.
-The adapter introduces an additional communication step ''app1->adapter->app2'' to the baseline communication chain that already haves two steps ''workers->app1'' and ''app1->app2''.
+The adapter introduces an additional communication step ''app1->adapter->app2'' to the baseline communication chain that already has two steps ''workers->app1'' and ''app1->app2''.
 The introduced communication step is expected to have a slightly inferior cost to the other steps, as it is performed via interprocess-calls, while the others are done via a private network with 2 GB of bandwidth.
-The hypothesis is confirmed by the experiment results in Figure ~\ref{fig:latPtP}.
+The hypothesis is confirmed by the experiment results in Figure \ref{fig:latPtP}.
 
 \paragraph{}
 
-The Figures  ~\ref{fig:payloadCpuPtP} and ~\ref{fig:payloadLatPtP} illustrate how larger payload sizes effect the latency and the consumed cpu resources.
+The Figures  \ref{fig:payloadCpuPtP} and \ref{fig:payloadLatPtP} illustrate how larger payload sizes effect the latency and the consumed cpu resources.
 A request rate of 480 request per second was used in this experiment.
 The latency is expected to rise with larger payload sizes because the HTTP packet size is typically 1.5 KB, bigger messages will need to be sent in multiple packets.
 The cpu cost is also expected to rise because the cost of deserialization of messages grows with the message payload size.
@@ -255,7 +255,7 @@ In future work this experiment should be repeated for larger payload sizes, up t
 
 \subsection{Weighted Point to Point Experiment}
 
-The topology of this experiment is represent in Figure ~\ref{fig:routExp}.
+The topology of this experiment is represent in Figure \ref{fig:routExp}.
 This experiment is also composed by the two microservices, where the first microservice forwards a percentage of its request thorough the adapter
 and forwards its remaining requests directly to the other microservice.
 The primary goal of this experiment was to see if the adapter overhead is significantly lower in scenarios where only a small percentage of all requests require adaptation.
@@ -267,7 +267,7 @@ The primary goal of this experiment was to see if the adapter overhead is signif
     \label{fig:routExp}
 \end{figure}
 
-Figure ~\ref{fig:routCpu} depicts the measured CPU cost of the adapter, the horizontal axis represents the percentage of requests that need adaptation, and the vertical axis represents the
+Figure \ref{fig:routCpu} depicts the measured CPU cost of the adapter, the horizontal axis represents the percentage of requests that need adaptation, and the vertical axis represents the
 cpu cores utilized by the adapter and demo applications.
 
 \textbf{TODO. recolor image to blue and legend}
@@ -284,7 +284,7 @@ the adapter implementation will need to launch more client threads which, conseq
     
 \paragraph{}
 
-When comparing the first and last data points in Figure ~\ref{fig:routCpu}, we can see that consumed resources have doubled, as expected.
+When comparing the first and last data points in Figure \ref{fig:routCpu}, we can see that consumed resources have doubled, as expected.
 In the other data points, the overhead remains relatively constant with a margin of error of 20\%,
 this explainable because the default amount of allocated threads by Tomcat (200 threads) is sufficient to handle the arrival rate in these data points.
 When 50\% of requests are routed through the adapter, the arrival rate is 240 requests/s, the tomcat thread model uses a thread per request,
@@ -300,7 +300,7 @@ The test time for this experiment was set to 5 minutes for each data point.
 
 \paragraph{}
 
-The utilized memory of the adapter and demo applications in this experiment is depicted in Figure ~\ref{fig:routMem}.
+The utilized memory of the adapter and demo applications in this experiment is depicted in Figure \ref{fig:routMem}.
 
 \begin{figure}[htbp]
     \centering
@@ -315,7 +315,7 @@ The results obtained confirm the expectation.
 
 \paragraph{}
 
-Figure ~\ref{fig:routLatency} shows the request latency as the proportion of adapted requests increases.
+Figure \ref{fig:routLatency} shows the request latency as the proportion of adapted requests increases.
 It is expected that the latency will steadily increase, because of the same reasons previously stated.
 When comparing the first and last data points, we can see that the latency has doubled as expected.
 In the other data points, the latency remains relatively constant, this mainly due to the error introduced by the short test duration.
@@ -331,7 +331,7 @@ In the other data points, the latency remains relatively constant, this mainly d
 
 The goal of the experiment was to see if the conclusions obtained from the point-to-point experiment are also applicable in scenarios with multiple microservices.
 The experiment is composed by two disjoint sets of microservices, where the first set receives request from the artillery workers and forward the requests to the second of microservices.
-The topology is represent in Figure ~\ref{fig:biPart}.
+The topology is represent in Figure \ref{fig:biPart}.
 
 \begin{figure}[htbp]
     \centering
@@ -347,7 +347,7 @@ then, it was upgraded all the microservices in the second set and added adapters
 
 \paragraph{}
 
-The outcomes of the ''point-to-point'' and ''bi-partition'' experiments are equivalent, as seen in the Figures ~\ref{fig:biPartCPU}, ~\ref{fig:biPartMem} and ~\ref{fig:biPartLatency}.
+The outcomes of the ''point-to-point'' and ''bi-partition'' experiments are equivalent, as seen in the Figures \ref{fig:biPartCPU}, \ref{fig:biPartMem} and \ref{fig:biPartLatency}.
 
 \begin{figure}[htbp]
     \centering
