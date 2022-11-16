@@ -36,22 +36,18 @@ In addition to the requirements listed above, it was considered that the followi
     \item Users must be able to specify how and when each service should evolve via a configuration file or directly through a terminal.
 \end{itemize}
 
-The architecture of the benchmark platform can be seen in Figure \ref{fig:canvas}.
+The architecture of the benchmark platform can be seen in Figure \ref{fig:benchmarkarchitecture}, and its components are described subsequently.
 
 \begin{figure}[htbp]
     \centering
-    \centerline{\includegraphics[height=6.2in]{canvas}}
+    \centerline{\includegraphics[height=4.2in]{benchmark-architecture}}
     \caption{Benchmark platform components}
-    \label{fig:canvas}
+    \label{fig:benchmarkarchitecture}
 \end{figure}
-
-\newpage
-
-The architecture components, and their applications are described below:
 
 \paragraph{- Kubernetes \cite{kubernetes}} is the test environment.
 It hosts the services holding the solutions implementations.
-The loading testing scripts are also managed via services in Kubernetes.
+The load test workers are also deployed as pods in Kubernetes.
 
 \paragraph{- Promotheus \cite{turnbull2018monitoring}} is a pull-based monitoring system.
 It periodically sends HTTP scrape requests, the response to these requests is parsed in storage along with the metrics for the scrape itself.
@@ -60,10 +56,14 @@ The gathered metrics can be consulted by external tools or directly visualized i
 
 \paragraph{- Artillery} \cite{artillery}
 is an open-source performance and reliability testing suite for developers and system administrators.
+The number of load test workers assigned to each experiment is configurable.
+The platform allows for the execution of multiple workers in different machines.
 
-\paragraph{- Jenkins} \cite{jenkins}
-is a free and open automation server.
-It aids in the automation of portions of software development such as building, testing, and deploying, allowing for continuous integration and continuous delivery.
+\paragraph{- Command-line script}
+The command-line tool is used to launch experiment's with a single command.
+Each experiment is represented in a configuration file.
+The platform allows the execution of multiple experiments in sequence without developer intervention.
+The installation and removal of the necessary components for an experiment is automatically handled by the platform.
 
 \section{Evaluation Methodology} % (fold)
 \label{sec:evaluation_methodology}
@@ -103,8 +103,8 @@ The experiments were carried out sequentially with a 5 minutes break in between.
 
 \begin{figure}[htbp]
     \centering
-    \centerline{\includegraphics[height=3.6in]{artillery-operator-architecture}}
-    \caption{Artillery Operator Architecture TODO improve image}
+    \centerline{\includegraphics[height=4.2in]{artillery-operator-architecture}}
+    \caption{Artillery operator architecture}
     \label{fig:artilleryoperator}
 \end{figure}
 
@@ -234,11 +234,6 @@ The CPU cost is also expected to rise because the cost of deserialization of mes
 
 \paragraph{}
 
-The results illustrated don't reveal any difference for the tested range of payload sizes.
-This can be explainable because the tested payload size range of 100 bytes to 2 KB each fits under a single HTTP packet.
-This range has initially selected because most services use HTTP messages that fall under this range.
-In future work this experiment should be repeated for larger payload sizes, up to 2 MB, to see how the adapter scales in this scenario.
-
 \begin{figure}[htbp]
     \centering
     \centerline{\includegraphics[height=3.5in]{Results/PtP_Size/Cpu-PtP_Size}}
@@ -252,6 +247,11 @@ In future work this experiment should be repeated for larger payload sizes, up t
     \caption{Adapter Latency cost in the point-to-point experiment - 480 request/s (arrival rate)}
     \label{fig:payloadLatPtP}
 \end{figure}
+
+The results illustrated don't reveal any difference for the tested range of payload sizes.
+This can be explainable because the tested payload size range of 100 bytes to 2 KB each fits under a single HTTP packet.
+This range has initially selected because most services use HTTP messages that fall under this range.
+In future work this experiment should be repeated for larger payload sizes, up to 2 MB, to see how the adapter scales in this scenario.
 
 \subsection{Weighted Point to Point Experiment}
 
@@ -267,10 +267,10 @@ The primary goal of this experiment was to see if the adapter overhead is signif
     \label{fig:routExp}
 \end{figure}
 
+\paragraph{}
+
 Figure \ref{fig:routCpu} depicts the measured CPU cost of the adapter, the horizontal axis represents the percentage of requests that need adaptation, and the vertical axis represents the
 CPU cores utilized by the adapter and demo applications.
-
-\textbf{TODO. recolor image to blue and legend}
 
 \begin{figure}[htbp]
     \centering
@@ -335,7 +335,7 @@ The topology is represent in Figure \ref{fig:biPart}.
 
 \begin{figure}[htbp]
     \centering
-    \centerline{\includegraphics[height=2.7in]{bipartExperiment}}
+    \centerline{\includegraphics[height=2.5in]{bipartExperiment}}
     \caption{Bi-partition experiment}
     \label{fig:biPart}
 \end{figure}
@@ -372,9 +372,25 @@ The outcomes of the ''point-to-point'' and ''bi-partition'' experiments are equi
 
 \subsection{Live Contract Evolution Experiment}
 
-\textbf{TODO}
+The experiment's goal was to see if a service's throughput would decrease during a contract upgrade.
 
-experimentlivedeploy
+\paragraph{}
+
+The test was performed with the same topology as in the point-to-point experiment.
+A deployment operation, was started at minute 2, and  finished at minute 3.
+In this deployment the proxy adapter was updated, and the contract of one of the services was changed without updating the consumer services.
+
+\paragraph{}
+
+The deployment was made with a rolling update strategy that incrementally updates pod instances with new ones.
+The error rate and timeouts during the experiment were zero.
+The experiment was done with an arrival rate of 960 virtual users/second.
+Multiple arrival rates were tested, it was selected the highest rate that didn't saturate the application and adapter servers.
+
+\paragraph{}
+
+The measured results are depicted in Figure \ref{fig:throughputlive}, demonstrating that there is no change in throughput.
+There was no change, as expected, because the rolling update strategy deletes previous pods only when new pods are active and reachable.
 
 \begin{figure}[htbp]
     \centering

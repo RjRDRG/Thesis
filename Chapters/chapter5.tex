@@ -154,29 +154,45 @@ in the chart definition, because the chart syntax doesn't allow the individual d
 
 \paragraph{}
 
-An example of the definition of service dependencies can be seen in Figure \ref{fig:serviceDepedencies}.
+An example of the definition of service dependencies can be seen in Listing \ref{lst:helm}.
 The dependencies of a service are mapped indirectly, each dependency point to a Helm chart that is implicitly associated with one service.
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=2in]{serviceDepedencies}
-    \caption{Helm chart dependencies definition example}
-    \label{fig:serviceDepedencies}
-\end{figure}
+\paragraph{}
 
-\newpage
+\begin{lstlisting}[language=yaml, caption=Chart.yaml example, label=lst:helm]
+dependencies:
+    - name: nginx
+      version: “1.2.3”
+      repositiry: https://example.com/charts
+    - name: memcached
+      version: “3.2.1”
+      repositiry: https://another.example.com/charts
+\end{lstlisting}
+
+\paragraph{}
 
 The declaration of resources consumed by a service is defined in chart template files.
 For each deployment template it was defined the resources consumed by its containers by
 setting the minimum amount of CPU and memory resources (represented on the requests key) and by setting a limit on these resources (represented on the limits key).
-An example of the definition of a service resources can be seen in Figure \ref{fig:serviceResources}.
+An example of the definition of a service resources can be seen in Listing \ref{lst:resource}.
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=3in]{serviceResources}
-    \caption{Helm Template Resources Definition Example}
-    \label{fig:serviceResources}
-\end{figure}
+\paragraph{}
+
+\begin{lstlisting}[language=yaml, caption=Helm template resources example, label=lst:resource]
+apiVersion: v1
+kind : Pod
+sepc:
+    containers:
+    - name: app
+      image: images.my-company.example/app:v4
+      resouces:
+        request:
+          memory: “64Mi”
+          cpu: “250m”
+        limits:
+          memory: “128Mi”
+          cpu: “500m”
+\end{lstlisting}
 
 \section{Contract Interpretation} % (fold)
 \label{sec:contract_interpretation}
@@ -204,7 +220,7 @@ The evolution of contracts is represented in a custom description language.
 The description only maps the details about the changed procedures of a service,
 it is not necessary to map the evolutions in service dependencies and resource requirements because they can be inferred by comparing the last two contract versions.
 The description language is hierarchical and uses array elements.
-The following Figure \ref{fig:evolution_yal} represents its structure, and Figure \ref{fig:evolution_example} gives an example.
+The following Figure \ref{lst:evolution_yal} represents its structure, and Figure \ref{lst:evolution_example} gives an example.
 Array elements are depicted by the [.] notation.
 
 \paragraph{}
@@ -220,19 +236,57 @@ Function resolutions are written as one line Java expressions that can use param
 parameters are referenced by their location and name (eg. function= {{json|firstName}} + {{json|lastName}} ).
 These references are replaced in the adapter implementation by their real value.
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=4.2in]{EvoExample}
-    \caption{Evolution specification example}
-    \label{fig:evolution_example}
-\end{figure}
+\paragraph{}
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=5in]{evolutionYal}
-    \caption{Evolution specification structure}
-    \label{fig:evolution_yal}
-\end{figure}
+\begin{lstlisting}[language=yaml, caption=Evolution specification example, label=lst:evolution_example]
+methods:
+- endpoint: /pets GET
+  endpoitPrior: /pets GET
+  messages:
+  - parameters:
+    - key: query|tags
+      resolution: link=query|tags
+      type: String
+    - key: query|limit
+      resolution: link=query|limit
+      type: String
+    type: Request
+    typePrior: Request
+  - parameters:
+    - key: json|
+      resolution: link=query|json
+      type: Array
+    type: ´200´
+    typePrior: ´200´
+\end{lstlisting}
+
+\begin{lstlisting}[language=yaml, caption=Evolution specification structure, label=lst:evolution_yal]
+[Methods]: List of the procedures supported by the new service.
+    - Endpoint: The endpoint of the procedure and its HTTP method
+       :in the new contract.
+      Prior Endpoint: The endpoint of the procedure and its HTTP
+       :method in the previous contract
+      [Messages]: The list of the messages exchanged by the
+       :procedure, request messages and response messages.
+        - Type: The response or request type in the new contract
+           :(e.g. REQUEST, 200, 400,… )
+          Prior Type: The response or request type in the
+          :previous contract
+         [Parameters]: The list of the parameters of the message
+          :(e.g. Path, Query, Header, Cookie and Body parameters)
+        - Key: The identifier of parameter, the first segment
+          :represents its location (e.g.Path, Query, Header,
+          :Cookie and Body parameters), the second segment
+          :represents the name of the parameter. Hieratical
+          :Body parameter can be mapped at any level by specifying
+          :the hierarchy path in the parameter name
+          :(e.g. json|specie.class.name; json|specie)
+          Resolution: The specification of a resolution for a
+          :parameter.
+          Type: The parameter type, Number, String, Array or Object
+\end{lstlisting}
+
+\paragraph{}
 
 To minimize the documentation effort it was developed a GUI editor for the facilitates the specification of evolutions.
 Figures \ref{fig:editor1} and \ref{fig:editor2} show the editor.
@@ -268,14 +322,15 @@ If they choose an intermediate property and input a resolution rule, then all ch
 After all parameters are resolved the developer submits the resolutions, and
 the editor outputs an evolution specification file with the same description language presented in the beginning of this section.
 
-\section{Compatiblity Verification} % (fold)
-\label{sec:compatiblity_verification}
+\section{Compatibility Verification} % (fold)
+\label{sec:compatibility_verification}
 
 The compatibility verification process is done by a dedicated module named ''Verifier''.
 This module was implemented in Java as a command-line application.
 The module verifies if the provided evolution specification is valid.
-It starts by checking if all the new contract procedures, messages and parameters are present in the specification,
-then it verifies if all the resolutions for each parameter are valid.
+In Algorithm \ref{alg:evoalg} it is presented the pseudo-code of the compatibility verification process.
+It starts by checking if all the old contract procedures, and messages are present in the specification,
+then it verifies the validity of the resolutions of each parameter in the new contract messages.
 Resolutions can be invalid due to four reasons:
 
 \begin{itemize}
@@ -290,47 +345,88 @@ The present implementation of the verifier module does not check whether the clu
 These functionalities were not implemented since the Helm deployment process already performs these verifications prior to the deployment of a service.
 Nonetheless, including these verifications in the verifier module would be useful in order for the solution to be decoupled from Helm.
 
-\textbf{TODO: pseudo codigo}
-
-\newpage
+\begin{algorithm}
+    \caption{Evolution validation algorithm}\label{alg:evoalg}
+    \begin{algorithmic}[1]
+        \Procedure {ValidateEvolution}{$Evolution$, $PriorContract$, $NewContract$}
+            \State \textbf{assert} $PriorContract.endpoints \subseteq Evolution.methods\rightarrow priorEndpoint$
+            \ForAll {$md \in Evolution.methods$}
+                \State \textbf{assert} $md.endpoint \in NewContract.endpoints$
+                \State $PriorMessages \leftarrow PriorContract.getMessages(md.priorEndpoint)$
+                \State $NewMessages \leftarrow NewContract.getMessages(md.priorEndpoint)$
+                \State \textbf{assert} $PriorMessages \subseteq md.messages$
+                \ForAll {$msg \in md.messages$}
+                    \State \textbf{assert} $msg \in NewMessages$
+                    \State \textbf{assert} $msg.parameters = NewMessages.get(msg).parameters$
+                    \ForAll {$prm \in msg.parameters$}
+                        \State $OldMessage \leftarrow PriorMessages.get(msg.priorType)$
+                        \State \textbf{assert} $VerifyResolution(prm, OldMessage)$
+                    \EndFor
+                \EndFor
+            \EndFor
+        \EndProcedure
+        \Statex
+        \Procedure {VerifyResolution}{$Parameter$, $OldMessage$}
+            \State $Resolution \leftarrow Parameter.resolution$
+            \If {$Resolution.type = Value$}
+                \State \textbf{assert} $Resolution.value\ \textbf{instanceof}\ Parameter.type$
+                \State \textbf{assert} $format(Resolution.value) = Parameter.format$
+            \ElsIf {$Resolution.type = Link$}
+                \State \textbf{assert} $Resolution.parameter \in OldMessage.parameters$
+                \State \textbf{assert} $Resolution.parameter.type = Parameter.type$
+                \State \textbf{assert} $Resolution.parameter.format = Parameter.format$
+            \ElsIf {$Resolution.type = Function$}
+                \State \textbf{assert} $Resolution.function.returnType = Parameter.type$
+                \State \textbf{assert} $Resolution.function.returnFormat = Parameter.format$
+                \ForAll {$arg \in Resolution.function.arguments$}
+                    \State \textbf{assert} $arg \in OldMessage.parameters$
+                \EndFor
+            \EndIf
+        \EndProcedure
+    \end{algorithmic}
+\end{algorithm}
 
 \section{Adapter Generation} % (fold)
 \label{sec:adapter_generation}
 
 The generation of the proxy adapter code is done in a dedicated module named ''Generator''.
 The adapter is generated by populating a template implementation with the information provided in evolution specifications.
-The adapter must be able to support all prior versions that are still in use, and adapt to the last version, in other words,
-a single adapter is used to support the adaptation of multiple versions to the current version.
+The adapter must be able to support all prior versions that are still in use, and adapt them to the last contract version.
+
+\paragraph{}
 
 The evolution specifications only provide information on how to adapt messages from contiguous versions (eg. v1\textrightarrow v2).
 The information necessary to adapt messages from discontinuous versions is obtained by chaining the evolution specifications and
 merging their resolutions (e.g merge[v1\textrightarrow v2, v2\textrightarrow v3] = v1\textrightarrow v3).
-
-This module begins by querying the active versions of the target service with the Kubectl command-line tool.
-Kubectl is a tool that interfaces with Kubernetes clusters and can be used to inspect and manage cluster resources.
-After determining the active service versions, this module retrieves all evolution specifications up to the oldest version that is still active,
-and then combines them so that all specifications link to the current version. Figure \ref{fig:merge} exemplifies the merge process.
+Figure \ref{fig:merge} exemplifies the merge process.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=3in]{merge}
+    \includegraphics[height=2.4in]{merge}
     \caption{Evolution specification merge process}
     \label{fig:merge}
 \end{figure}
 
-A single proxy adapter supports the adaptation of messages for multiple versions of the same service contract.
-The implementation exposes each version of the contract adaptation procedures in a distinct port.
-A Kubernetes service is created for accessing each of the adapter ports.
-It is also possible to version procedures with header parameters,
-but the generated adapter code must be more complex because a single endpoint must be able to adapt messages from multiple versions.
+\paragraph{}
 
-\textbf{TODO: pseudo codigo}
+This module begins by querying the active versions of the target service with the Kubectl command-line tool.
+Kubectl is a tool that interfaces with Kubernetes clusters and can be used to inspect and manage cluster resources.
+After determining the active service versions, this module retrieves all evolution specifications up to the oldest version that is still active,
+and then combines them so that all specifications link to the current version.
 
 \section{Adapter} % (fold)
 \label{sec:adapter}
 
 The adaption approach consists on: for each endpoint the
 adapter re-constructs the entire request from zero and populates the parameter resolutions with the information of the original request.
+
+\paragraph{}
+
+The adapter server exposes each of the supported contract version's in a distinct port.
+A Kubernetes service is created for accessing each of the adapter ports.
+
+\paragraph{}
+
 The {\fontfamily{qtm}\selectfont  Function} resolutions are written as one-line Java expressions.
 The resolutions are injected directly into the template implementation of the adapter, and the parameter references in the resolution are then replaced with the parameters themselves.
 
