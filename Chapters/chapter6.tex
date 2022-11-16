@@ -221,7 +221,7 @@ The overhead was calculated by processing the averages of the measured latency i
 \end{figure}
 
 It is expected for the overhead to be less or equal to 150\%, because the latency overhead is largely attributable to communication costs.
-The adapter introduces an additional communication step ''app1->adapter->app2'' to the baseline communication chain that already has two steps ''workers->app1'' and ''app1->app2''.
+The adapter introduces an additional communication step ''app1\textrightarrow adapter\textrightarrow app2'' to the baseline communication chain that already has two steps ''workers\textrightarrow app1'' and ''app1\textrightarrow app2''.
 The introduced communication step is expected to have a slightly inferior cost to the other steps, as it is performed via interprocess-calls, while the others are done via a private network with 2 GB of bandwidth.
 The hypothesis is confirmed by the experiment results in Figure \ref{fig:latPtP}.
 
@@ -274,7 +274,7 @@ cpu cores utilized by the adapter and demo applications.
 
 \begin{figure}[htbp]
     \centering
-    \centerline{\includegraphics[height=3.3in]{Results/R/Cpu-R}}
+    \centerline{\includegraphics[height=3in]{Results/R/Cpu-R}}
     \caption{CPU used in the routing experiment - 480 request/s (arrival rate) 100 bytes (payload size)}
     \label{fig:routCpu}
 \end{figure}
@@ -304,7 +304,7 @@ The utilized memory of the adapter and demo applications in this experiment is d
 
 \begin{figure}[htbp]
     \centering
-    \centerline{\includegraphics[height=3.3in]{Results/R/Memory-R}}
+    \centerline{\includegraphics[height=3in]{Results/R/Memory-R}}
     \caption{Memory used in the routing experiment - 480 request/s (arrival rate) 100 bytes (payload size)}
     \label{fig:routMem}
 \end{figure}
@@ -322,7 +322,7 @@ In the other data points, the latency remains relatively constant, this mainly d
 
 \begin{figure}[htbp]
     \centering
-    \centerline{\includegraphics[height=3.3in]{Results/R/Latency-R}}
+    \centerline{\includegraphics[height=3in]{Results/R/Latency-R}}
     \caption{Request latency in the routing experiment - 480 request/s (arrival rate) 100 bytes (payload size)}
     \label{fig:routLatency}
 \end{figure}

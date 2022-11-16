@@ -196,12 +196,12 @@ Combining multiple procedures into a single procedure is also costly because the
 The requests of the affected procedures would need to be stored in the adapter before they could be merged and sent through the new endpoint.
 Furthermore, these two types of evolution are cumbersome to be documented in a description language, because the language would need to relate procedures in an N->1 and 1->N relationships.
 
-\subsection{Evolution Specification} % (fold)
+\subsection{Specification of contract evolutions} % (fold)
 \label{sec:evolution_specification}
 
 It is not always possible to implicitly deduce the evolutions in a contract when comparing a new version to a prior version
 (for example, renaming field \textbf{A} to \textbf{B} is indistinguishable, from inserting a new field \textbf{B} and removing a field of the same type \textbf{A}).
-The developer must declare which evolution occurred explicitly.
+The developer must declare explicitly which evolution occurred.
 
 \paragraph{Approach:}
 The evolutions are specified in a manifest file, complete with its own syntax and rules,
@@ -211,10 +211,10 @@ A mapping for one element can fall into one of three types:
 \begin{itemize}
     \item \textbf{Default value}: The developer provides a default value for the element.
     This mapping is only valid if the default value has the same type and format as the element.
-    \item \textbf{Link}: The developer indicates that element X on the previous contract is equivalent to element Y in the new contract.
+    \item \textbf{Link}: The developer indicates that element A on the previous contract is equivalent to element B in the new contract.
     This mapping is only valid if the two elements have the same type and format.
-    \item \textbf{Function}: The developer applies a function over Xn elements of previous contract and indicates that the result of the function is equivalent to element Y in the new contract.
-    This mapping is only valid if the function's output type and format are equal to element Y and if the function's arguments match the type and format of the provided Xn elements.
+    \item \textbf{Function}: The developer applies a function over $X_{n}$ elements of previous contract and indicates that the result of the function is equivalent to element Y in the new contract.
+    This mapping is only valid if the function's output type and format are equal to element Y and if the function's arguments match the type and format of the provided  $X_{n}$ elements.
 \end{itemize}
 Depending on the API evolution a different mapping type is used:
 renamed fields in contracts are supported with the usage of links;
@@ -247,14 +247,14 @@ which circumvents distributed transactions in deployments,
 because container orchestrations tools such as Kubernetes allow the deployment of closely related containers as atomic units known as "pods".
 
 \paragraph{Alternatives:}
-The generated adapter code can be embedded in the service implementation.
+An option, is to have the generated adapter code can be embedded in the service implementation.
 This approach is expected to have higher performance than the previous approach since
 the adapter would use function calls instead of inter-process calls, and because message serialization and de-serialization would be unnecessary.
 The downside of this approach is that it would entail the modification of the service's code, which is problematic because each service can be implemented in a different framework and programming language.
 
 \paragraph{}
 
-Alternatively the adapter can be installed on the nodes of all the consumers of a producer service.
+In another option, the adapter can be installed on the nodes of all the consumers of a producer service.
 This approach is problematic because a service upgrade would entail the re-deployment of all consumers.
 If one of the consumer re-deployments fails, the entire service upgrade would have to be cancelled;
 this is only achievable with the use of distributed transactions, which are inherently complex.

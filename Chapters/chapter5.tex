@@ -24,7 +24,7 @@ whereas the pipeline architecture covers all components needed during the system
 
 The runtime environment is supported by Kubernetes,
 a simplified configuration with three microservices is depicted in Figure \ref{fig:runtime}.
-In this example, one micro-service has undergone three major API changes (the accounts micro-service).
+In this example, one micro-service has undergone three major API changes (the accounts microservice).
 The inventory micro-service, which is dependent on the previous service, has been updated to reflect the changes, but the shipping micro-service has not been updated and is two versions behind.
 
 \begin{figure}[htbp]
@@ -48,7 +48,7 @@ A consumer accesses a producer app via the service that has the same version as 
 
 \paragraph{}
 
-When a microservice app is upgraded via a rolling update \footnote{A rolling update gradually replaces old replicas with new replicas},
+When a microservice app is upgraded via a rolling update,
 the services never become unavailable:
 they point either to the adapter containers or the application containers, depending on whether the affected pods finished the upgrade process.
 Whereas in the traditional approach all consumers would need to be upgraded in tandem with consumed services in order to avoid downtime.
@@ -118,21 +118,21 @@ between each specification manifest, and their versions.
 
 \paragraph{}
 
-A snippet of a ''Pet Store'' OpenApi contract can be seen in Figure \ref{fig:open_contract}.
+A snippet of a \textit{Pet Store} OpenApi contract can be seen in Figure \ref{fig:open_contract}.
 In this example we can view the specification of a JSON schema for a Pet data object,
 as well the specification for an HTTP endpoint.
 OpenApi allows properties to be defined robustly with specification of not only their type but also their format, as shown in line 31.
 
 \paragraph{}
 
-The types and formats of properties are standardized between object schemas and http parameters.
+The types and formats of properties are standardized between object schemas and HTTP parameters.
 Properties have the following data types: string, number, integer, boolean, array, and object.
 Property formats are free-form, yet there are established conventions for the most commonly used formats.
 
 \begin{figure}[htbp]
     \centering
     \centerline{\includegraphics[height=7in]{openContract}}
-    \caption{OpenAPI Contract Example}
+    \caption{OpenAPI contract example}
     \label{fig:open_contract}
 \end{figure}
 
@@ -143,8 +143,8 @@ Helm is package manager for Kubernetes that allows developers to more easily pac
 A chart is a Helm package, composed of a collection of files that describe a related set of Kubernetes resources.
 The most significant components of a Chart are the:
 \begin{itemize}
-    \item The Chart.yaml, that allows the definition of the Chart dependencies and other meta-information about the application such as its name and version.
-    \item The Template's directory, that contains incomplete Kubernetes manifests "Templates" such as Services, Deployments, DaemonSets, Namespaces and so on.
+    \item The Chart.yaml, that allows the definition of the Chart dependencies and other meta-information about the application such as its name and version;
+    \item The Template's directory, that contains incomplete Kubernetes manifests \textit{Templates} such as Services, Deployments, DaemonSets, Namespaces and so on;
     \item The Values.yaml, that contains key-value pairs used to complete the definition of each template, this values can be overridden later when the chart is deployed, the file is used to define the default values.
 \end{itemize}
 A single chart might be used to deploy something simple, like a single kubernetes pod, or something complex, like a complete web app stack with HTTP servers, databases, caches, and so on.
@@ -160,7 +160,7 @@ The dependencies of a service are mapped indirectly, each dependency point to a 
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=2in]{serviceDepedencies}
-    \caption{Helm Chart Dependencies Definition Example}
+    \caption{Helm chart dependencies definition example}
     \label{fig:serviceDepedencies}
 \end{figure}
 
@@ -181,19 +181,19 @@ An example of the definition of a service resources can be seen in Figure \ref{f
 \section{Contract Interpretation} % (fold)
 \label{sec:contract_interpretation}
 
-The interpretation of contract specification is done in a dedicated module named "Parser".
+The interpretation of a contract specification is done in a dedicated module named ''Parser''.
 This module is meant to be used as Java library by other modules,
 it interprets contracts written in OpenApi format and provides a read-only Java interface
 that is agnostic to the original specification format.
 
 \paragraph{}
 
-The implementation of the Parser module uses the Swagger-parser project \cite{swaggerparser} to convert OpenApi contracts into a Java POJO representation, that is accessible via a simplified read-only interface.
-All the forthcoming modules operate under this interface not under the OpenApi format.
-Although it was adopted the OpenApi format the solution is not dependent on it, this module provides a decoupling point.
+The implementation of the parser module uses the Swagger-parser project \cite{swaggerparser} to convert OpenApi contracts into a Java POJO representation, that is accessible via a simplified read-only interface.
+All the forthcoming modules operate under this interface instead of the OpenApi format.
+Although it was adopted the OpenApi format the solution is not dependent on it, as the parser module provides a decoupling point.
 This enables the specification of different contract to be written in different or even mixed WADL,
-as long as the Parser module is extended to support the new WADL's.
-The interpretation of service resources and dependencies written in Helm charts is also supported by the Parser module under a separate interface.
+as long as the parser module is extended to support the new WADL's.
+The interpretation of service resources and dependencies written in Helm charts is also supported by the parser module under a separate interface.
 
 \newpage
 
@@ -209,8 +209,7 @@ Array elements are depicted by the [.] notation.
 
 \paragraph{}
 
-As previously mentioned in the design chapter, resolutions can have one of three distinct types
-DefaultValues, Link or Function.
+As previously mentioned in the chapter \ref{cha:design}, resolutions can have one of three distinct types {\fontfamily{qtm}\selectfont  DefaultValues, Link or Function}.
 The type of resolution is represented in the first segment of a resolution, while the second segment represents the resolution itself.
 Link resolutions have the following format "link={Parameter Location}|{Parameter Name}", the parameter of the prior contract must be of the same type and format.
 Default value resolutions have the following format "default=#Value", the value that must be of the same type and format.
@@ -224,18 +223,20 @@ These references are replaced in the adapter implementation by their real value.
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=4.2in]{EvoExample}
-    \caption{Evolution Specification Example}
+    \caption{Evolution specification example}
     \label{fig:evolution_example}
 \end{figure}
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=5in]{evolutionYal}
-    \caption{Evolution Specification Structure}
+    \caption{Evolution specification structure}
     \label{fig:evolution_yal}
 \end{figure}
 
-\newpage
+To minimize the documentation effort it was developed a GUI editor for the facilitates the specification of evolutions.
+Figures \ref{fig:editor1} and \ref{fig:editor2} show the editor.
+The GUI editor was implemented as an IDE Plugin, the current implementation supports the IntelliJ integrated development environment.
 
 \begin{figure}[htbp]
     \centering
@@ -251,14 +252,6 @@ These references are replaced in the adapter implementation by their real value.
     \label{fig:editor2}
 \end{figure}
 
-\newpage
-
-To minimize the documentation effort it was developed a GUI editor for the facilitates the specification of evolutions.
-Figures \ref{fig:editor1} and \ref{fig:editor2} show the editor.
-The GUI editor was implemented as an IDE Plugin, the current implementation supports the Intellij integrated development environment.
-
-\paragraph{}
-
 The editor compares two contract versions,
 and automatically maps all the elements that haven't changed from one version to the other, the
 developer is left with the task of explicitly mapping the remaining elements.
@@ -270,16 +263,16 @@ afterwards the developer must edit each of the endpoint messages and specify a r
 in a contract, unresolved parameters are highlighted in red.
 The right column holds the resolutions that were already mapped and uppermost left column allows the developer to write rules
 for each unresolved parameter.
-The developer can select leaf parameters in the hierarchy, or can choose intermediate properties.
-If he chooses an intermediate property and inputs resolution rule all child parameters are also resolved.
+The developer can select leaf parameters in the hierarchy, or choose intermediate properties.
+If they choose an intermediate property and input a resolution rule, then all child parameters are also resolved.
 After all parameters are resolved the developer submits the resolutions, and
 the editor outputs an evolution specification file with the same description language presented in the beginning of this section.
 
 \section{Compatiblity Verification} % (fold)
 \label{sec:compatiblity_verification}
 
-The compatibility verification process is done by a dedicated module named "Verifier".
-This module was implemented in java as command-line application.
+The compatibility verification process is done by a dedicated module named ''Verifier''.
+This module was implemented in Java as a command-line application.
 The module verifies if the provided evolution specification is valid.
 It starts by checking if all the new contract procedures, messages and parameters are present in the specification,
 then it verifies if all the resolutions for each parameter are valid.
@@ -287,15 +280,15 @@ Resolutions can be invalid due to four reasons:
 
 \begin{itemize}
     \setlength\itemsep{0em}
-    \item Invalid syntax in resolution expressions
-    \item References parameters that don't exist in the previous contract
-    \item Uses functions that are not supported
-    \item Uses resolutions that have a different type and format then the parameter
+    \item Invalid syntax in resolution expressions;
+    \item References parameters that don't exist in the previous contract;
+    \item Uses functions that are not supported;
+    \item Uses resolutions that have a different type and format then the parameter.
 \end{itemize}
 
-The present implementation of the Verifier module does not test whether the cluster has adequate computational resources to provision the service or whether all service dependencies are alive and reachable.
+The present implementation of the verifier module does not check whether the cluster has adequate computational resources to provision the service or whether all service dependencies are alive and reachable.
 These functionalities were not implemented since the Helm deployment process already performs these verifications prior to the deployment of a service.
-Nonetheless, including these verifications in the Verifier module would be useful in order for the solution to be decoupled from Helm.
+Nonetheless, including these verifications in the verifier module would be useful in order for the solution to be decoupled from Helm.
 
 \textbf{TODO: pseudo codigo}
 
@@ -304,14 +297,14 @@ Nonetheless, including these verifications in the Verifier module would be usefu
 \section{Adapter Generation} % (fold)
 \label{sec:adapter_generation}
 
-The generation of the proxy adapter code is done in a dedicated module named "Generator".
-The adapter is generated by populating a template implementation with the information provided in evolution specs.
+The generation of the proxy adapter code is done in a dedicated module named ''Generator''.
+The adapter is generated by populating a template implementation with the information provided in evolution specifications.
 The adapter must be able to support all prior versions that are still in use, and adapt to the last version, in other words,
 a single adapter is used to support the adaptation of multiple versions to the current version.
 
-The evolution specifications only provide information on how to adapt messages from contiguous versions (eg. v1->v2).
+The evolution specifications only provide information on how to adapt messages from contiguous versions (eg. v1\textrightarrow v2).
 The information necessary to adapt messages from discontinuous versions is obtained by chaining the evolution specifications and
-merging their resolutions (e.g merge[v1->v2, v2->v3] = v1->v3).
+merging their resolutions (e.g merge[v1\textrightarrow v2, v2\textrightarrow v3] = v1\textrightarrow v3).
 
 This module begins by querying the active versions of the target service with the Kubectl command-line tool.
 Kubectl is a tool that interfaces with Kubernetes clusters and can be used to inspect and manage cluster resources.
@@ -321,7 +314,7 @@ and then combines them so that all specifications link to the current version. F
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=3in]{merge}
-    \caption{Evolution Specification Merge Process}
+    \caption{Evolution specification merge process}
     \label{fig:merge}
 \end{figure}
 
@@ -331,15 +324,15 @@ A Kubernetes service is created for accessing each of the adapter ports.
 It is also possible to version procedures with header parameters,
 but the generated adapter code must be more complex because a single endpoint must be able to adapt messages from multiple versions.
 
+\textbf{TODO: pseudo codigo}
+
 \section{Adapter} % (fold)
 \label{sec:adapter}
 
 The adaption approach consists on: for each endpoint the
 adapter re-constructs the entire request from zero and populates the parameter resolutions with the information of the original request.
-The "Function" resolutions are written as one-line java expressions.
+The {\fontfamily{qtm}\selectfont  Function} resolutions are written as one-line Java expressions.
 The resolutions are injected directly into the template implementation of the adapter, and the parameter references in the resolution are then replaced with the parameters themselves.
-
-\textbf{TODO: pseudo codigo}
 
 \paragraph{}
 
@@ -348,7 +341,7 @@ Because TLS is mandatory in HTTP 1.2, the implementation only supports HTTP 1.1.
 
 \paragraph{}
 
-The adapter was built with Spring Boot and an Apache Tomcat/9.0.65 http server, the base image of the adapter docker container is an "openjdk:11-nanoserver".
+The adapter was built with Spring Boot and an Apache Tomcat/9.0.65 HTTP server, the base image of the adapter docker container is an "openjdk:11-nanoserver".
 In order to prevent the JVM from calling garbage collector frequently and reallocating the heap memory while Tomcat is trying to serve requests,
 the JVM has started with a higher maximum heap memory, and the initial heap memory
 size was set to the same value as its maximum memory size.

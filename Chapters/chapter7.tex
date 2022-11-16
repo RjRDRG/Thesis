@@ -57,18 +57,15 @@ The adoption of a Non-blocking I/O (NIO) model could improve performance and lea
 
 \paragraph{}
 
+Information gathered about procedure dependencies can be translated into an ontology language and stored in a registry.
+This approach would provide richer data and reduce the burden in developing other API management tools;
+however, it is outside the scope of this thesis and has not been investigated.
+This aspect could be investigated further in future work.
+
+\paragraph{}
+
 Lastly, it would be interesting to use a formal language to define function resolutions in contract evolution specifications.
-The current implementation supports the specification of function resolutions via one-line java expressions,
+The current implementation supports the specification of function resolutions via one-line Java expressions,
 the adoption of a formal language would make the compatibility verification process more robust and enable the adapter to be implemented in programming languages other than Java.
-
-\textbf{TODO: ontology}
-
-Information collected about the active services and dependencies between
-procedures can be translated into an ontology language and stored in a registry. The main
-advantage of this approach is that the registry can be integrated with a reasoning system
-capable of performing deductive inferences, such as seeing the impact of a service failure
-across the system, and the resulting cascading failures. This approach delivers richer data
-and reduces the burden in the development of other API management tools, however,
-this approach falls outside the scope of this thesis and has not been explored.
 
 
