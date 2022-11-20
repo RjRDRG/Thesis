@@ -17,31 +17,23 @@
 Microservices \cite{microservices, microservices2017tenets, microservicesTomorrow} are an architectural style in which software is developed using self-contained components that
 communicate with one another via standardized network interfaces.
 These services segregate fine-grained business functionalities and can be independently tested, deployed, and scaled by automated mechanisms.
-There is virtually no centralized management, each service may be written in a different programming language and employ a different data storage technology.
-
-\paragraph{}
+There is typically no centralized management, each service may be written in a different programming language and employ a different data storage technology.
 
 To understand the microservice style it's useful to compare it to the monolithic style:
-A monolithic application is built often using the Model-View-Controller (MVC) pattern \cite{mvc}, which is composed by three parts:
+Monolithic application's are built often using the Model-View-Controller (MVC) pattern~\cite{mvc}, which is composed by three parts:
 The view, a client-side user interface composed of HTML pages and Javascript that runs in the user's browser;
 The model, a relational database management system;
 The controller, a server-side application that handles requests, retrieves and updates data from the database, executes domain logic,
 and populates the views that are sent to the browser.
 
-\paragraph{}
-
 The server-side application is a monolith, a single logical executable, in which all logic for handling requests runs as a single process,
 different domains of the application are divided into classes, functions, and namespaces by utilizing the basic features of a programming language.
-
-\paragraph{}
 
 Large monolithic software becomes a barrier when the underlying application must scale while maintaining a high level of availability.
 Scaling the server-side application involves scaling all the application functionalities, rather than the functionalities that require greater resources.
 Any small change involves building and re-deploying the entire monolith.
 
-\paragraph{}
-
-Several techniques are used in the microservice architecture to meet the requirements of system scalability and high availability, namely:
+In contrast to monolithic applications, several techniques are used in the microservice architecture to meet the requirements of system scalability and high availability, namely:
 
 \begin{figure}[htbp]
     \centering
@@ -50,18 +42,16 @@ Several techniques are used in the microservice architecture to meet the require
     \label{fig:monoliths and microservices}
 \end{figure}
 
+//TODO use description
+
 \paragraph{- Componentization -}
 
 In contrast to monoliths, which achieve componentization solely via the use of libraries and programming language capabilities,
 microservices achieve componentization primarily through the division of different business domains and functionalities into distinct executables
 that are exposed as services.
 
-\paragraph{}
-
 While this componentization approach helps to enforce component's encapsulation via more explicit component interfaces,
 its primary benefit is that services become independently deployable.
-
-\paragraph{}
 
 This feature helps to fulfill the requirements of system scalability and high availability by
 making different components scalable across multiple nodes and limiting cascading errors via the replication and isolation of components.
@@ -70,8 +60,6 @@ making different components scalable across multiple nodes and limiting cascadin
 
 While monolithic applications typically use a single logical database for persistent data, microservices provide greater flexibility, fault tolerance,
 and scalability by allowing each service to manage its own database, which can be a different instance of the same database technology or a completely different database system.
-
-\paragraph{}
 
 Decentralizing data responsibility across services has implications for the implementation of cross-domain operations affecting multiple resources.
 The common approach for dealing with the problem of consistency when updating multiple resources in a database system is to use transactions.
@@ -83,12 +71,10 @@ The divergence between different services is addressed with the use of compensat
 \paragraph{- Communication Channel -}
 
 \citeauthor{microservices}, a well-known author in the context of microservices, promotes the use of ''smart endpoints'' and ''dumb pipes'' for microservices communication.
-Enterprise Service Buses (ESB) \cite{esb} were previously commonly used in service-oriented architecture (SOA) systems,
+Enterprise Service Buses (ESB)~\cite{esb} were previously commonly used in service-oriented architecture (SOA) systems,
 and it was common to incorporate orchestration and transformation logic into the communication infrastructure,
 making the ''pipe smart''.
 This approach had several flaws, the tooling was complex and expensive, and it was difficult to solve problems in production environments.
-
-\paragraph{}
 
 The reverse approach has been adopted with microservices,
 where services own their domain-centric logic ''smart endpoints'' and transport messages via ''dumb pipes''.
@@ -96,30 +82,25 @@ where services own their domain-centric logic ''smart endpoints'' and transport 
 \paragraph{- Communication Strategies -}
 The majority of communication between microservices is done via request/response-based communication or event-driven messaging.
 
-\paragraph{}
-
 Request/response-based communication protocols are typically suited for synchronous settings,
 where the client contacts one receiver at time and needs the response before it can continue.
 In this approach there is a clear control of the flow,
 there is a service that plays the role of orchestrator and determines the sequence of operations to be performed in other services.
-The HTTP and RPC protocols are the most widely adopted protocols that follow this approach.
-
-\paragraph{}
+The HTTP~\cite{http} and RPC~\cite{rpc} protocols are the most widely adopted protocols under this approach.
 
 Event-driven messaging communication protocols are suited for asynchronous settings,
-where the client publishes a message to multiple receivers and can process the responses at a later time.
+where a client publishes a message to multiple receivers and can process the responses at a later time.
 In this approach there is no orchestrator, each service knows their role and what to do based on events that occurred.
 The main disadvantage of this strategy is that consistency is not guaranteed when multiple services consume events and one of them fails.
+Kafka~\cite{kafka} is the most widely adopted protocol under this approach.
 
 \paragraph{Decomposition}
 When designing a software system, it's important to decide how the system is divided into distinct components.
-Independent replacement and upgrade-ability are key features to consider when developing a component.
-The problems caused by poor division of concerns are alleviated in the context of microservices, because a system is typically divided into many small components with a single responsibility,
+Independent replacement and upgrade-ability are key features to consider when designing a component.
+The problems caused by poor division of concerns are alleviated in the context of microservices, because a system's are typically divided into small components with a single responsibility,
 whereas in traditional architectures components have wider responsibilities.
 
-\paragraph{}
-
-To reduce the risk of structural refactors, techniques such as Domain-Driven Design (DDD) \cite{ddd} are often used.
+To reduce the risk of structural refactors, techniques such as Domain-Driven Design (DDD)~\cite{ddd} are often used.
 DDD is a software design approach that decomposes a complex system into multiple autonomous bounded contexts,
 where all the software structure (e.g\ methods, classes, variables) match the business domain.
 If the business domain is well-defined, the requirements of independent replacement and upgrade-ability can be met by reflecting business correlations in the software structure.
@@ -127,17 +108,13 @@ If the business domain is well-defined, the requirements of independent replacem
 \section{Software Provisioning} % (fold)
 \label{sec:software_provisioning}
 
-To provision distributed systems two fundamental ingredients are required:
+Two key processes are essential to provision distributed systems:
 a method for packaging and isolating services;
 a system capable of managing physical hardware to support services.
 
-\paragraph{}
-
-The isolation of services is accomplished through resource virtualization in one of two ways: containers or virtual machines (VM).
-Containers provide the most efficient approach because unlike VMs, containers share the host system’s kernel with other containers.
-VMs virtualize an entire machine down to the hardware layers, while containers only virtualize software layers above the operating system level.
-
-\paragraph{}
+Services can be isolated using one of two methods: containers or virtual machines (VM).
+Containers offer the most efficient solution because, unlike virtual machines, they share the host system's kernel with other containers.
+VMs virtualize an entire machine down to the hardware layers, while containers only virtualize the software layers above the operating system level.
 
 Docker \cite{docker} is the most popular container technology. It is built on top of the following kernel systems:
 \begin{itemize}
@@ -146,20 +123,14 @@ Docker \cite{docker} is the most popular container technology. It is built on to
     \item Copy-On-Write File system: Allows several containers to share common data.
 \end{itemize}
 
-\paragraph{}
-
 Additionally, Docker provides a mechanism for packaging code and its dependencies, referred to as container images.
 A container image is an executable package of software that contains all the components necessary to run an application: code, libraries, runtime and settings.
 
-\paragraph{}
-
 The management of services can be accomplished with the use container orchestration technologies.
 Container orchestration eliminates many of the manual processes involved in the management of distributed systems.
-Some popular options used for the lifecycle management of services are Docker Swarm \cite{docker2016swarm} and Kubernetes \cite{kubernetes}.
+Some popular options used for the lifecycle management of services are Docker Swarm~\cite{docker2016swarm} and Kubernetes~\cite{kubernetes}.
 
-\paragraph{}
-
-Kubernetes \cite{kubernetes} is an open-source container orchestration system that evolved from Google's Borg and Omega projects \cite{burns2016borg}.
+Kubernetes~\cite{kubernetes} is an open-source container orchestration system that evolved from Google's Borg and Omega projects~\cite{burns2016borg}.
 It manages the deployment, management, scaling, and networking of containers of distributed systems across a wide range of environments
 and cloud providers.
 This means ensuring that all containers used to execute various workloads are scheduled to run on physical or virtual machines,
@@ -188,42 +159,36 @@ In comparison to Swarm, Kubernetes is more difficult to deploy and manage, howev
 \section{DevOps} % (fold)
 \label{sec:dev_ops}
 
-DevOps can be viewed as a collection of practices designed to accelerate the software development cycle and shorten the time between developing new features and deploying them to production.
+DevOps~\cite{devops} can be viewed as a collection of practices designed to accelerate the software development cycle and shorten the time between developing new features and deploying them to production.
 The term DevOps is derived from the words development and IT operations, and it refers to the combination and automation of the traditional responsibilities of both departments.
-
-\paragraph{}
 
 Traditionally the tasks of development, testing, and deployment were divided among different engineering teams.
 Different teams had different goals, and in the typical scenario, communication between teams was slow and inefficient.
 By automating repetitive operations, DevOps minimizes the need for team coordination and speeds up manual processes that would have taken days or at least several hours.
 Building automated pipelines that are executed after the developer changes the codebase is a common DevOps practice.
 
-\paragraph{}
-
 Pipelines are typically in charge of packaging, testing, and deploying code to testing or production environments.
 If any phase of the automated pipeline fails, the developer receives immediate feedback on which task failed, and the pipeline's execution is halted.
-An example of a typical continuous deployment (CD) pipeline is shown in Figure \ref{fig:pipeline_example}.
+An example of a continuous deployment (CD) pipeline is shown in Figure~\ref{fig:pipeline_example}.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[height=2.9in]{pipelineExample}
-    \caption{CD Pipeline Example}
+    \caption{CD pipeline example}
     \label{fig:pipeline_example}
 \end{figure}
 
-The pipeline is divided into two sub-sections the build and release pipelines.
+The pipeline is divided into two sections the build and release pipelines.
 To reduce the iteration time of software development,
-the steps of the build pipeline can be conducted first on the developer computer and then repeated and verified on the external pipeline.
+the test steps of the build pipeline are conducted first on the developer computer and then repeated and verified on the external pipeline.
 The release pipeline entails the deployment of code into production.
-The code is initially deployed in live testing environments where it is constantly monitored.
-After passing all live testing phases, the code is considered as part of the system and is deployed into the production environment.
-
-\paragraph{}
+The code is initially deployed in staging environments where it is tested and monitored.
+After passing all staging phases, the code is considered as part of the system and is deployed into the production environment.
 
 There are less complex pipeline architectures that automate fewer tasks.
 A continuous integration (CI) pipeline contains a subset of the tasks of CD pipeline.
 It only defines a strategy for continuously integrating and merging code from multiple sources.
-Continuous delivery pipeline is an extension of CI, that enables the automation of deployments to a staging environment where the software is tested in sequential phases.
+Continuous delivery pipeline is an extension of CI, that enables the automation of deployments to staging environments where the software is tested in sequential phases.
 A continuous deployment (CD) pipeline goes a step further by defining a strategy for automating the deployment and scaling of software in a production environment.
 
 

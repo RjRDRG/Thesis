@@ -18,36 +18,24 @@ support the automatic validation of deployment operations.
 Deployments that would lead to irremediably incompatible states are rejected, such as a
 microservice attempting to utilize a deleted or modified endpoint, or a microservice being deployed before its dependencies are alive and reachable.
 
-\paragraph{}
-
 Additionally, the proposed solution was designed over widely adopted workflows and documentation formats, such as DevOp pipelines and the OpenAPI description language,
 which enables its compatibility with other management tools.
-    
-\paragraph{}
 
 The proposed solution requires the documentation of the services capabilities, dependencies and consumed computational resources.
 These aspects were documented using conventional description languages (eg. OpenAPI contracts and Helm charts).
 The only additional documentation necessary is the specification of contract evolutions, which is minimized
 via an IDE tool that automatically identifies unmodified service procedures and possible contract evolutions (section \ref{sec:evolution_representation}).
 
-\paragraph{}
-
 The approach is agnostic to the underling application, all of its components don't require the modification of application microservices or their architecture.
 The solution may be plugged into any distributed application that uses the HTTP communication protocol and runs in a Kubernetes environment.
-
-\paragraph{}
 
 One conclusion drawn from the results is that the latency introduced by an embed adapter is similar to the latency introduced by an additional call between two distinct nodes.
 Thus, installing the adapter in the same node as the adapted service is unnecessary.
 Instead, it would be more beneficial to host the adapter in a different node of the same node pool, and use an adapter with a more generic implementation that can handle the adaptation of multiple services.
 Such an approach would require fewer computational resources since a distinct adapter replica wouldn't need to be installed on every service replica, in other words, a single adapter would serve multiple services.
 
-\paragraph{}
-
 Furthermore, the acquired findings show that the adapter CPU and memory cost grow linearly with the arrival rate of requests that must be adapted.
 If only a small fraction of requests requires adaptation, the computational cost of the adapter will be low in comparison to the cost of the application.
-
-\paragraph{}
 
 In future work, an interesting avenue to explore would be the implementation of the adapter using HTTP server's that support different threading models, the current implementation
 was made under the Blocking I/O (BIO) model.
@@ -55,14 +43,10 @@ In the BIO model, each request is processed by a different thread.
 This adds a significant thread overhead and impairs highly concurrent applications.
 The adoption of a Non-blocking I/O (NIO) model could improve performance and lead to lower CPU resource usage.
 
-\paragraph{}
-
 Information gathered about procedure dependencies can be translated into an ontology language and stored in a registry.
 This approach would provide richer data and reduce the burden in developing other API management tools;
 however, it is outside the scope of this thesis and has not been investigated.
 This aspect could be investigated further in future work.
-
-\paragraph{}
 
 Lastly, it would be interesting to use a formal language to define function resolutions in contract evolution specifications.
 The current implementation supports the specification of function resolutions via one-line Java expressions,

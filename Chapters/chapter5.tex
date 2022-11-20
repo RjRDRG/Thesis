@@ -40,20 +40,14 @@ unique IP address that can be discovered thorough an environment variable, or an
 The containers of a pod are selected in services policies by attributing names to their exposed ports and assigning the same name on the target port of the service policy.
 In adapter containers, one port is exposed for each of the supported contract versions and named with the version number.
 
-\paragraph{}
-
 It is defined one service for each contract version that is still being consumed, as shown in Figure \ref{fig:runtime}.
 Older versions are supported by the adapter, while the most up to date version is directly supported by the microservice app.
 A consumer accesses a producer app via the service that has the same version as the one specified in its code.
-
-\paragraph{}
 
 When a microservice app is upgraded via a rolling update,
 the services never become unavailable:
 they point either to the adapter containers or the application containers, depending on whether the affected pods finished the upgrade process.
 Whereas in the traditional approach all consumers would need to be upgraded in tandem with consumed services in order to avoid downtime.
-
-\paragraph{}
 
 The only novel module introduced in the runtime environment is the proxy adapter;
 the forthcoming modules are either developer tools or are invoked on stages of the DevOps pipeline.
@@ -67,22 +61,18 @@ The development stages are represented in green, while operational stages are re
 The other nodes on the graph's reflect the resources used in each stage.
 External resources are depicted in blue, while the novel modules developed in this thesis are depicted in black.
 
-\paragraph{}
-
 Two novel stages were introduced in the development pipeline section: the writing of service contracts, and the specification of contract evolutions.
 These two stages are skipped if a service only underwent changes that did not affect its API or dependencies.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=9in]{DevOps}
+    \includegraphics[height=1.5in]{pipeArch}
     \caption{DevOps Pipeline}
     \label{fig:pipeline}
 \end{figure}
 
 It was also introduced two novel stages in the operational pipeline section:
 the verification of the service compatibility with the rest of the system, and the generation of adapter component.
-
-\paragraph{}
 
 The pipeline was developed using the Jenkins pipeline suite, each of the novel stages is supported by a distinct Java application that is pulled from version control
 and executed directly on the pipeline, whereas the other stages are supported natively by the Jenkins suite toolkit.
@@ -98,15 +88,11 @@ Designing a WADL tailored for this problem would be counterproductive because te
 and supporting an additional WADL would require the development of an extensive converter tool
 that would need to be constantly maintained in order to support changes in new versions of the OpenApi and the new WADL specification's.
 
-\paragraph{}
-
 To represent records in messages, it was chosen the JSON format, because of its simplicity and widespread adoption.
 There are more performant formats that have a binary representation,
 however such formats are typically not supported by front-end frameworks, and for the purpose of this prototype
 it is not important to measure the performance of different object serialization protocols, since
 there are already sources that provide comparisons in this regard between XML, JSON, Protobuf, Thrift and other popular formats \cite{serializationBenchmark}.
-
-\paragraph{}
 
 The schema of JSON records must also be described,
 the OpenAPI specification supports the description of records
@@ -116,14 +102,10 @@ Using a language other than OpenApi, however, would necessitate decoupling the s
 This would require additional effort on the part of the developing team to maintain the cross-references
 between each specification manifest, and their versions.
 
-\paragraph{}
-
 A snippet of a \textit{Pet Store} OpenApi contract can be seen in Figure \ref{fig:open_contract}.
 In this example we can view the specification of a JSON schema for a Pet data object,
 as well the specification for an HTTP endpoint.
 OpenApi allows properties to be defined robustly with specification of not only their type but also their format, as shown in line 31.
-
-\paragraph{}
 
 The types and formats of properties are standardized between object schemas and HTTP parameters.
 Properties have the following data types: string, number, integer, boolean, array, and object.
@@ -152,46 +134,38 @@ The typical approach is to define an individual chart for each distinct microser
 If a single chart is used to deploy multiple services it is no longer possible to represent accurately the dependencies of each service
 in the chart definition, because the chart syntax doesn't allow the individual definition of the dependencies of each service, it only allows the declaration of the dependencies of the deployment as a whole.
 
-\paragraph{}
-
 An example of the definition of service dependencies can be seen in Listing \ref{lst:helm}.
 The dependencies of a service are mapped indirectly, each dependency point to a Helm chart that is implicitly associated with one service.
 
-\paragraph{}
-
-\begin{lstlisting}[language=yaml, caption=Chart.yaml example, label=lst:helm]
+\begin{lstlisting}[caption=Chart.yaml example, label=lst:helm, captionpos=b]
 dependencies:
     - name: nginx
-      version: “1.2.3”
+      version: "1.2.3"
       repositiry: https://example.com/charts
     - name: memcached
-      version: “3.2.1”
+      version: "3.2.1"
       repositiry: https://another.example.com/charts
 \end{lstlisting}
-
-\paragraph{}
 
 The declaration of resources consumed by a service is defined in chart template files.
 For each deployment template it was defined the resources consumed by its containers by
 setting the minimum amount of CPU and memory resources (represented on the requests key) and by setting a limit on these resources (represented on the limits key).
 An example of the definition of a service resources can be seen in Listing \ref{lst:resource}.
 
-\paragraph{}
-
-\begin{lstlisting}[language=yaml, caption=Helm template resources example, label=lst:resource]
+\begin{lstlisting}[caption=Helm template resources example, label=lst:resource, captionpos=b]
 apiVersion: v1
-kind : Pod
+kind: Pod
 sepc:
     containers:
     - name: app
       image: images.my-company.example/app:v4
       resouces:
         request:
-          memory: “64Mi”
-          cpu: “250m”
+          memory: "64Mi"
+          cpu: "250m"
         limits:
-          memory: “128Mi”
-          cpu: “500m”
+          memory: "128Mi"
+          cpu: "500m"
 \end{lstlisting}
 
 \section{Contract Interpretation} % (fold)
@@ -201,8 +175,6 @@ The interpretation of a contract specification is done in a dedicated module nam
 This module is meant to be used as Java library by other modules,
 it interprets contracts written in OpenApi format and provides a read-only Java interface
 that is agnostic to the original specification format.
-
-\paragraph{}
 
 The implementation of the parser module uses the Swagger-parser project \cite{swaggerparser} to convert OpenApi contracts into a Java POJO representation, that is accessible via a simplified read-only interface.
 All the forthcoming modules operate under this interface instead of the OpenApi format.
@@ -219,26 +191,43 @@ The interpretation of service resources and dependencies written in Helm charts 
 The evolution of contracts is represented in a custom description language.
 The description only maps the details about the changed procedures of a service,
 it is not necessary to map the evolutions in service dependencies and resource requirements because they can be inferred by comparing the last two contract versions.
-The description language is hierarchical and uses array elements.
-The following Figure \ref{lst:evolution_yal} represents its structure, and Figure \ref{lst:evolution_example} gives an example.
-Array elements are depicted by the [.] notation.
+The description language is hierarchical, as seen below.
 
-\paragraph{}
+\begin{itemize}
+    \setlength\itemsep{0em}
+    \item \textbf{Methods:} List of the procedures supported by the new service.
+    \begin{itemize}
+        \setlength\itemsep{0em}
+        \item \textbf{Endpoint:} The endpoint of the procedure and its HTTP method in the new contract.
+        \item \textbf{Prior Endpoint:} The endpoint of the procedure and its HTTP method in the previous contract
+        \item \textbf{Messages:}  List of the messages exchanged by the procedure, the request message and response messages.
+        \begin{itemize}
+            \setlength\itemsep{0em}
+            \item \textbf{Type:} The response or request type in the new contract (e.g. REQUEST, 200, 400, etc)
+            \item \textbf{Prior Type:} The response or request type in the previous contract
+            \item \textbf{Parameters:} List of the parameters of the message (e.g. Path, Query, Header, Cookie and Body parameters)
+            \begin{itemize}
+                \setlength\itemsep{0em}
+                \item \textbf{Key:}  The identifier of parameter, the first segment represents its location (e.g.Path, Query, Header, Cookie and Body parameters), the second segment represents the name of the parameter. Hieratical Body parameter can be mapped at any level by specifying the hierarchy path in the parameter name (e.g. json|specie.class.name; json|specie)
+                \item \textbf{Resolution:} The specification of a resolution for a parameter
+                \item \textbf{Type:} The parameter type, Number, String, Array or Object
+            \end{itemize}
+        \end{itemize}
+    \end{itemize}
+\end{itemize}
 
-As previously mentioned in the chapter \ref{cha:design}, resolutions can have one of three distinct types {\fontfamily{qtm}\selectfont  DefaultValues, Link or Function}.
+Figure \ref{lst:evolution_example}  depicts an evolution specification written in this language.
+
+As previously mentioned in the Chapter \ref{cha:design}, resolutions can have one of three distinct types DefaultValue, Link or Function.
 The type of resolution is represented in the first segment of a resolution, while the second segment represents the resolution itself.
 Link resolutions have the following format "link={Parameter Location}|{Parameter Name}", the parameter of the prior contract must be of the same type and format.
 Default value resolutions have the following format "default=#Value", the value that must be of the same type and format.
-
-\paragraph{}
 
 Function resolutions are written as one line Java expressions that can use parameters of the previous contract, the
 parameters are referenced by their location and name (eg. function= {{json|firstName}} + {{json|lastName}} ).
 These references are replaced in the adapter implementation by their real value.
 
-\paragraph{}
-
-\begin{lstlisting}[language=yaml, caption=Evolution specification example, label=lst:evolution_example]
+\begin{lstlisting}[caption=Evolution specification example, label=lst:evolution_example, captionpos=b]
 methods:
 - endpoint: /pets GET
   endpoitPrior: /pets GET
@@ -256,37 +245,9 @@ methods:
     - key: json|
       resolution: link=query|json
       type: Array
-    type: ´200´
-    typePrior: ´200´
+    type: '200'
+    typePrior: '200'
 \end{lstlisting}
-
-\begin{lstlisting}[language=yaml, caption=Evolution specification structure, label=lst:evolution_yal]
-[Methods]: List of the procedures supported by the new service.
-    - Endpoint: The endpoint of the procedure and its HTTP method
-       :in the new contract.
-      Prior Endpoint: The endpoint of the procedure and its HTTP
-       :method in the previous contract
-      [Messages]: The list of the messages exchanged by the
-       :procedure, request messages and response messages.
-        - Type: The response or request type in the new contract
-           :(e.g. REQUEST, 200, 400,… )
-          Prior Type: The response or request type in the
-          :previous contract
-         [Parameters]: The list of the parameters of the message
-          :(e.g. Path, Query, Header, Cookie and Body parameters)
-        - Key: The identifier of parameter, the first segment
-          :represents its location (e.g.Path, Query, Header,
-          :Cookie and Body parameters), the second segment
-          :represents the name of the parameter. Hieratical
-          :Body parameter can be mapped at any level by specifying
-          :the hierarchy path in the parameter name
-          :(e.g. json|specie.class.name; json|specie)
-          Resolution: The specification of a resolution for a
-          :parameter.
-          Type: The parameter type, Number, String, Array or Object
-\end{lstlisting}
-
-\paragraph{}
 
 To minimize the documentation effort it was developed a GUI editor for the facilitates the specification of evolutions.
 Figures \ref{fig:editor1} and \ref{fig:editor2} show the editor.
@@ -309,8 +270,6 @@ The GUI editor was implemented as an IDE Plugin, the current implementation supp
 The editor compares two contract versions,
 and automatically maps all the elements that haven't changed from one version to the other, the
 developer is left with the task of explicitly mapping the remaining elements.
-
-\paragraph{}
 
 The editor starts by requesting the developer to map endpoints in the new contract to endpoints in the old contract,
 afterwards the developer must edit each of the endpoint messages and specify a resolution for all the parameters that changed
@@ -393,8 +352,6 @@ The generation of the proxy adapter code is done in a dedicated module named ''G
 The adapter is generated by populating a template implementation with the information provided in evolution specifications.
 The adapter must be able to support all prior versions that are still in use, and adapt them to the last contract version.
 
-\paragraph{}
-
 The evolution specifications only provide information on how to adapt messages from contiguous versions (eg. v1\textrightarrow v2).
 The information necessary to adapt messages from discontinuous versions is obtained by chaining the evolution specifications and
 merging their resolutions (e.g merge[v1\textrightarrow v2, v2\textrightarrow v3] = v1\textrightarrow v3).
@@ -407,8 +364,6 @@ Figure \ref{fig:merge} exemplifies the merge process.
     \label{fig:merge}
 \end{figure}
 
-\paragraph{}
-
 This module begins by querying the active versions of the target service with the Kubectl command-line tool.
 Kubectl is a tool that interfaces with Kubernetes clusters and can be used to inspect and manage cluster resources.
 After determining the active service versions, this module retrieves all evolution specifications up to the oldest version that is still active,
@@ -419,23 +374,13 @@ and then combines them so that all specifications link to the current version.
 
 The adaption approach consists on: for each endpoint the
 adapter re-constructs the entire request from zero and populates the parameter resolutions with the information of the original request.
-
-\paragraph{}
-
 The adapter server exposes each of the supported contract version's in a distinct port.
 A Kubernetes service is created for accessing each of the adapter ports.
 
-\paragraph{}
-
-The {\fontfamily{qtm}\selectfont  Function} resolutions are written as one-line Java expressions.
+The Function resolutions are written as one-line Java expressions.
 The resolutions are injected directly into the template implementation of the adapter, and the parameter references in the resolution are then replaced with the parameters themselves.
-
-\paragraph{}
-
 The adapter's current template implementation does not support HTTPS, however this can be added.
 Because TLS is mandatory in HTTP 1.2, the implementation only supports HTTP 1.1.
-
-\paragraph{}
 
 The adapter was built with Spring Boot and an Apache Tomcat/9.0.65 HTTP server, the base image of the adapter docker container is an "openjdk:11-nanoserver".
 In order to prevent the JVM from calling garbage collector frequently and reallocating the heap memory while Tomcat is trying to serve requests,
