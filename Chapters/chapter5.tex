@@ -100,7 +100,7 @@ TODO mention which functionalities of OpenAPI aren't supported
 
 \begin{figure}[htbp]
     \centering
-    \centerline{\includegraphics[height=7in]{openContract}}
+    \centerline{\includegraphics[height=6.5in]{openContract}}
     \caption{OpenAPI contract example}
     \label{fig:open_contract}
 \end{figure}
@@ -256,9 +256,9 @@ procedures:
       format: yyyy
 \end{lstlisting}
 
-To minimize the documentation effort it was developed a GUI editor for the facilitates the specification of evolutions.
-Figures \ref{fig:editor1} and \ref{fig:editor2} show the editor.
-The GUI editor was implemented as an IDE Plugin, the current implementation supports the IntelliJ integrated development environment.
+To minimize the documentation effort it was developed a GUI editor that facilitates the specification of evolutions.
+Figures \ref{fig:editor1} and \ref{fig:editor2} depict the editor interfaces.
+The editor was implemented as an IDE Plugin, the current implementation supports the IntelliJ integrated development environment.
 
 \begin{figure}[htbp]
     \centering
@@ -279,12 +279,14 @@ and automatically maps all the elements that haven't changed from one version to
 developer is left with the task of explicitly mapping the remaining elements.
 
 The editor starts by requesting the developer to map endpoints in the new contract to endpoints in the old contract,
-afterwards the developer must edit each of the endpoint messages and specify a resolution for all the parameters that changed
+afterwards the developer must match each of the endpoint messages and specify a resolution for all the parameters that changed
 in a contract, unresolved parameters are highlighted in red.
-The right column holds the resolutions that were already mapped and uppermost left column allows the developer to write rules
-for each unresolved parameter.
-The developer can select leaf parameters in the hierarchy, or choose intermediate properties.
-If they choose an intermediate property and input a resolution rule, then all child parameters are also resolved.
+
+The right column of the editor~\ref{fig:editor2} holds the resolutions that were already mapped.
+The uppermost left column allows the developer to write rules for each unresolved parameter.
+The developer can select leaf parameters in the hierarchy, or choose intermediate parameters.
+If they choose an intermediate parameter and input a resolution rule, then all child parameters are also resolved.
+
 After all parameters are resolved the developer submits the resolutions, and
 the editor outputs an evolution specification file with the same description language presented in the beginning of this section.
 
@@ -295,10 +297,9 @@ The compatibility verification process is done by a dedicated module named ''Ver
 This module was implemented in Java as a command-line application.
 The module verifies if the provided evolution specification is valid.
 In Algorithm \ref{alg:evoalg} it is presented the pseudo-code of the compatibility verification process.
-It starts by checking if all the old contract procedures, and messages are present in the specification,
-then it verifies the validity of the resolutions of each parameter in the new contract messages.
+It starts by checking if all the procedures and messages of prior contract are present in the specification,
+then it verifies the validity of the resolutions for each parameter of the new contract messages.
 Resolutions can be invalid due to four reasons:
-
 \begin{itemize}
     \setlength\itemsep{0em}
     \item Invalid syntax in resolution expressions;
@@ -309,19 +310,19 @@ Resolutions can be invalid due to four reasons:
 
 The present implementation of the verifier module does not check whether the cluster has adequate computational resources to provision the service or whether all service dependencies are alive and reachable.
 These functionalities were not implemented since the Helm deployment process already performs these verifications prior to the deployment of a service.
-Nonetheless, including these verifications in the verifier module would be useful in order for the solution to be decoupled from Helm.
+Nonetheless, including these verifications in the verifier module could be useful in order for the solution to be decoupled from Helm.
 
 \begin{algorithm}
     \caption{Evolution validation algorithm}\label{alg:evoalg}
     \begin{algorithmic}[1]
         \Procedure {ValidateEvolution}{$Evolution$, $PriorContract$, $NewContract$}
-            \State \textbf{assert} $PriorContract.endpoints \subseteq Evolution.methods\rightarrow priorEndpoint$
-            \ForAll {$md \in Evolution.methods$}
-                \State \textbf{assert} $md.endpoint \in NewContract.endpoints$
-                \State $PriorMessages \leftarrow PriorContract.getMessages(md.priorEndpoint)$
-                \State $NewMessages \leftarrow NewContract.getMessages(md.priorEndpoint)$
-                \State \textbf{assert} $PriorMessages \subseteq md.messages$
-                \ForAll {$msg \in md.messages$}
+            \State \textbf{assert} $PriorContract.procedures \subseteq Evolution.procedures\rightarrow priorEndpoint$
+            \ForAll {$pd \in Evolution.procedures$}
+                \State \textbf{assert} $pd \in NewContract.procedures$
+                \State $PriorMessages \leftarrow PriorContract.getMessages(pd.priorEndpoint)$
+                \State $NewMessages \leftarrow NewContract.getMessages(pd.endpoint)$
+                \State \textbf{assert} $PriorMessages \subseteq pd.messages$
+                \ForAll {$msg \in pd.messages$}
                     \State \textbf{assert} $msg \in NewMessages$
                     \State \textbf{assert} $msg.parameters = NewMessages.get(msg).parameters$
                     \ForAll {$prm \in msg.parameters$}
@@ -359,22 +360,42 @@ The generation of the proxy adapter code is done in a dedicated module named ''G
 The adapter is generated by populating a template implementation with the information provided in evolution specifications.
 The adapter must be able to support all prior versions that are still in use, and adapt them to the last contract version.
 
-The evolution specifications only provide information on how to adapt messages from contiguous versions (eg. v1\textrightarrow v2).
+Evolution specifications only provide information on how to adapt messages from contiguous versions (eg. v1\textrightarrow v2).
 The information necessary to adapt messages from discontinuous versions is obtained by chaining the evolution specifications and
-merging their resolutions (e.g merge[v1\textrightarrow v2, v2\textrightarrow v3] = v1\textrightarrow v3).
-Figure \ref{fig:merge} exemplifies the merge process.
+merging their resolutions. Figure \ref{fig:merge} exemplifies the merge process.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[height=2.4in]{merge}
-    \caption{Evolution specification merge process}
+    \includegraphics[height=2in]{merge}
+    \caption{Evolution specification merge process example}
     \label{fig:merge}
 \end{figure}
 
 This module begins by querying the active versions of the target service with the Kubectl command-line tool.
-Kubectl is a tool that interfaces with Kubernetes clusters and can be used to inspect and manage cluster resources.
+Kubectl~\cite{kubectl} is a tool that interfaces with Kubernetes clusters and can be used to inspect and manage cluster resources.
+
 After determining the active service versions, this module retrieves all evolution specifications up to the oldest version that is still active,
 and then combines them so that all specifications link to the current version.
+
+Default and Link resolution rules can be chained together in a straightforward manner.
+Function resolutions are chained together by replacing the parameter references with resolutions.
+Below in Table~\ref{table:1} it is presented an example, where resolution rules are chained incrementally from the two last versions to the oldest version:
+
+\begin{table}[h!]
+\centering
+\begin{tabular}{|l|l|l|}
+    \hline
+    \thead{Transition} &  \thead{Missing} & \thead{Resolution for parameter := path|seven_7} \\
+    \hline
+    v_3\rightarrow v_4 & 7 & function=path|five_5 + path|two_2  \\    \hline
+    v_2\rightarrow v_4 & 7,2 & function=path|five_5 + (default=2)_2  \\    \hline
+    v_1\rightarrow v_4 & 7,5,2 & function=(function=path|three_3 + (default=2)_2)_5 + (default=2)_2 \\    \hline
+\end{tabular}
+\caption{Chained resolution rules example}
+\label{table:1}
+\end{table}
+
+
 
 \section{Adapter} % (fold)
 \label{sec:adapter}
