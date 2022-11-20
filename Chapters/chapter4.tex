@@ -22,14 +22,14 @@ The requirements that guided the design of the system, are outlined below by the
 
 \begin{itemize}
     \setlength\itemsep{0em}
-    \item No downtime when upgrading service contracts
-    \item Supporting all types of contract changes
-    \item Integration with existing tools and workflows
-    \item Minimize conception and maintenance effort
-    \item Automatic validation of the safety of deployment operations
-    \item Consumer and producer services are ignorant to the presence of proxy adapters
-    \item Transactionless deployment of upgrades to service contracts
-    \item No overhead when services communicate using the same contract version
+    \item No downtime when upgrading service contracts;
+    \item Automatic validation of the safety of deployment operations;
+    \item Supporting all types of contract changes;
+    \item Integration with existing tools and workflows;
+    \item Minimize conception and maintenance effort;
+    \item Consumer and producer services ignorant to the presence of proxy adapters;
+    \item Transactionless deployment of upgrades to service contracts;
+    \item No overhead when services communicate using the same contract version.
 \end{itemize}
 
 Four criteria were considered when evaluating each approach:
@@ -61,7 +61,7 @@ rely on choreography still require the HTTP request-response protocol to support
 
 \paragraph{Alternatives:}
 If choreography was adopted, the approach would need to support an additional communication protocol with different a contract structure and syntax.
-It is complex to implement a generic approach that can support multiple types of communication protocol's.
+It is complex to implement a generic approach that can handle multiple types of communication protocol's.
 Other event-driven and request-response protocols, such as RPC, have contracts with a simplified
 syntax and structure.
 There are already a number of tools that support the evolution of contracts under these protocols, albeit with some limitations.
@@ -77,20 +77,20 @@ Additionally the contract specification of a service also includes information a
 \paragraph{Approach:}
 The contract is composed by two distinct manifests.
 In the first manifest the capabilities of a service are specified using the conventional approach of a Web API description language.
-In the second manifest the service dependencies and computational requirements are documented with a distinct description language.
-The contract is divided into multiple manifests, because external consumers are only interested on the documentation of the capabilities of a service,
-and because it may be problematic to disclose information about computational requirements.
+In the second manifest the service dependencies and hardware requirements are documented with a distinct description language.
+The contract is divided into separate manifests, because external consumers are only interested on the documentation of the capabilities of a service,
+and because it may be problematic to disclose information about hardware requirements.
 
-To reduce the documentation effort only the dependencies between services are document, the dependencies between procedures are not specified (eg. Service A in version 1.0 depends on service B in version 2.0).
+To reduce the documentation effort only the dependencies between services are document, the dependencies between service procedures are not specified (eg. Service A in version 1.0 depends on service B in version 2.0).
 One drawback of not documenting dependencies at the procedure level is that it is not possible to detect procedures that are unused by other services.
-The installation of adapters is unnecessary in cases where only unused procedures are updated in contract.
+The installation of adapters is unnecessary in cases where only unused procedures are updated in a contract.
 This case is expected to be rare, and having unused procedures in a microservice is undesirable due to API bloat.
 The specification of inter-service dependencies is sufficient to ensure the safety of deployment operations.
 The documentation of inter-procedure dependencies can be useful in API management tools,
 these dependencies can be discovered indirectly via the alternative approach presented below.
 
 \paragraph{Alternatives:}
-Inter-procedure dependencies can be determined automatically by inspecting request logs between services.
+Dependencies can be determined automatically by inspecting request logs between services.
 The advantage of this approach is the reduced documentation effort, but it comes at a cost because
 it is no longer possible to validate the safety of service deployments, since the dependencies of a service are unknown when it is deployed.
 With this approach it is only possible to validate the safety of the removal of services that have been running over a long enough period of time.
@@ -98,8 +98,10 @@ With this approach it is only possible to validate the safety of the removal of 
 \subsection{Compatibility Verification} % (fold)
 \label{sec:compatibility_verification_design}
 
+TODO inconsistent
+
 Intuitively, compatibility verification determines whether
-all the edited elements in a producer service contract are compatible with the ones effectively
+all the edited elements in a producer contract are compatible with the ones effectively
 used by the consumer services, and whether the new contract requirements are met
 by the system’s existing resources.
 
@@ -127,38 +129,39 @@ comparable to those used in centralized systems, for visualizing the impact of a
 In this section, it is discussed how such tools could be implemented.
 
 \paragraph{Approach:}
-Since all service contracts declare their dependencies on other services, determining the impact of change can be done by
-looping over all the contracts of the active services and verifying whether the changed service is being consumed.
+Since all service contracts declare their dependencies on other services, the impact of change can be evaluated at a macroscopic level by
+iterating thorough all contracts of the active services and verifying whether the changed service is being consumed.
 Service contracts are stored in a version control system, with semantic versioning, where
 each major version represents incompatible contract changes and minor versions represent backwards compatible contract changes.
 The active services are discovered by querying the deployed services in the container orchestration tool.
 
 \paragraph{Alternatives:}
-Information collected about the active services and dependencies between procedures can be translated into an ontology language \cite{ontology} and stored in a registry.
+Information collected about dependencies between procedures can be translated into an ontology language \cite{ontology} and stored in a registry.
 The main advantage of this approach is that the registry can be integrated with a reasoning system capable of performing deductive inferences, such as
 seeing the impact of a service failure across the system, and the resulting cascading failures.
-This approach delivers richer data and reduces the burden in the development of other API management tools,
-however, this approach falls outside the scope of this thesis and has not been explored.
+This approach delivers fine-grained data about impact of contract changes and reduces the burden in the development of other API management tools.
+This approach has not been explored because it falls outside the scope of this thesis, and can be used as complementary solution to the previous approach.
 
 \subsection{Supported Contract Changes} % (fold)
 \label{sec:supported_contract_changes}
 
 An HTTP contract is composed by procedures, each of which contains one request message and up to N response messages.
 
-Response messages consist of a status code and parameters.
-Different response messages cannot share the same status code.
-The parameters of a response message can be placed in one of three locations: headers, cookies, or body.
+Response messages are composed by a status code and parameters.
+The same status code cannot be shared across multiple response messages.
+A response message's parameters can be placed in one of three places: headers, cookies, or body.
 
 Request messages, on the other hand, are composed by an endpoint and parameters.
 The endpoint is comprised by an HTTP method, a domain, and a sequence of path segments.
 The parameters of a request message can be placed in two additional locations: path or query.
-Parameters placed on headers, cookies, path or query locations cannot have object or collection types.
+Only body parameters can have object or collection types.
+Other parameter groups are limited to using primitive types (string, number, boolean).
 
-All the contract features listed above can be subject to change as the contract evolves.
+All the contract elements mentioned above can be subject to change as the contract evolves.
 Multiple types of changes can also occur simultaneously in the same contract evolution.
 A taxonomy of all conceivable HTTP contract changes is presented bellow:
 
-\newpage
+TODO categories
 
 \begin{itemize}
     \setlength\itemsep{0em}
@@ -182,13 +185,13 @@ A taxonomy of all conceivable HTTP contract changes is presented bellow:
 \end{itemize}
 
 \paragraph{Approach:}
-Of all the stated contract changes, the only evolutions that aren't directly supported are "merging/splitting procedures".
-These evolution types can be converted into an equivalent evolution that keeps the affected procedures in the contract but marks them as deprecated, while adding the new procedures.
+Of all the stated contract changes, the only evolutions that aren't directly supported are architectural changes.
 
 Supporting the division of a procedure into multiple procedures is complex because the adapter would have to use distributed transactions to handle the independent failures of each new procedure.
 Combining multiple procedures into a single procedure is also costly because the adapter must be stateful and session based to support this change.
 The requests of the affected procedures would need to be stored in the adapter before they could be merged and sent through the new endpoint.
 Furthermore, these two types of evolution are cumbersome to be documented in a description language, because the language would need to relate procedures in an N->1 and 1->N relationships.
+Alternatively, architectural evolutions can be converted into an equivalent TODO CATEGORIE evolution that keeps the affected procedures in the contract but marks them as deprecated, while adding the new procedures.
 
 \subsection{Specification of contract evolutions} % (fold)
 \label{sec:evolution_specification}
@@ -198,7 +201,7 @@ It is not always possible to implicitly deduce the evolutions in a contract when
 The developer must declare explicitly which evolution occurred.
 
 \paragraph{Approach:}
-The evolutions are specified in a manifest file, complete with its own syntax and rules,
+Contract evolutions are specified in a manifest file, complete with its own syntax and rules,
 which outlines how to adapt calls between two versions of a contract.
 In this file all mappings between elements in each version are explicitly defined.
 A mapping for one element can fall into one of three types:
@@ -215,11 +218,14 @@ renamed fields in contracts are supported with the usage of links;
 the addition of new fields in contracts is supported with the use of default values;
 complex contract changes, such as changing the format of a date are supported with the use of functions.
 
+Additionally, procedures of a previous contract that are unused can be declared as obsolete in cases where there functionality is no longer needed.
+Procedures that are obsolete don't need to be adapted by the proxy component.
+
 \paragraph{Alternatives:}
 The evolution specification is defined alongside the contract specification in the same manifest file.
 Most web API specification languages already support default values and name aliases.
 With these two features it would be straightforward
-to document the following contract evolutions: renamed fields, addition of fields and removal of fields.
+to document the following contract evolutions: renamed/addition/removal of fields.
 This alternative may seem appealing for simpler contracts, but it becomes impractical as the number of revisions and consumers in prior versions rises.
 This approach clutters service contract's with information that is irrelevant to consumers, and makes the specification of complex contract evolutions more cumbersome.
 
@@ -241,7 +247,7 @@ which circumvents distributed transactions in deployments,
 because container orchestrations tools such as Kubernetes allow the deployment of closely related containers as atomic units known as "pods".
 
 \paragraph{Alternatives:}
-An option, is to have the generated adapter code can be embedded in the service implementation.
+An option, is to have the generated adapter code embedded in the service implementation.
 This approach is expected to have higher performance than the previous approach since
 the adapter would use function calls instead of inter-process calls, and because message serialization and de-serialization would be unnecessary.
 The downside of this approach is that it would entail the modification of the service's code, which is problematic because each service can be implemented in a different framework and programming language.
@@ -259,7 +265,7 @@ instead of one adapter, N adapters would be needed, one in each consumer.
 \label{sec:adapter_polymorphism}
 
 The adapter can have a generic implementation that is able to adapt messages from any service, or it can
-have a direct implementation that can only manage the adaptation of messages for one service.
+have a direct implementation that can only manage the adaptation of messages for a single service.
 
 \paragraph{Approach:}
 The adapter implementation is derived from a template implementation,
@@ -278,17 +284,18 @@ The disadvantage of this approach is that it requires modifications on the consu
 \subsection{Message Routing} % (fold)
 \label{sec:message_routing}
 
-Messages will need to reach either an application or an adapter, depending on the consumer expected contract, and the current producer contract.
+Messages will need to reach either the application or the adapter, depending on the consumer expected contract, and the current producer contract.
+Only messages that require adaptation should be forwarded through the adapter to reduce the adapter's load and resource consumption.
 
 \paragraph{Approach:}
-The application and adapter servers of a microservice are accessible internally inside a cluster via distinct Kubernetes services.
-A Kubernetes service, is an abstraction that defines a policy for accessing a logical set of containers under a single network address.
-For each version of a service contract a distinct Kubernetes service is created with the corresponding service name and contract version.
-The address of each Kubernetes service is discoverable via an internal DNS server.
+The application and adapter servers of a microservice are accessible internally inside a cluster via distinct Kubernetes (K8s) services.
+A K8s service, is an abstraction that defines a policy for accessing a logical set of containers under a single network address.
+For each version of a service contract a distinct K8s service is created with the corresponding service name and contract version.
+The address of each K8s service is discoverable via an internal DNS server.
 
-When a microservice is upgraded, it's Kubernetes services are refreshed with the new addresses of the application and adapter containers.
-The Kubernetes service that previously pointed to the application containers, will now point to the adapter containers, and
-a new Kubernetes service is created to support the new contract.
+When a microservice is upgraded, it's K8s services are refreshed with the new addresses of the application and adapter containers.
+The K8s service that previously pointed to the application containers, will now point to the adapter containers, and
+a new K8s service is created to support the new contract.
 All consumers of the previous contract will begin forwarding their requests to the adapter container's rather than the application containers.
 
 Consumers that only use unaffected procedures in the contract evolution don't need to direct their calls through the adapter.
@@ -302,7 +309,7 @@ With this approach consumer services are no longer unaware of the existence of p
 and will need to use different addresses when calling different procedures of the same producer.
 
 \paragraph{Alternatives:}
-A reverse proxy like nginx could be used to route only the messages that require adaptation through the adapter.
+A reverse proxy like Nginx~\cite{nginx} could be used to route only the messages that require adaptation through the adapter.
 With this approach all requests are forwarded through reverse proxy and redirected based on custom routing rules.
 The routing rules are installed and updated when contract implementations are deployed.
 This approach is counter-productive since it necessitates an additional reverse proxy server,
@@ -321,7 +328,3 @@ A contract upgrade is supported by the re-deployment of the impacted microservic
 
 The operations of contract compatibility verification, adapter generation, deployment,
 and removal are introduced as additional stages in typical continuous deployment pipelines.
-The generation of the adapter components could be preformed outside the deployment pipeline,
-this would increase the solution flexibility by allowing developers to manually extend adapters to cover unforeseen corner cases,
-however, it is preferable to generate the adapters in the pipeline so that adapter generation program has clearer view
-over the participating services in the system.

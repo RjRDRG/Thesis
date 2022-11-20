@@ -15,17 +15,17 @@
 \label{sec:architecture}
 The system was built using a modular approach,
 each module is entirely self-contained, making it simple to expand or replace system functionality.
-The system architecture is split into two distinct areas: the runtime, and the pipeline.
-The runtime architecture comprises all essential components to the system liveness,
-whereas the pipeline architecture covers all components needed during the system's provisioning and development.
+The system components are split into two distinct areas: runtime, and pipeline components.
+The runtime comprises all essential components to the system liveliness,
+whereas the pipeline covers all components needed during the system's provisioning and development.
 
 \subsection{Runtime Architecture} % (fold)
 \label{sec:runtime_architecture}
 
-The runtime environment is supported by Kubernetes,
-a simplified configuration with three microservices is depicted in Figure \ref{fig:runtime}.
-In this example, one micro-service has undergone three major API changes (the accounts microservice).
-The inventory micro-service, which is dependent on the previous service, has been updated to reflect the changes, but the shipping micro-service has not been updated and is two versions behind.
+The only novel component introduced in a typical microservices runtime environment is the proxy adapter.
+An example with three microservices is depicted in Figure~\ref{fig:runtime}.
+In this example, the Account's microservice has undergone three major API changes.
+The Inventory micro-service, which is dependent on the previous service, has been updated to reflect the changes, but the Shipping micro-service has not been updated and is two versions behind.
 
 \begin{figure}[htbp]
     \centering
@@ -34,35 +34,24 @@ The inventory micro-service, which is dependent on the previous service, has bee
     \label{fig:runtime}
 \end{figure}
 
-In Kubernetes a microservice is internally accessible through the Service abstraction.
-a Service defines a policy for accessing a logical set of Pods via a load balancer with a
-unique IP address that can be discovered thorough an environment variable, or an DNS name.
-The containers of a pod are selected in services policies by attributing names to their exposed ports and assigning the same name on the target port of the service policy.
-In adapter containers, one port is exposed for each of the supported contract versions and named with the version number.
-
-It is defined one service for each contract version that is still being consumed, as shown in Figure \ref{fig:runtime}.
+It is defined a distinct K8s service for each contract version that is still being consumed, as shown for the three versions of Accounts microservice.
 Older versions are supported by the adapter, while the most up to date version is directly supported by the microservice app.
 A consumer accesses a producer app via the service that has the same version as the one specified in its code.
+
+Containers are selected in services policies by attributing names to their exposed ports and assigning the same name on the target port of the service policy.
+In adapter containers, one port is exposed for each of the supported contract versions and named with the version number.
 
 When a microservice app is upgraded via a rolling update,
 the services never become unavailable:
 they point either to the adapter containers or the application containers, depending on whether the affected pods finished the upgrade process.
-Whereas in the traditional approach all consumers would need to be upgraded in tandem with consumed services in order to avoid downtime.
+In the traditional approach all consumers would need to be upgraded in tandem with their consumed services in order to avoid downtime.
 
-The only novel module introduced in the runtime environment is the proxy adapter;
-the forthcoming modules are either developer tools or are invoked on stages of the DevOps pipeline.
-
-\subsection{DevOps Pipeline Architecture} % (fold)
+\subsection{DevOps Pipeline} % (fold)
 \label{sec:devops_pipeline_architecture}
 
-A proof-of-concept deployment pipeline was developed, its architecture is depicted in Figure \ref{fig:pipeline}.
-The nodes on the left side of the graph represent the pipeline.
-The development stages are represented in green, while operational stages are represented in red.
-The other nodes on the graph's reflect the resources used in each stage.
-External resources are depicted in blue, while the novel modules developed in this thesis are depicted in black.
-
-Two novel stages were introduced in the development pipeline section: the writing of service contracts, and the specification of contract evolutions.
-These two stages are skipped if a service only underwent changes that did not affect its API or dependencies.
+A proof-of-concept pipeline was developed, its architecture is depicted in Figure \ref{fig:pipeline}.
+The nodes depicted in blue represent the introduced novel stages.
+If a service only underwent changes that did not affect its API or dependencies, the introduced stages are skipped.
 
 \begin{figure}[htbp]
     \centering
@@ -71,11 +60,8 @@ These two stages are skipped if a service only underwent changes that did not af
     \label{fig:pipeline}
 \end{figure}
 
-It was also introduced two novel stages in the operational pipeline section:
-the verification of the service compatibility with the rest of the system, and the generation of adapter component.
-
 The pipeline was developed using the Jenkins pipeline suite, each of the novel stages is supported by a distinct Java application that is pulled from version control
-and executed directly on the pipeline, whereas the other stages are supported natively by the Jenkins suite toolkit.
+and executed directly on the pipeline, whereas the other stages are supported natively by the suite.
 The modules that enable each novel stage will be discussed in detail in the following sections.
 
 \section{Contract Representation} % (fold)
@@ -94,11 +80,10 @@ however such formats are typically not supported by front-end frameworks, and fo
 it is not important to measure the performance of different object serialization protocols, since
 there are already sources that provide comparisons in this regard between XML, JSON, Protobuf, Thrift and other popular formats \cite{serializationBenchmark}.
 
-The schema of JSON records must also be described,
-the OpenAPI specification supports the description of records
-in conjunction with the signature of HTTP endpoints.
-Other JSON schema specification languages exist, such as the JSON-schema project \cite{jsonschema}.
-Using a language other than OpenApi, however, would necessitate decoupling the specification of schemas from the specification of HTTP endpoints.
+The schema of JSON records must be described.
+The OpenAPI standard includes a schema description language in its Web API description language, that supports JSON records.
+There are dedicated JSON schema description languages (such as the JSON-schema project \cite{jsonschema}), however,
+using a language other than OpenApi, would necessitate decoupling the specification of schemas from the specification of HTTP endpoints.
 This would require additional effort on the part of the developing team to maintain the cross-references
 between each specification manifest, and their versions.
 
@@ -110,6 +95,8 @@ OpenApi allows properties to be defined robustly with specification of not only 
 The types and formats of properties are standardized between object schemas and HTTP parameters.
 Properties have the following data types: string, number, integer, boolean, array, and object.
 Property formats are free-form, yet there are established conventions for the most commonly used formats.
+
+TODO mention which functionalities of OpenAPI aren't supported
 
 \begin{figure}[htbp]
     \centering
@@ -127,14 +114,14 @@ The most significant components of a Chart are the:
 \begin{itemize}
     \item The Chart.yaml, that allows the definition of the Chart dependencies and other meta-information about the application such as its name and version;
     \item The Template's directory, that contains incomplete Kubernetes manifests \textit{Templates} such as Services, Deployments, DaemonSets, Namespaces and so on;
-    \item The Values.yaml, that contains key-value pairs used to complete the definition of each template, this values can be overridden later when the chart is deployed, the file is used to define the default values.
+    \item The Values.yaml, that contains key-value pairs used to complete the definition of each template. Values can be overridden when the chart is deployed, the file is used to define the default values.
 \end{itemize}
-A single chart might be used to deploy something simple, like a single kubernetes pod, or something complex, like a complete web app stack with HTTP servers, databases, caches, and so on.
+A single chart might be used to deploy something simple, like a single Kubernetes pod, or something complex, like a complete web app stack with HTTP servers, databases, caches, and so on.
 The typical approach is to define an individual chart for each distinct microservice, so that they can be upgraded individually.
 If a single chart is used to deploy multiple services it is no longer possible to represent accurately the dependencies of each service
 in the chart definition, because the chart syntax doesn't allow the individual definition of the dependencies of each service, it only allows the declaration of the dependencies of the deployment as a whole.
 
-An example of the definition of service dependencies can be seen in Listing \ref{lst:helm}.
+An example of the definition of a service/chart dependencies can be seen in Listing \ref{lst:helm}.
 The dependencies of a service are mapped indirectly, each dependency point to a Helm chart that is implicitly associated with one service.
 
 \begin{lstlisting}[caption=Chart.yaml example, label=lst:helm, captionpos=b]
@@ -149,7 +136,7 @@ dependencies:
 
 The declaration of resources consumed by a service is defined in chart template files.
 For each deployment template it was defined the resources consumed by its containers by
-setting the minimum amount of CPU and memory resources (represented on the requests key) and by setting a limit on these resources (represented on the limits key).
+setting the minimum amount of CPU and Memory resources (represented on the requests key) and by setting a limit on these resources (represented on the limits key).
 An example of the definition of a service resources can be seen in Listing \ref{lst:resource}.
 
 \begin{lstlisting}[caption=Helm template resources example, label=lst:resource, captionpos=b]
@@ -176,77 +163,97 @@ This module is meant to be used as Java library by other modules,
 it interprets contracts written in OpenApi format and provides a read-only Java interface
 that is agnostic to the original specification format.
 
-The implementation of the parser module uses the Swagger-parser project \cite{swaggerparser} to convert OpenApi contracts into a Java POJO representation, that is accessible via a simplified read-only interface.
-All the forthcoming modules operate under this interface instead of the OpenApi format.
+The implementation of the parser module uses the Swagger-parser project \cite{swaggerparser} to convert OpenApi contracts into a Java POJO representation.
+The OpenApi POJO representation is accessed through a custom read-only wrapper class and interface.
+All the forthcoming modules operate under this interface instead of the OpenApi POJO format.
+
 Although it was adopted the OpenApi format the solution is not dependent on it, as the parser module provides a decoupling point.
 This enables the specification of different contract to be written in different or even mixed WADL,
 as long as the parser module is extended to support the new WADL's.
 The interpretation of service resources and dependencies written in Helm charts is also supported by the parser module under a separate interface.
-
-\newpage
 
 \section{Evolution Representation} % (fold)
 \label{sec:evolution_representation}
 
 The evolution of contracts is represented in a custom description language.
 The description only maps the details about the changed procedures of a service,
-it is not necessary to map the evolutions in service dependencies and resource requirements because they can be inferred by comparing the last two contract versions.
-The description language is hierarchical, as seen below.
+it is not necessary to map the changes in service dependencies and resource requirements because they can be inferred by comparing the last two contract versions.
+The description language haves the following format:
 
 \begin{itemize}
     \setlength\itemsep{0em}
-    \item \textbf{Methods:} List of the procedures supported by the new service.
+    \item \textbf{Procedures:} List of the procedures that are adapted between contract versions.
     \begin{itemize}
         \setlength\itemsep{0em}
         \item \textbf{Endpoint:} The endpoint of the procedure and its HTTP method in the new contract.
-        \item \textbf{Prior Endpoint:} The endpoint of the procedure and its HTTP method in the previous contract
-        \item \textbf{Messages:}  List of the messages exchanged by the procedure, the request message and response messages.
+        \item \textbf{Prior Endpoint:} The endpoint of the procedure and its HTTP method in the previous contract.
+        \item \textbf{Messages:}  List of the messages exchanged by the procedure in the new contract version (the request message and response messages).
         \begin{itemize}
             \setlength\itemsep{0em}
-            \item \textbf{Type:} The response or request type in the new contract (e.g. REQUEST, 200, 400, etc)
-            \item \textbf{Prior Type:} The response or request type in the previous contract
-            \item \textbf{Parameters:} List of the parameters of the message (e.g. Path, Query, Header, Cookie and Body parameters)
+            \item \textbf{Type:} The response or request type in the new contract. \\\textit{(e.g. REQUEST, 200, 400, etc)}
+            \item \textbf{Prior Type:} The response or request type in the previous contract.
+            \item \textbf{Parameters:} List of the parameters of the message (Path, Query, Header, Cookie and Body parameters).
             \begin{itemize}
                 \setlength\itemsep{0em}
-                \item \textbf{Key:}  The identifier of parameter, the first segment represents its location (e.g.Path, Query, Header, Cookie and Body parameters), the second segment represents the name of the parameter. Hieratical Body parameter can be mapped at any level by specifying the hierarchy path in the parameter name (e.g. json|specie.class.name; json|specie)
-                \item \textbf{Resolution:} The specification of a resolution for a parameter
-                \item \textbf{Type:} The parameter type, Number, String, Array or Object
+                \item \textbf{Key:}  The identifier of the parameter. \\\textit{(e.g path|quantity)}
+                \item \textbf{Resolution:} The specification of a resolution for a parameter. \\\textit{(eg. link=query|limit)}.
+                \item \textbf{Type:} The type of the parameter. \\\textit{(eg. String)}
+                \item \textbf{Format:} The format of the parameter. \\\textit{(eg. yyyy-mm-dd hh:mm:ss)}
             \end{itemize}
         \end{itemize}
     \end{itemize}
 \end{itemize}
 
-Figure \ref{lst:evolution_example}  depicts an evolution specification written in this language.
+The first segment of parameter keys represents the parameter location (e.g.Path, Query, Header, Cookie and Body parameters), the second segment represents the ''name'' of the parameter.
+\[ \langle location\rangle |\langle name\rangle \;\;\;(e.g\;path|quantity) \]
+Schemas used in a message body are flattened into multiple parameters:
+\[ \mathbf{Item}\bm{\{}id,price\bm{\}} \rightarrow json|item.id,\;json|item.price \]
+The schema Item is flattened into two distinct parameters, which are mapped by specifying the hierarchy path in the parameter name.
 
-As previously mentioned in the Chapter \ref{cha:design}, resolutions can have one of three distinct types DefaultValue, Link or Function.
-The type of resolution is represented in the first segment of a resolution, while the second segment represents the resolution itself.
-Link resolutions have the following format "link={Parameter Location}|{Parameter Name}", the parameter of the prior contract must be of the same type and format.
-Default value resolutions have the following format "default=#Value", the value that must be of the same type and format.
+As previously mentioned in Section \ref{sec:evolution_specification}, resolutions can have one of three distinct types DefaultValue, Link or Function.
+The type of resolution is represented in the first segment of a resolution rule, while the second segment represents the resolution itself:
 
-Function resolutions are written as one line Java expressions that can use parameters of the previous contract, the
-parameters are referenced by their location and name (eg. function= {{json|firstName}} + {{json|lastName}} ).
-These references are replaced in the adapter implementation by their real value.
+\begin{itemize}
+    \item \textbf{Default value resolution:} \[ default=\langle value\rangle \;\;\;(e.g\;default=true) \]
+    \item \textbf{Link resolution:} \[ link=\langle location\rangle|\langle name\rangle \;\;\;(e.g\;link=query|limit) \]
+    \item \textbf{Function resolution:} \[ function=\langle expression\rangle \;\;\;(e.g\;function=json|name + json|surname) \]
+\end{itemize}
+
+Function resolutions are written as one line Java expressions that can use parameters of the previous contract. The
+parameters are referenced by their location and name.
+
+The description language supports arrays in request and response schemas.
+Arrays are defined by bracketing the array elements of a parameter.
+\[ \mathbf{Item}\bm{\{}tags:Tag[]\bm{\}}\;\;\;\mathbf{Tag}\bm{\{}id:String\bm{\}} \rightarrow \;json|item.[tags].id \]
+\[ \mathbf{Item}\bm{\{}tags:Tag[]\bm{\}}\;\;\;\mathbf{Tag}\bm{\{}keywords:String[]\bm{\}} \rightarrow \;json|item.[tags].[keywords] \]
+Link resolution's between two parameters with the same number of array elements are resolved by matching the members of the different array elements.
+If a Link resolution uses parameters with a different number of array elements, the first members of the unpaired array elements are selected, while remaining array members are ignored.
+
+The Listing \ref{lst:evolution_example} depicts an example of a evolution description in this language.
 
 \begin{lstlisting}[caption=Evolution specification example, label=lst:evolution_example, captionpos=b]
-methods:
+procedures:
 - endpoint: /pets GET
   endpoitPrior: /pets GET
   messages:
-  - parameters:
-    - key: query|tags
-      resolution: link=query|tags
-      type: String
-    - key: query|limit
-      resolution: link=query|limit
-      type: String
-    type: Request
+  - type: Request
     typePrior: Request
-  - parameters:
-    - key: json|
-      resolution: link=query|json
-      type: Array
-    type: '200'
+    parameters:
+    - key: query|limit
+      resolution: link=path|limit
+      type: String
+      format: none
+  - type: '200'
     typePrior: '200'
+    parameters:
+    - key: json|[pet].name
+      resolution: function=json|[pet].first_name + [pet].surname
+      type: String
+      format: none
+    - key: json|[pet].birth
+      resolution: function=LocalDate.now().getYear() - json|[pet].age
+      type: String
+      format: yyyy
 \end{lstlisting}
 
 To minimize the documentation effort it was developed a GUI editor for the facilitates the specification of evolutions.
