@@ -377,20 +377,25 @@ Kubectl~\cite{kubectl} is a tool that interfaces with Kubernetes clusters and ca
 After determining the active service versions, this module retrieves all evolution specifications up to the oldest version that is still active,
 and then combines them so that all specifications link to the current version.
 
-Default and Link resolution rules can be chained together in a straightforward manner.
-Function resolutions are chained together by replacing the parameter references with resolutions.
+Link resolution rules can be chained together in a straightforward manner.
+Function resolutions are chained together by recursively replacing missing parameter references with their resolutions .
 Below in Table~\ref{table:1} it is presented an example, where resolution rules are chained incrementally from the two last versions to the oldest version:
 
 \begin{table}[h!]
 \centering
 \begin{tabular}{|l|l|l|}
     \hline
-    \thead{Transition} &  \thead{Missing} & \thead{Resolution for parameter := path|seven_7} \\
+    \thead{Transition} &  \thead{Missing^*} & \thead{Resolution for parameter := path|seven_7} \\
     \hline
     v_3\rightarrow v_4 & 7 & function=path|five_5 + path|two_2  \\    \hline
     v_2\rightarrow v_4 & 7,2 & function=path|five_5 + (default=2)_2  \\    \hline
     v_1\rightarrow v_4 & 7,5,2 & function=(function=path|three_3 + (default=2)_2)_5 + (default=2)_2 \\    \hline
 \end{tabular}
+\begin{tablenotes}
+    \flushleft
+    \tiny
+    *Indicates the missing parameters in the prior contract (e.g 7\textlangle =\textrangle path|seven)
+\end{tablenotes}
 \caption{Chained resolution rules example}
 \label{table:1}
 \end{table}
@@ -415,4 +420,6 @@ In order to prevent the JVM from calling garbage collector frequently and reallo
 the JVM has started with a higher maximum heap memory, and the initial heap memory
 size was set to the same value as its maximum memory size.
 The maximum number of threads for Tomcat was set to 2000, in order to support a higher load of requests.
+
+TODO pseudo codigo
 

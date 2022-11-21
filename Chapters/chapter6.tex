@@ -14,23 +14,23 @@
 \section{Benchmark platform} % (fold)
 \label{sec:benchmark_platform}
 
-It was constructed a benchmark platform to compare our solution to existing ones.
+A benchmark platform was developed to evaluate our solution to existing ones.
 This section discusses the proposed benchmark platform's requirements and design.
 \citeauthor{microservices2017benchmark} \cite{microservices2017benchmark} propose an initial set of requirements
-to support repeatable microservices research (Figure \ref{fig:benchmark}).
+to support repeatable microservices research (Table \ref{tab:benchmark}).
 
-\begin{figure}[htbp]
+\begin{table}[htb]
     \centering
-    \centerline{\includegraphics[height=4.2in]{benchmark_requirements}}
+    \includegraphics[height=4.2in]{benchmark_requirements}
     \caption{Benchmark requirements \cite{microservices2017benchmark}}
-    \label{fig:benchmark}
-\end{figure}
+    \label{tab:benchmark}
+\end{table}
 
 In addition to the requirements listed above, it was considered that the following requirements should also be included:
 \begin{itemize}
     \setlength\itemsep{0em}
-    \item The ability to evaluate different solutions in comparable scenarios while utilizing the same evaluation criteria;
-    \item The ability to evaluate diverse solutions without changing their implementation;
+    \item The capacity to evaluate different solutions in comparable scenarios while using the same evaluation criteria;
+    \item The capacity to evaluate diverse solutions without changing their implementation;
     \item Experiments must be easy to share and replicate;
     \item It should be possible to aggregate reported metrics for a specific time period between two events, such as the start and end of a service's evolution;
     \item Users must be able to specify how and when each service should evolve via a configuration file or directly through a terminal.
@@ -45,26 +45,18 @@ The architecture of the benchmark platform can be seen in Figure \ref{fig:benchm
     \label{fig:benchmarkarchitecture}
 \end{figure}
 
-\paragraph{- Kubernetes \cite{kubernetes} -} is the test environment.
-It hosts the applications under test, the monitoring system, and the load test workers.
-
-\paragraph{- Promotheus \cite{turnbull2018monitoring} -} is a pull-based monitoring system.
-It periodically sends HTTP scrape requests, the response to these requests is parsed in storage along with the metrics for the scrape itself.
-Prometheus provides a query language that allows the metrics to be aggregated by events, components or metadata.
-The gathered metrics can be consulted by external tools or directly visualized in this platform via dashboards.
-
-\paragraph{- Artillery \cite{artillery} -}
-is an open-source load testing suite for developers and system administrators.
-
-\paragraph{- Artillery Operator \cite{artilleryop} -}
-enables the creation and execution of distributed Artillery load tests from Kubernetes schedule jobs.
-The architecture of this tool is depicted in Figure \ref{fig:artilleryoperator}.
-
-\paragraph{- Helm \cite{helm} -}
-is a package manager for Kubernetes that allows developers to more easily deploy, package, and configure applications into Kubernetes clusters.
-
-\paragraph{- Helmfile \cite{helmfile} -}
- extends Helm's capabilities by enclosing it in a declarative specification that allows the composition of multiple Helm charts as a single deployment artifact.
+\begin{description}
+    \item[Kubernetes \cite{kubernetes}] is the test environment. It hosts the applications under test, the monitoring system, and the load test workers.
+    \item[Promotheus \cite{turnbull2018monitoring}] is a pull-based monitoring system.
+    It periodically sends HTTP scrape requests, the response to these requests is parsed in storage along with the metrics for the scrape itself.
+    Prometheus provides a query language that allows the metrics to be aggregated by events, components or metadata.
+    The gathered metrics can be consulted by external tools or directly visualized in this platform via dashboards.
+    \item[Artillery \cite{artillery}] is an open-source load testing suite for developers and system administrators.
+    \item[Artillery Operator \cite{artilleryop}] enables the creation and execution of distributed Artillery load tests from Kubernetes schedule jobs.
+    The architecture of this tool is depicted in Figure \ref{fig:artilleryoperator}.
+    \item[Helm \cite{helm}] is a package manager for Kubernetes that allows developers to more easily deploy, package, and configure applications into Kubernetes clusters.
+    \item[Helmfile \cite{helmfile}] extends Helm's capabilities by enclosing it in a declarative specification that allows the composition of multiple Helm charts as a single deployment artifact.
+\end{description}
 
 \begin{figure}[htbp]
     \centering
@@ -77,11 +69,11 @@ Experiments are launched using a custom command-line tool.
 The command-line tool can also be used to install all the benchmark platform's required components in a Kubernetes cluster.
 The tool allows for the execution of multiple experiments in sequence without the need for developer intervention.
 The components and resources of an experiment are automatically deleted, and experiment metrics are automatically gathered at the end of the experiment.
-The experiment metrics are obtained by querying the prometheus monitoring system, which returns a series of the observations recorded throughout the experiment.
-An experiment is composed by four manifests:
+The experiment metrics are obtained by querying the prometheus monitoring system, which returns series of observations recorded throughout the experiment.
 \begin{itemize}
     \setlength\itemsep{0em}
-    \item \textbf{Helmfile} specifies the resources, and the configuration of the application under test;
+    \item [An experiment is composed by four manifests:]
+    \item \textbf{Helmfile} specifies the application under test;
     \item \textbf{Artillery workload job} defines the test scenarios of the experiment;
     \item \textbf{Metrics script} holds the queries that should be performed after the experiment ends;
     \item \textbf{(Optional) Evolution script} outlines the deployment actions required to upgrade services during the experiment execution.
@@ -89,21 +81,17 @@ An experiment is composed by four manifests:
 
 Each of the four manifests can include template variables that are changed using a configuration file.
 An experiment is started by passing the configuration file to a run script.
-The developed demo application and load test scripts support the following configurations:
 \begin{itemize}
     \setlength\itemsep{0em}
-    \item Warm up phase duration;
-    \item Ramp up phase duration;
-    \item Sustained load phase duration;
-    \item Warm up arrival rate;
-    \item Ramp up phase min arrival rate;
-    \item Ramp up phase max arrival rate;
-    \item Sustained load phase arrival rate;
+    \item [The demo application and load test scripts support the following configurations:]
+    \item Warm up phase - duration, arrival rate;
+    \item Ramp up phase - duration, min/max arrival rate;
+    \item Sustained load phase - duration, arrival rate;
     \item Number of distributed artillery workers;
     \item Number of application replicas;
     \item Payload size of the sent messages;
-    \item Recursion - Number of subsequent blocking calls after an initial request;
-    \item Fanout - Number of parallel calls for a single request.
+    \item Fanout - Number of subsequent parallel calls for a single request.
+    \item Depth - Number of subsequent blocking calls after an initial request;
 \end{itemize}
 
 \section{Evaluation Methodology} % (fold)
@@ -111,54 +99,46 @@ The developed demo application and load test scripts support the following confi
 
 The setup and the methodology of the conducted experiments is described below:
 
-\paragraph{- Environment -}
+\begin{description}
+    \item[Environment -] The experiments were conducted in a cloud environment with 10 virtual machines.
+    All 10 nodes were hosted in the same datacenter in the region of Strasbourg, France.
+    Each virtual machines was hosted in different physical machines, no two VMs shared the same hardware.
+    Each node is interconnected with a bandwidth of 2 Gb/s.
+    Each virtual machine is equipped with 4GB of RAM and 2 virtual cores of an Intel Core Haswell (no TSX) CPU.
+    \item[Tested microservice system -] To test the cost of the adapter system a demo application was developed.
+    The demo application holds a configurable amount of services that run an identical image.
+    The image is a simple HTTP Spring server that forwards and returns received requests unchanged.
+    Environment variables allow for the configuration of the interconnections between services.
+    The number of parallel calls (fanout) and recursive calls (depth) between services after an initial request are both configurable.
+    The demo application was developed in two separate versions with unique contracts.
+    In the first version, one of the procedures of the application was altered.
+    All the parameters in the body's schema of this procedure were renamed.
+    \item[Experiment Setup -] To inject load in the experiments, 10 workers of the artillery load testing tool were used,
+    the workers are executed remotely in the cluster and were spread in 6 nodes.
+    These workers are supported by are monitored by a common Kubernetes job.
+    The workers are installed and removed from cluster using the artillery-operator project \cite{artilleryoperator}.
+    In each experiment all the resources of previous experiments were deleted,
+    and a new namespace was created to avoid contamination in the metrics extracted.
+    The experiments were carried out sequentially with a 5 minutes break in between.
 
-The experiments were conducted in a cloud environment with 10 virtual machines.
-All 10 nodes were hosted in the same datacenter in the region of Strasbourg, France.
-Each virtual machines was hosted in different physical machines, no two VMs shared the same hardware.
-Each node is interconnected with a bandwidth of 2 Gb/s.
-Each virtual machine is equipped with 4GB of RAM and 2 virtual cores of an Intel Core Haswell (no TSX) CPU.
-
-\paragraph{- Tested microservice system -}
-
-To test the cost of the adapter system a demo application was developed.
-The demo application holds a configurable amount of services that run an identical image.
-The image is a simple HTTP spring server that returns received requests unchanged.
-The interconnections between microservices is configurable thorough environment variables.
-The number of synchronous calls (SyC) between microservices for a single request and also the number of parallel calls (PrC) between microservices is configurable.
-The demo application was developed in two separate versions with unique contracts.
-In the first version, one of the procedures of the application was altered.
-All the parameters in the body's schema of this procedure were renamed.
-
-\paragraph{- Experiment Setup -}
-
-To inject load in the experiments, 10 workers of the artillery load testing tool were used,
-the workers are executed remotely in the cluster and were spread in 6 nodes.
-These workers are supported by Kubernetes pods that are monitored by a common job.
-The workers are installed and removed from cluster using the artillery-operator project \cite{artilleryoperator}.
-In each experiment all the resources of previous experiments were deleted and a new job and namespace were created in the
-cluster to avoid contamination in the metrics extracted.
-The experiments were carried out sequentially with a 5 minutes break in between.
-
-Each experiment had three phases:
-a warm up phase of 30 seconds with an arrival rate of 5 virtual users/second;
-a ramp up phase of 2 minutes;
-a sustained load phase of 6 minutes.
-The metrics were only extracted during the sustained load phase.
-The first and last 30 seconds were left out to allow time for all the artillery worker threads to enter the sustained load phase.
-It was excluded tests that had a high enough throughput to saturate the application.
-The error rate and timeouts were 0 during all the presented experiments.
-
-\paragraph{- Metrics -}
-
-In each experiment it was extracted 3 metrics: the CPU resources, the memory resources and latency of the system.
-The resources were only queried from the adapters and the replicas that belong to the target microservice application under test.
-The resources consumed by the monitoring system and artillery workers were excluded from the results.
-The throughput and latency were extracted by parsing the reports of the artillery load testing tool.
-The CPU resource samples were taken from each node at 5 seconds intervals using the prometheus node exporter.
-Memory resource samples were gathered from each container at 5 seconds intervals using the kubelet node agent API.
-The latency statistics were calculated with a period of 10 seconds over 5 minutes, the results obtained represent the
-average of the reported 30 periods.
+    Each experiment had three phases:
+    a warm up phase of 30 seconds with an arrival rate of 5 virtual users/second;
+    a ramp up phase of 2 minutes;
+    a sustained load phase of 6 minutes.
+    The metrics were only extracted during the sustained load phase.
+    The first and last 30 seconds were left out to allow time for all the artillery worker threads to enter the sustained load phase.
+    It was excluded tests that had a high enough throughput to saturate the application.
+    The error rate and timeouts were 0 during all the presented experiments.
+    \item[Metrics -] In each experiment it was extracted 3 metrics: the CPU resources, the memory resources and latency of the system.
+    The resources were only queried from the adapters, and the replicas that belong to the target application under test.
+    The resources consumed by the monitoring system and artillery workers were excluded from the results.
+    The throughput and latency were extracted by parsing the reports of the artillery load testing tool.
+    The CPU resource samples were taken from each node at 5 seconds intervals using the prometheus node exporter.
+    Memory resource samples were gathered from each container at 5 seconds intervals using the kubelet node agent API.
+    The latency statistics were calculated with a period of 10 seconds over 5 minutes, the results obtained represent the
+    average of the reported 30 periods.
+    \item[]
+\end{description}
 
 \section{Experiments} % (fold)
 \label{sec:experiments}
