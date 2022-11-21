@@ -313,6 +313,10 @@ The present implementation of the verifier module does not check whether the clu
 These functionalities were not implemented since the Helm deployment process already performs these verifications prior to the deployment of a service.
 Nonetheless, including these verifications in the verifier module could be useful in order for the solution to be decoupled from Helm.
 
+The module also does not verify if the type and format of a function resolution matches the type and format of a parameter.
+To support this validations in verifier module with would be necessary to use a dedicated language for specifying function resolutions.
+The verification of correct function resolution types is done alternatively by the generator module that verifies compile-time errors when parameter references are substituted by real values.
+
 \begin{algorithm}
     \caption{Evolution validation algorithm}\label{alg:evoalg}
     \begin{algorithmic}[1]
@@ -344,10 +348,14 @@ Nonetheless, including these verifications in the verifier module could be usefu
                 \State \textbf{assert} $Resolution.parameter.type = Parameter.type$
                 \State \textbf{assert} $Resolution.parameter.format = Parameter.format$
             \ElsIf {$Resolution.type = Function$}
-                \State \textbf{assert} $Resolution.function.returnType = Parameter.type$
-                \State \textbf{assert} $Resolution.function.returnFormat = Parameter.format$
-                \ForAll {$arg \in Resolution.function.arguments$}
-                    \State \textbf{assert} $arg \in OldMessage.parameters$
+                \State \st{\textbf{assert} $Resolution.function.returnType = Parameter.type$}
+                \State \st{\textbf{assert} $Resolution.function.returnFormat = Parameter.format$}
+                \ForAll {$prm \in Resolution.function.parameters$}
+                    \If {$prm.key == null\;\&\&\;prm.resolution != null$}
+                        \State \textbf{assert} $VerifyResolution(prm, OldMessage)$
+                    \Else
+                        \State \textbf{assert} $prm \in OldMessage.parameters$
+                    \EndIf
                 \EndFor
             \EndIf
         \EndProcedure
