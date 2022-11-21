@@ -113,14 +113,15 @@ All the contract elements mentioned above can be subject to change's as the cont
 Multiple types of changes can also occur simultaneously in the same contract evolution.
 \begin{itemize}
     \setlength\itemsep{0em}
-    \item [A taxonomy of all conceivable HTTP contract evolutions is presented bellow:]
+    \item [A taxonomy of all conceivable HTTP contract evolutions~\cite{list} is presented bellow:]
     \item [\textbf{Functional evolutions:}]
     \item Adding/removing a parameter.
     \item Adding/removing a response message from a procedure.
     \item Adding/removing a procedure.
     \item [\textbf{Semantic evolutions:}]
     \item Changing the type of parameter. \\ \textit{(eg. turning a integer field into a string)}
-    \item Changing the HTTP method of an endpoint.
+    \item Changing a resource URL
+    \item Changing a domain URL
     \item Changing the status code of a response.
     \item [\textbf{Syntactic evolutions:}]
     \item Renaming a parameter.
@@ -184,28 +185,27 @@ This approach clutters service contract's with information that is irrelevant to
 \subsection{Compatibility Verification} % (fold)
 \label{sec:compatibility_verification_design}
 
-TODO inconsistent
-
 Intuitively, compatibility verification determines whether
 all the edited elements in a producer contract are compatible with the ones effectively
 used by the consumer services, and whether the new contract requirements are met
 by the system’s existing resources.
+\newpage
+\paragraph{Approach:}The verification procedure examines if:
+\begin{itemize}
+    \setlength\itemsep{0em}
+    \item There are enough computational resources to accommodate the service;
+    \item All the service dependencies are available and reachable in the system;
+    \item A new contract is compatible with the prior contract versions that are still being consumed.
+\end{itemize}
 
-\paragraph{Approach:}
-The verification procedure used examines both the producer contract and all consumer references to determine the safety of a deployment operation.
-Edited elements are considered compatible if the information supplied by prior elements is sufficient to meet the edited elements parameters.
-Contract requirements are fulfilled if there are enough computational resources to accommodate the service and if all the
-service dependencies are available and reachable in the system.
+Edited elements are considered compatible if a resolution rule is present that employs earlier elements to satisfy the edited elements' requirements.
+This approach makes the assumption that all procedures from previous contract versions are being used.
+If a new contract is missing a procedure supported in an earlier version,
+the developers must verify if the procedure is not being used and mark it as obsolete in the evolution manifest before the contract can be deemed safe.
 
 \paragraph{Alternatives:}
-Instead of determining if a new contract version is compatible with all consumer references,
-it is evaluated only whether the new contract is compatible with the prior contract versions that are still being consumed.
-If a new contract is missing a procedure that was present in a prior version,
-the developers will need to verify if the procedure is not being consumed
-and mark it as obsolete in the evolution manifest for the contract to be considered safe.
-This approach has the advantage of streamlining the verification process by eliminating the
-need for all contracts to be accessible by machine code in a standardized fashion.
-The downside is that it introduces human error in the verification of un-utilized service capabilities.
+To assess the safety of a deployment operation, the verification process alternatively could examine only the most recent producer contract version and all consumer references.
+This approach has the benefit of removing human error from the verification of unused service procedures, however, it necessitates the documentation of all references between consumers and service procedures.
 
 \subsection{Adapter Location} % (fold)
 \label{sec:adapter_location}
