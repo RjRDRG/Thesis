@@ -215,9 +215,9 @@ As previously mentioned in Section \ref{sec:evolution_specification}, resolution
 The type of resolution is represented in the first segment of a resolution rule, while the second segment represents the resolution itself:
 
 \begin{itemize}
-    \item \textbf{Default value resolution:} \[ default=\langle value\rangle \;\;\;(e.g\;default=true) \]
-    \item \textbf{Link resolution:} \[ link=\langle location\rangle|\langle name\rangle \;\;\;(e.g\;link=query|limit) \]
-    \item \textbf{Function resolution:} \[ function=\langle expression\rangle \;\;\;(e.g\;function=json|name + json|surname) \]
+    \item \textbf{Default value resolution:} \[ \mathit{default}=\langle value\rangle \;\;\;(e.g\;default=true) \]
+    \item \textbf{Link resolution:} \[ \mathit{link}=\langle location\rangle|\langle name\rangle \;\;\;(e.g\;link=query|limit) \]
+    \item \textbf{Function resolution:} \[ \mathit{function}=\langle expression\rangle \;\;\;(e.g\;function=json|name + json|surname) \]
 \end{itemize}
 
 Function resolutions are written as one line Java expressions that can use parameters of the previous contract. The
@@ -388,25 +388,23 @@ and then combines them so that all specifications link to the current version.
 
 Link resolution rules can be chained together in a straightforward manner.
 Function resolutions are chained together by recursively replacing missing parameter references with their resolutions .
-Below in Table~\ref{table:1} it is presented an example, where resolution rules are chained incrementally from the two last versions to the oldest version:
+Below in Table~\ref{tab:table1} it is presented an example, where resolution rules are chained incrementally from the two last versions to the oldest version:
 
 \begin{table}[h!]
 \centering
 \begin{tabular}{|l|l|l|}
     \hline
-    \thead{Transition} &  \thead{Missing^*} & \thead{Resolution for parameter := path|seven_7} \\
+    \thead{$Transition$} &  \thead{$Missing^*$} & \thead{$Resolution for parameter \coloneqq = path|seven_7$} \\
     \hline
-    v_3\rightarrow v_4 & 7 & function=path|five_5 + path|two_2  \\    \hline
-    v_2\rightarrow v_4 & 7,2 & function=path|five_5 + (default=2)_2  \\    \hline
-    v_1\rightarrow v_4 & 7,5,2 & function=(function=path|three_3 + (default=2)_2)_5 + (default=2)_2 \\    \hline
+    $v_3\rightarrow v_4$ & $7$ & $function=path|five_5 + path|two_2$  \\    \hline
+    $v_2\rightarrow v_4$ & $7,2$ & $function=path|five_5 + (default=2)_2$  \\    \hline
+    $v_1\rightarrow v_4$ & $7,5,2$ & $function=(function=path|three_3 + (default=2)_2)_5 + (default=2)_2$ \\    \hline
 \end{tabular}
-\begin{tablenotes}
-    \flushleft
-    \tiny
-    *Indicates the missing parameters in the prior contract (e.g 7\textlangle =\textrangle path|seven)
+\begin{tablenotes}[flushleft]
+    \item *Indicates the missing parameters in the prior contract (e.g 7\textlangle =\textrangle path|seven)
 \end{tablenotes}
 \caption{Chained resolution rules example}
-\label{table:1}
+\label{tab:table1}
 \end{table}
 
 
@@ -414,21 +412,66 @@ Below in Table~\ref{table:1} it is presented an example, where resolution rules 
 \section{Adapter} % (fold)
 \label{sec:adapter}
 
-The adaption approach consists on: for each endpoint the
-adapter re-constructs the entire request from zero and populates the parameter resolutions with the information of the original request.
-The adapter server exposes each of the supported contract version's in a distinct port.
-A Kubernetes service is created for accessing each of the adapter ports.
+The adaption approach, for each endpoint, re-constructs the entire message from zero and populates the parameter resolutions with the information of the original message.
 
-The Function resolutions are written as one-line Java expressions.
-The resolutions are injected directly into the template implementation of the adapter, and the parameter references in the resolution are then replaced with the parameters themselves.
-The adapter's current template implementation does not support HTTPS, however this can be added.
+In Algorithm~\ref{alg:adapteraldg}, it is presented the pseudo-code of the template implementation of the adapter proxy.
+The terms highlighted in blue are replaced by a template engine.
+The sections highlighted in orange represent code fragments that are repeated for each of the mentioned terms in the section comment.
+
+The adapter current template implementation does not support HTTPS, however this could be added in future work.
 Because TLS is mandatory in HTTP 1.2, the implementation only supports HTTP 1.1.
 
 The adapter was built with Spring Boot and an Apache Tomcat/9.0.65 HTTP server, the base image of the adapter docker container is an "openjdk:11-nanoserver".
 In order to prevent the JVM from calling garbage collector frequently and reallocating the heap memory while Tomcat is trying to serve requests,
 the JVM has started with a higher maximum heap memory, and the initial heap memory
 size was set to the same value as its maximum memory size.
-The minimum and maximum number of threads for Tomcat was set to 15 and 2000 respectively, in order to support a higher load of requests.
+The minimum and maximum number of threads for Tomcat was set to 25 and 2000 respectively, in order to support a higher load of requests.
 
-TODO pseudo codigo
+\begin{algorithm}
+    \caption{Proxy adapter template algorithm}\label{alg:adapteraldg}
+    \begin{algorithmic}[1]
+        \State $\textcolor{foo}{\#For\;each\;endpoint\;\{}$
+        \Procedure {Adapt\textcolor{blue}{Endpoint}Request}{$Path$, $Query$, $Headers$, $Cookies$, $Body$}
+            \State $Body \leftarrow FlattenBody(Body)$
+            \State $new\_method  \leftarrow \textcolor{blue}{NewMethod}$
+            \State $new\_url  \leftarrow \textcolor{blue}{NewURL}$
+            \State $new\_params  \leftarrow \{\}$
+            \State $\textcolor{foo}{\#For\;each\;new\;request\;parameter\;\{}$
+            \State \;\;\;\;$id \leftarrow param.key.id$
+            \State \;\;\;\;$location \leftarrow param.key.location$
+            \State \;\;\;\;$resolution \leftarrow \textcolor{blue}{Resolution(Path, Query, Headers, Cookies, Body)})$
+            \State \;\;\;\;$new\_params.add(location,id,resolution)$
+            \State $\textcolor{foo}{\}}$
+            \State $new\_body  \leftarrow ComposeBody(new\_params.get(body))$
+            \State $new\_path  \leftarrow ComposePath(new\_url, new\_params.get(path\|query))$
+            \State $new\_headers  \leftarrow ComposeHeaders(new\_params.get(header\|cookie))$
+            \State $response \leftarrow ForwardRequest(new\_path, new\_method, new\_body, new\_headers)$
+            \State $\textbf{return}\;Adapt\textcolor{blue}{Endpoint}Response(response)$
+        \EndProcedure
+        \Statex
+        \Procedure {Adapt\textcolor{blue}{Endpoint}Response}{$Response$}
+            \State $Status \leftarrow Response.status$
+            \State $Headers \leftarrow Response.headers$
+            \State $Cookies \leftarrow Response.cookies$
+            \State $Body \leftarrow FlattenBody(Response.body)$
+            \State $\textcolor{foo}{\#For\;each\;prior\;response\;status\{}$
+            \State \;\;\;\;\textbf{if}$\;Status = \textcolor{blue}{PriorStatus}$\;\textbf{then}
+            \State \;\;\;\;\;\;\;\;$new\_status\_code  \leftarrow \textcolor{blue}{NewStatusCode}$
+            \State \;\;\;\;\;\;\;\;$new\_params  \leftarrow \{\}$
+            \State \;\;\;\;\;\;\;\;$\textcolor{foo}{\#For\;each\;prior\;response\;parameter\{}$
+            \State \;\;\;\;\;\;\;\;\;\;\;\;$id \leftarrow param.key.id$
+            \State \;\;\;\;\;\;\;\;\;\;\;\;$location \leftarrow param.key.location$
+            \State \;\;\;\;\;\;\;\;\;\;\;\;$resolution \leftarrow \textcolor{blue}{Resolution(Headers, Cookies, Body)})$
+            \State \;\;\;\;\;\;\;\;\;\;\;\;$new\_params.add(location,id,resolution)$
+            \State \;\;\;\;\;\;\;\;$\textcolor{foo}{\}}$
+            \State \;\;\;\;\;\;\;\;$new\_body  \leftarrow ComposeBody(new\_params.get(body))$
+            \State \;\;\;\;\;\;\;\;$new\_headers  \leftarrow ComposeHeaders(new\_params.get(header|cookie))$
+            \State \;\;\;\;\;\;\;\;$\textbf{return}\ ComposeResponse(new\_body, new\_headers, new\_status\_code)$
+            \State \;\;\;\;\textbf{end\;if}
+            \State $\textcolor{foo}{\}}$
+        \EndProcedure
+        \State $\textcolor{foo}{\}}$
+    \end{algorithmic}
+\end{algorithm}
+
 
