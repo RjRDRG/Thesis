@@ -277,19 +277,13 @@ In this experiment, the overhead is expected to gradually rise due to the increa
 To support higher request rates the adapter implementation will need to launch more client threads which, consequently, increase the consumed CPU resources.
 
 When comparing the first and last data points in Figure \ref{fig:routCpu}, we can see that consumed resources have doubled, as expected.
-In the other data points, the overhead remains relatively constant with a margin of error of 20\%,
 
-//TODO wrong argument
-
-this explainable because the default amount of allocated threads by Tomcat (200 threads) is sufficient to handle the arrival rate in these data points.
-When 50\% of requests are routed through the adapter, the arrival rate is 240 requests/s, the tomcat thread model uses a thread per request, and requests
-consequently 240 threads are necessary to handle the arrival rate, which can be translated to an overhead of 120\%.
-
-The 20\% margin of error in the other data points is explainable by the nondeterministic nature of the artillery workers.
+The overhead also increases gradually in the other data points, with an estimated 20\% margin of error.
+The large margin of error is explainable by the nondeterministic nature of the artillery workers.
 Remark that the artillery test has two scenarios: one where the worker calls an endpoint that can only be handled by using the adapter, and another in which the adapter is not utilized.
-Each scenario weight as set to reflect the corresponding test percentages,
-however, the distribution of requests is nondeterministic and will only be equal to the given weights over very long test periods.
-The test time for this experiment was set to 5 minutes for each data point.
+Each scenario weight as set to reflect the corresponding test request distribution,
+however, the dispersion of requests is nondeterministic and will only be equal to the given weights over very long test periods.
+The duration of this experiment was set to 5 minutes for each data point.
 
 The utilized memory of the adapter and demo applications in this experiment is depicted in Figure \ref{fig:routMem}.
 
