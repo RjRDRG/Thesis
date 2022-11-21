@@ -34,7 +34,7 @@ The Inventory micro-service, which is dependent on the previous service, has bee
     \label{fig:runtime}
 \end{figure}
 
-It is defined a distinct K8s service for each contract version that is still being consumed, as shown for the three versions of Accounts microservice.
+Every contract version that is still in use has its own unique K8s service, as can be seen for the three versions of the Accounts microservice.
 Older versions are supported by the adapter, while the most up to date version is directly supported by the microservice app.
 A consumer accesses a producer app via the service that has the same version as the one specified in its code.
 
@@ -60,7 +60,7 @@ If a service only underwent changes that did not affect its API or dependencies,
     \label{fig:pipeline}
 \end{figure}
 
-The pipeline was developed using the Jenkins pipeline suite, each of the novel stages is supported by a distinct Java application that is pulled from version control
+The pipeline was developed using the Jenkins~\cite{jenkins} pipeline suite, each of the novel stages is supported by a distinct Java application that is pulled from version control
 and executed directly on the pipeline, whereas the other stages are supported natively by the suite.
 The modules that enable each novel stage will be discussed in detail in the following sections.
 
@@ -299,9 +299,9 @@ The module verifies if the provided evolution specification is valid.
 In Algorithm \ref{alg:evoalg} it is presented the pseudo-code of the compatibility verification process.
 It starts by checking if all the procedures and messages of prior contract are present in the specification,
 then it verifies the validity of the resolutions for each parameter of the new contract messages.
-Resolutions can be invalid due to four reasons:
 \begin{itemize}
     \setlength\itemsep{0em}
+    \item [Resolutions can be invalid due to four reasons:]
     \item Invalid syntax in resolution expressions;
     \item References parameters that don't exist in the previous contract;
     \item Uses functions that are not supported;
@@ -419,7 +419,7 @@ The adapter was built with Spring Boot and an Apache Tomcat/9.0.65 HTTP server, 
 In order to prevent the JVM from calling garbage collector frequently and reallocating the heap memory while Tomcat is trying to serve requests,
 the JVM has started with a higher maximum heap memory, and the initial heap memory
 size was set to the same value as its maximum memory size.
-The maximum number of threads for Tomcat was set to 2000, in order to support a higher load of requests.
+The minimum and maximum number of threads for Tomcat was set to 15 and 2000 respectively, in order to support a higher load of requests.
 
 TODO pseudo codigo
 

@@ -19,8 +19,16 @@ communicate with one another via standardized network interfaces.
 These services segregate fine-grained business functionalities and can be independently tested, deployed, and scaled by automated mechanisms.
 There is typically no centralized management, each service may be written in a different programming language and employ a different data storage technology.
 
-To understand the microservice style it's useful to compare it to the monolithic style:
-Monolithic application's are built often using the Model-View-Controller (MVC) pattern~\cite{mvc}, which is composed by three parts:
+To understand the microservice architectural style it's useful to compare it to the monolithic architectural style (Figure~\ref{fig:monoliths_and_microservices}).
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[height=3in]{microVSmono}
+    \caption{Monoliths and microservices \cite{microservices}}
+    \label{fig:monoliths_and_microservices}
+\end{figure}
+
+Monolithic application's are often built using the Model-View-Controller (MVC) pattern~\cite{mvc}, which is composed by three parts:
 The view, a client-side user interface composed of HTML pages and Javascript that runs in the user's browser;
 The model, a relational database management system;
 The controller, a server-side application that handles requests, retrieves and updates data from the database, executes domain logic,
@@ -28,82 +36,61 @@ and populates the views that are sent to the browser.
 
 The server-side application is a monolith, a single logical executable, in which all logic for handling requests runs as a single process,
 different domains of the application are divided into classes, functions, and namespaces by utilizing the basic features of a programming language.
-
 Large monolithic software becomes a barrier when the underlying application must scale while maintaining a high level of availability.
 Scaling the server-side application involves scaling all the application functionalities, rather than the functionalities that require greater resources.
 Any small change involves building and re-deploying the entire monolith.
 
 In contrast to monolithic applications, several techniques are used in the microservice architecture to meet the requirements of system scalability and high availability, namely:
+\begin{description}
+    \item [Componentization -] In contrast to monoliths, which achieve componentization solely via the use of libraries and programming language capabilities,
+    microservices achieve componentization primarily through the division of different business domains and functionalities into distinct executables
+    that are exposed as services.
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[height=3in]{microVSmono}
-    \caption{Monoliths and Microservices \cite{microservices}}
-    \label{fig:monoliths and microservices}
-\end{figure}
+    While this componentization approach helps to enforce component's encapsulation via more explicit component interfaces,
+    its primary benefit is that services become independently deployable.
 
-//TODO use description
+    This feature helps to fulfill the requirements of system scalability and high availability by
+    making different components scalable across multiple nodes and limiting cascading errors via the replication and isolation of components.
+    \item[Decentralized Data Management -] While monolithic applications typically use a single logical database for persistent data, microservices provide greater flexibility, fault tolerance,
+    and scalability by allowing each service to manage its own database, which can be a different instance of the same database technology or a completely different database system.
 
-\paragraph{- Componentization -}
+    Decentralizing data responsibility across services has implications for the implementation of cross-domain operations affecting multiple resources.
+    The common approach for dealing with the problem of consistency when updating multiple resources in a database system is to use transactions.
+    A transaction must preserve Atomicity, Consistency, Isolation, and Durability, commonly known as ACID properties.
+    These properties are more difficult to fulfill in a distributed context than in a traditional database setting, hence developing and maintaining applications that use distributed transactions is notoriously complex.
+    Microservice architectures advocate for transaction-less service coordination with eventual consistency.
+    The divergence between different services is addressed with the use of compensating operations instead of transactions.
+    \item[Communication Channel -] \citeauthor{microservices}, a well-known author in the context of microservices, promotes the use of ''smart endpoints'' and ''dumb pipes'' for microservices communication.
+    Enterprise Service Buses (ESB)~\cite{esb} were previously commonly used in service-oriented architecture (SOA) systems,
+    and it was common to incorporate orchestration and transformation logic into the communication infrastructure,
+    making the ''pipe smart''.
+    This approach had several flaws, the tooling was complex and expensive, and it was difficult to solve problems in production environments.
 
-In contrast to monoliths, which achieve componentization solely via the use of libraries and programming language capabilities,
-microservices achieve componentization primarily through the division of different business domains and functionalities into distinct executables
-that are exposed as services.
+    The reverse approach has been adopted with microservices,
+    where services own their domain-centric logic ''smart endpoints'' and transport messages via ''dumb pipes''.
+    \item[Communication Strategies -] The majority of communication between microservices is done via request/response-based communication or event-driven messaging.
 
-While this componentization approach helps to enforce component's encapsulation via more explicit component interfaces,
-its primary benefit is that services become independently deployable.
+    Request/response-based communication protocols are typically suited for synchronous settings,
+    where the client contacts one receiver at time and needs the response before it can continue.
+    In this approach there is a clear control of the flow,
+    there is a service that plays the role of orchestrator and determines the sequence of operations to be performed in other services.
+    The HTTP~\cite{http} and RPC~\cite{rpc} protocols are the most widely adopted protocols under this approach.
 
-This feature helps to fulfill the requirements of system scalability and high availability by
-making different components scalable across multiple nodes and limiting cascading errors via the replication and isolation of components.
+    Event-driven messaging communication protocols are suited for asynchronous settings,
+    where a client publishes a message to multiple receivers and can process the responses at a later time.
+    In this approach there is no orchestrator, each service knows their role and what to do based on events that occurred.
+    The main disadvantage of this strategy is that consistency is not guaranteed when multiple services consume events and one of them fails.
+    Kafka~\cite{kafka} is the most widely adopted protocol under this approach.
+    \item[Decomposition -] When designing a software system, it's important to decide how the system is divided into distinct components.
+    Independent replacement and upgrade-ability are key features to consider when designing a component.
+    The problems caused by poor division of concerns are alleviated in the context of microservices, because a system's are typically divided into small components with a single responsibility,
+    whereas in traditional architectures components have wider responsibilities.
 
-\paragraph{- Decentralized Data Management -}
-
-While monolithic applications typically use a single logical database for persistent data, microservices provide greater flexibility, fault tolerance,
-and scalability by allowing each service to manage its own database, which can be a different instance of the same database technology or a completely different database system.
-
-Decentralizing data responsibility across services has implications for the implementation of cross-domain operations affecting multiple resources.
-The common approach for dealing with the problem of consistency when updating multiple resources in a database system is to use transactions.
-A transaction must preserve Atomicity, Consistency, Isolation, and Durability, commonly known as ACID properties.
-These properties are more difficult to fulfill in a distributed context than in a traditional database setting, hence developing and maintaining applications that use distributed transactions is notoriously complex.
-Microservice architectures advocate for transaction-less service coordination with eventual consistency.
-The divergence between different services is addressed with the use of compensating operations instead of transactions.
-
-\paragraph{- Communication Channel -}
-
-\citeauthor{microservices}, a well-known author in the context of microservices, promotes the use of ''smart endpoints'' and ''dumb pipes'' for microservices communication.
-Enterprise Service Buses (ESB)~\cite{esb} were previously commonly used in service-oriented architecture (SOA) systems,
-and it was common to incorporate orchestration and transformation logic into the communication infrastructure,
-making the ''pipe smart''.
-This approach had several flaws, the tooling was complex and expensive, and it was difficult to solve problems in production environments.
-
-The reverse approach has been adopted with microservices,
-where services own their domain-centric logic ''smart endpoints'' and transport messages via ''dumb pipes''.
-
-\paragraph{- Communication Strategies -}
-The majority of communication between microservices is done via request/response-based communication or event-driven messaging.
-
-Request/response-based communication protocols are typically suited for synchronous settings,
-where the client contacts one receiver at time and needs the response before it can continue.
-In this approach there is a clear control of the flow,
-there is a service that plays the role of orchestrator and determines the sequence of operations to be performed in other services.
-The HTTP~\cite{http} and RPC~\cite{rpc} protocols are the most widely adopted protocols under this approach.
-
-Event-driven messaging communication protocols are suited for asynchronous settings,
-where a client publishes a message to multiple receivers and can process the responses at a later time.
-In this approach there is no orchestrator, each service knows their role and what to do based on events that occurred.
-The main disadvantage of this strategy is that consistency is not guaranteed when multiple services consume events and one of them fails.
-Kafka~\cite{kafka} is the most widely adopted protocol under this approach.
-
-\paragraph{Decomposition}
-When designing a software system, it's important to decide how the system is divided into distinct components.
-Independent replacement and upgrade-ability are key features to consider when designing a component.
-The problems caused by poor division of concerns are alleviated in the context of microservices, because a system's are typically divided into small components with a single responsibility,
-whereas in traditional architectures components have wider responsibilities.
-
-To reduce the risk of structural refactors, techniques such as Domain-Driven Design (DDD)~\cite{ddd} are often used.
-DDD is a software design approach that decomposes a complex system into multiple autonomous bounded contexts,
-where all the software structure (e.g\ methods, classes, variables) match the business domain.
-If the business domain is well-defined, the requirements of independent replacement and upgrade-ability can be met by reflecting business correlations in the software structure.
+    To reduce the risk of structural refactors, techniques such as Domain-Driven Design (DDD)~\cite{ddd} are often used.
+    DDD is a software design approach that decomposes a complex system into multiple autonomous bounded contexts,
+    where all the software structure (e.g\ methods, classes, variables) match the business domain.
+    If the business domain is well-defined, the requirements of independent replacement and upgrade-ability can be met by reflecting business correlations in the software structure.
+\end{description}
 
 \section{Software Provisioning} % (fold)
 \label{sec:software_provisioning}
@@ -116,8 +103,10 @@ Services can be isolated using one of two methods: containers or virtual machine
 Containers offer the most efficient solution because, unlike virtual machines, they share the host system's kernel with other containers.
 VMs virtualize an entire machine down to the hardware layers, while containers only virtualize the software layers above the operating system level.
 
-Docker \cite{docker} is the most popular container technology. It is built on top of the following kernel systems:
+Docker \cite{docker} is the most popular container technology.
+It is built on top of the following kernel systems:
 \begin{itemize}
+    \setlength\itemsep{0em}
     \item Namespaces: Isolate the kernel resources (e.g.\ processes, filesystem, users, network stacks) used by each container.
     \item Cgroups: Isolate the hardware resources used by each container.
     \item Copy-On-Write File system: Allows several containers to share common data.
@@ -140,6 +129,7 @@ Additionally, Kubernetes also provides a control plane to monitor all running co
 Kubernetes accomplishes this through a well-defined, high-level architecture that encourages extensibility:
 
 \begin{itemize}
+    \setlength\itemsep{0em}
     \item Pod: Encapsulates an application's container (or multiple containers),
     storage resources, has a unique network IP address, and provides configuration options for the container(s).
     \item Service: Is an abstraction that defines a logical set of Pods as well as a policy for accessing them.

@@ -19,7 +19,6 @@ microservice-based systems more robust, in the sense that it should be harder to
 potentially break the system soundness.
 There are many approaches to solve this problem, each with its own set of compromises.
 The requirements that guided the design of the system, are outlined below by their priority:
-
 \begin{itemize}
     \setlength\itemsep{0em}
     \item No downtime when upgrading service contracts;
@@ -197,7 +196,7 @@ Alternatively, architectural evolutions can be converted into an equivalent TODO
 \label{sec:evolution_specification}
 
 It is not always possible to implicitly deduce the evolutions in a contract when comparing a new version to a prior version
-(for example, renaming field \textbf{A} to \textbf{B} is indistinguishable, from inserting a new field \textbf{B} and removing a field of the same type \textbf{A}).
+(for example, renaming field $A$ to $B$ is indistinguishable, from inserting a new field $B$ and removing a field $A$ of the same type).
 The developer must declare explicitly which evolution occurred.
 
 \paragraph{Approach:}
@@ -206,6 +205,7 @@ which outlines how to adapt calls between two versions of a contract.
 In this file all mappings between elements in each version are explicitly defined.
 A mapping for one element can fall into one of three types:
 \begin{itemize}
+    \setlength\itemsep{0em}
     \item \textbf{Default value}: The developer provides a default value for the element.
     This mapping is only valid if the default value has the same type and format as the element.
     \item \textbf{Link}: The developer indicates that element A on the previous contract is equivalent to element B in the new contract.
@@ -287,8 +287,7 @@ The disadvantage of this approach is that it requires modifications on the consu
 Messages will need to reach either the application or the adapter, depending on the consumer expected contract, and the current producer contract.
 Only messages that require adaptation should be forwarded through the adapter to reduce the adapter's load and resource consumption.
 
-\paragraph{Approach:}
-The application and adapter servers of a microservice are accessible internally inside a cluster via distinct Kubernetes (K8s) services.
+\paragraph{Approach:} The application and adapter servers of a microservice are accessible internally inside a cluster via distinct Kubernetes (K8s) services.
 A K8s service, is an abstraction that defines a policy for accessing a logical set of containers under a single network address.
 For each version of a service contract a distinct K8s service is created with the corresponding service name and contract version.
 The address of each K8s service is discoverable via an internal DNS server.

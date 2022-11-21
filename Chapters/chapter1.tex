@@ -42,10 +42,9 @@ In SOA, components provide functionality to other components via network message
 A component is exposed via the service abstraction, which defines a standardized contract for the message exchange and format.
 Microservices~\cite{microservices} are a modern iteration of the SOA model,
 that reduces the excessive and imposing architectural layers introduced in earlier generations of the SOA model.
-Some advantages of service orientation over monoliths are as follows:
-
 \begin{itemize}
     \setlength\itemsep{0em}
+    \item [Some advantages of service orientation over monoliths are as follows:]
     \item Functional independence - Each component is operationally independent, components only communicate through their standardized interfaces.
     \item Component scalability - When a single component becomes overloaded, additional instances of the component can be deployed separately.
     \item Separate development - Different teams may work on different modules of the system with minimal coordination if the component interfaces are defined ahead of time.
@@ -75,19 +74,16 @@ Software engineering guidelines assume a scenario of frequent service implementa
 in the context of iterative approaches to software development, contracts are typically modified as frequently as implementation details.
 Preserving the integrity of microservice architectures is a daunting task that can only be accomplished by the most diligent teams, for the following reasons:
 
-\paragraph{ The ramifications of changing a contract are discovered after the fact:}
-Services evolve independently, and contracts are rarely formally specified or documented.
-The only symptoms of a broken system are runtime errors or unexpected behaviors.
-
-\paragraph{ The safety of a deployment operation is unknown:}
-Established orchestration platforms can't guarantee the safety of deployments because they rely only on software packaging information (like version IDs) to manage deployments.
-A new model for such environments is required to ensure the safety of deployment tasks, one that uses information from contracts of previously deployed services,
- and employs a compatibility relation between them.
-
-\paragraph{ A contract change, entails the redeployment and downtime of its consumers:}
-Modifications to a service's definition have an immediate impact on the entire system, by requiring the downtime of all consumer services.
-Deployments of “compatible” services should not disrupt the system soundness,
-one service should be able to be replaced while the remainder of the system remains operational.
+\begin{description}
+    \item [The ramifications of changing a contract are discovered after the fact:] Services evolve independently, and contracts are rarely formally specified or documented.
+    The only symptoms of a broken system are runtime errors or unexpected behaviors.
+    \item[The safety of a deployment operation is unknown:] Established orchestration platforms can't guarantee the safety of deployments because they rely only on software packaging information (like version IDs) to manage deployments.
+    A new model for such environments is required to ensure the safety of deployment tasks, one that uses information from contracts of previously deployed services,
+    and employs a compatibility relation between them.
+    \item[A contract change, entails the redeployment and downtime of its consumers:] Modifications to a service's definition have an immediate impact on the entire system, by requiring the downtime of all consumer services.
+    Deployments of “compatible” services should not disrupt the system soundness,
+    one service should be able to be replaced while the remainder of the system remains operational.
+\end{description}
 
 \section{Contributions} % (fold)
 \label{sec:contributions}
@@ -109,10 +105,9 @@ The addition, deletion, rename and migration of fields will be supported under a
 Modifications on the signatures of WebAPIs, such as changing a path parameter to a query parameter, will also be supported.
 More complex changes, such as altering a field type or format,
 will be supported through the use of user-defined functions.
-In summary, this work will provide:
-
 \begin{itemize}
     \setlength\itemsep{0em}
+    \item [In summary, this work will provide:]
     \item A compatibility verification on contract evolutions that determines whether or not messages may be exchanged without data loss;
     \item Definition of a description language for the specification of contract evolutions;
     \item Implementation of a robust type-safe adaptation protocol for service contracts;

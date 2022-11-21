@@ -18,18 +18,18 @@ support the automatic validation of deployment operations.
 Deployments that would lead to irremediably incompatible states are rejected, such as a
 microservice attempting to utilize a deleted or modified endpoint, or a microservice being deployed before its dependencies are alive and reachable.
 
-Additionally, the proposed solution was designed over widely adopted workflows and documentation formats, such as DevOp pipelines and the OpenAPI description language,
+Additionally, the proposed solution was designed over widely adopted workflows and documentation formats, such as DevOps pipelines and the OpenAPI description language,
 which enables its compatibility with other management tools.
 
 The proposed solution requires the documentation of the services capabilities, dependencies and consumed computational resources.
 These aspects were documented using conventional description languages (eg. OpenAPI contracts and Helm charts).
 The only additional documentation necessary is the specification of contract evolutions, which is minimized
-via an IDE tool that automatically identifies unmodified service procedures and possible contract evolutions (section \ref{sec:evolution_representation}).
+via an IDE tool that automatically identifies unmodified service procedures and possible contract evolutions (Section \ref{sec:evolution_representation}).
 
 The approach is agnostic to the underling application, all of its components don't require the modification of application microservices or their architecture.
 The solution may be plugged into any distributed application that uses the HTTP communication protocol and runs in a Kubernetes environment.
 
-One conclusion drawn from the results is that the latency introduced by an embed adapter is similar to the latency introduced by an additional call between two distinct nodes.
+One conclusion drawn from the results is that the latency introduced by an adapter installed as side-car container is similar to the latency introduced by an additional call between two distinct nodes in the same datacenter.
 Thus, installing the adapter in the same node as the adapted service is unnecessary.
 Instead, it would be more beneficial to host the adapter in a different node of the same node pool, and use an adapter with a more generic implementation that can handle the adaptation of multiple services.
 Such an approach would require fewer computational resources since a distinct adapter replica wouldn't need to be installed on every service replica, in other words, a single adapter would serve multiple services.

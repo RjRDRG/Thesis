@@ -31,7 +31,6 @@ client code generation in different programming languages, load test scripts, an
 The OpenAPI Specification (OAS)~\cite{openAPI} is the most widely adopted Http Description Language;
 it defines a standard language-agnostic interface that allows both computers and humans to comprehend the capabilities of a service.
 The OpenAPI initiative is on a continuous effort to develop API tooling on top of their specification, some of the supported tools of version 3.0 range from:
-
 \begin{itemize}
     \setlength\itemsep{0em}
     \item Auto Generators: Tools that parse code and turn it into an OpenAPI Specification document
@@ -49,12 +48,12 @@ than the full name.
 \citeauthor{headRest}~\cite{headRest} proposes an alternative WADL that supports the expression of semantic aspects in data, the HeadRest specification language.
 Two ideas are embodied in the proposed language:
 
-\paragraph{Refinement Types}~\cite{freeman1991refinement} can be used to express the properties of data exchanged.
-A refinement type x can be defined as:
+\paragraph{Refinement Types~\cite{freeman1991refinement}} can be used to express the properties of data exchanged.
+A refinement type x can be defined as
 \[ x:T \rightarrow e \]
 Where x is an object of the primitive type T, and e is a predicate which returns true or false depending on whether the value conforms to the boolean expression (e.g.\ x > 10).
 
-\paragraph{Pre- and post-conditions} can be used to express relationships between data sent in
+\paragraph{Pre- and post-conditions}can be used to express relationships between data sent in
 requests, and the data returned in responses. These conditions can be expressed as a collection of Hoare triple assertions
 \[ \{\phi\} (a : t) \{\psi\} \]
 Where \emph{a} is HTTP operation type (GET, POST, PUT, or DELETE), \emph{t} is an URI template (e.g. /users/), and $\Phi$ and $\Psi$ are boolean expressions.
@@ -86,7 +85,7 @@ In JSON schemas are typically inferred from the structure of objects in a progra
 Without an explicit schema definition and versioning strategy, fields can be unilaterally added or withdrawn at any moment without the consumers' knowledge.
 
 There are cross-language serialization protocols that require the data schemas to be explicitly defined under schema language.
-Avro, Thrift, and Protocol Buffers~\cite{8,9,10} are among them.
+Avro~\cite{8}, Thrift~\cite{9}, and Protocol Buffers~\cite{10} are among them.
 The benefit of having an explicit and versioned schema is that it makes the system more robust to schema evolutions, and
 enables messages to be sent with minimal size.
 The encoding of a message only requires the inclusion of the message data, and the schema version.
@@ -106,7 +105,7 @@ It is essentially a CRUD (Create, Read, Update, Delete) application with persist
 
 One framework that employs schema registries is Avro~\cite{8}, a data serialization framework developed within Apache's Hadoop project.
 Avro requires a schema registry because the encoding of data records does not include data about the record structure such as field names or data types.
-Only the data values of a record are appended in the serialized byte sequence, as seen in figure~\ref{fig:avro}.
+Only the data values of a record are appended in the serialized byte sequence, as seen in Figure~\ref{fig:avro}.
 The deserializer knows which bytes belong to which field by comparing both the consumer and producer schemas.
 This allows for a more compact serialization method, but it requires data consumers to understand the structure of the data written by producers.
 
@@ -124,7 +123,7 @@ In the RMI the registry is only used for locating the first object that a client
 support for finding other objects.
 
 Registries can be used to store not only service schemas but also service-to-service dependencies, and other meta-information about services, the benefits and drawbacks of their use will be
-assessed in section \ref{sec:tools}.
+assessed in Section \ref{sec:tools}.
 
 \section{Service Evolution Approaches} % (fold)
 \label{sec:service_evolution_approaches}
@@ -132,7 +131,6 @@ assessed in section \ref{sec:tools}.
 Controlling and supporting the evolution of services is a significant technological research endeavor.
 \citeauthor{webServiceEvolution} \cite{webServiceEvolution} propose five standards for evaluating existing methods for evolving Web services.
 These standards and some methods are also applicable in a micro-service setting:
-
 \begin{itemize}
     \item \textbf{Granularity of evolution -} Granularity refers to the unit on which the evolution is based.
     Coarse-grained evolution strategies support the evolution of general interface properties,
@@ -179,7 +177,6 @@ These protocols support the evolution of schemas via resolution rules and declar
 where the old version of the software can deal with the new version of the service’s syntax.
 However, the schema evolution support in these protocols is limited \cite{11}.
 The common limitations of the aforementioned protocols are presented bellow:
-
 \begin{itemize}
     \item To ensure backwards compatibility, newly added fields must be optional.
     \item The only fields that can be removed to maintain forward compatibility are optional fields.
@@ -312,7 +309,6 @@ Correctness is guaranteed as long as the property is not utilized.
 
 As illustrated,
 the system is capable of overcoming differences in contract definitions with the following evolutions:
-
 \begin{itemize}
     \item \textbf{Adding new attributes to a type -} As a result of the addition of the "Desc" attribute to Catalog, the data returned by this module will include values for this attribute.
     Other modules will keep this data (as unknown attributes) to ensure that no data is lost;
@@ -342,7 +338,6 @@ same functionality but different signatures (e.g\ parameters name, order, type).
 
 \citeauthor{adaptersWebServices}~\cite{adaptersWebServices} present a taxonomy of all conceivable mismatches as well as remedies to each type in the context of SOA.
 Some of the defined mismatches remain important in the context of microservice evolution:
-
 \begin{itemize}
     \item \textbf{Message Split Mismatch:} This type occurs when the protocol P requires a single message to achieve certain functionality,
     while in protocol PR the same behavior is achieved by receiving several messages.
@@ -406,7 +401,6 @@ In AAMP all requests from client applications are routed through the API gateway
 The API gateway, acts as a facade to the backend services,
 allowing API providers to abstract API implementations and evolve backend architecture without impacting API consumers.
 The AAMP's other responsibilities and functionalities include:
-
 \begin{itemize}
     \setlength\itemsep{0em}
     \item Accepting API calls and routing them to configured backends;
