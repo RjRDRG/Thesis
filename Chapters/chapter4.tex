@@ -94,54 +94,7 @@ The advantage of this approach is the reduced documentation effort, but it comes
 it is no longer possible to validate the safety of service deployments, since the dependencies of a service are unknown when it is deployed.
 With this approach it is only possible to validate the safety of the removal of services that have been running over a long enough period of time.
 
-\subsection{Compatibility Verification} % (fold)
-\label{sec:compatibility_verification_design}
-
-TODO inconsistent
-
-Intuitively, compatibility verification determines whether
-all the edited elements in a producer contract are compatible with the ones effectively
-used by the consumer services, and whether the new contract requirements are met
-by the system’s existing resources.
-
-\paragraph{Approach:}
-The verification procedure used examines both the producer contract and all consumer references to determine the safety of a deployment operation.
-Edited elements are considered compatible if the information supplied by prior elements is sufficient to meet the edited elements parameters.
-Contract requirements are fulfilled if there are enough computational resources to accommodate the service and if all the
-service dependencies are available and reachable in the system.
-
-\paragraph{Alternatives:}
-Instead of determining if a new contract version is compatible with all consumer references,
-it is evaluated only whether the new contract is compatible with the prior contract versions that are still being consumed.
-If a new contract is missing a procedure that was present in a prior version,
-the developers will need to verify if the procedure is not being consumed
-and mark it as obsolete in the evolution manifest for the contract to be considered safe.
-This approach has the advantage of streamlining the verification process by eliminating the
-need for all contracts to be accessible by machine code in a standardized fashion.
-The downside is that it introduces human error in the verification of un-utilized service capabilities.
-
-\subsection{API Management Tools} % (fold)
-\label{sec:tools}
-
-In distributed systems there is a lack of tools
-comparable to those used in centralized systems, for visualizing the impact of a change and effort required to implement it.
-In this section, it is discussed how such tools could be implemented.
-
-\paragraph{Approach:}
-Since all service contracts declare their dependencies on other services, the impact of change can be evaluated at a macroscopic level by
-iterating thorough all contracts of the active services and verifying whether the changed service is being consumed.
-Service contracts are stored in a version control system, with semantic versioning, where
-each major version represents incompatible contract changes and minor versions represent backwards compatible contract changes.
-The active services are discovered by querying the deployed services in the container orchestration tool.
-
-\paragraph{Alternatives:}
-Information collected about dependencies between procedures can be translated into an ontology language \cite{ontology} and stored in a registry.
-The main advantage of this approach is that the registry can be integrated with a reasoning system capable of performing deductive inferences, such as
-seeing the impact of a service failure across the system, and the resulting cascading failures.
-This approach delivers fine-grained data about impact of contract changes and reduces the burden in the development of other API management tools.
-This approach has not been explored because it falls outside the scope of this thesis, and can be used as complementary solution to the previous approach.
-
-\subsection{Supported Contract Changes} % (fold)
+\subsection{Supported Contract Evolutions} % (fold)
 \label{sec:supported_contract_changes}
 
 An HTTP contract is composed by procedures, each of which contains one request message and up to N response messages.
@@ -158,7 +111,6 @@ Other parameter groups are limited to using primitive types (string, number, boo
 
 All the contract elements mentioned above can be subject to change's as the contract evolves.
 Multiple types of changes can also occur simultaneously in the same contract evolution.
-\newpage
 \begin{itemize}
     \setlength\itemsep{0em}
     \item [A taxonomy of all conceivable HTTP contract evolutions is presented bellow:]
@@ -192,7 +144,7 @@ Furthermore, these two types of evolution are cumbersome to be documented in a d
 
 Alternatively, architectural evolutions can be converted into equivalent functional evolution's that keep the deprecated procedures in the contract alongside the new procedures.
 
-\subsection{Specification of contract evolutions} % (fold)
+\subsection{Specification of Contract Evolutions} % (fold)
 \label{sec:evolution_specification}
 
 It is not always possible to implicitly deduce the evolutions in a contract when comparing a new version to a prior version
@@ -228,6 +180,32 @@ With these two features it would be straightforward
 to document the following contract evolutions: renamed/addition/removal of fields.
 This alternative may seem appealing for simpler contracts, but it becomes impractical as the number of revisions and consumers in prior versions rises.
 This approach clutters service contract's with information that is irrelevant to consumers, and makes the specification of complex contract evolutions more cumbersome.
+
+\subsection{Compatibility Verification} % (fold)
+\label{sec:compatibility_verification_design}
+
+TODO inconsistent
+
+Intuitively, compatibility verification determines whether
+all the edited elements in a producer contract are compatible with the ones effectively
+used by the consumer services, and whether the new contract requirements are met
+by the system’s existing resources.
+
+\paragraph{Approach:}
+The verification procedure used examines both the producer contract and all consumer references to determine the safety of a deployment operation.
+Edited elements are considered compatible if the information supplied by prior elements is sufficient to meet the edited elements parameters.
+Contract requirements are fulfilled if there are enough computational resources to accommodate the service and if all the
+service dependencies are available and reachable in the system.
+
+\paragraph{Alternatives:}
+Instead of determining if a new contract version is compatible with all consumer references,
+it is evaluated only whether the new contract is compatible with the prior contract versions that are still being consumed.
+If a new contract is missing a procedure that was present in a prior version,
+the developers will need to verify if the procedure is not being consumed
+and mark it as obsolete in the evolution manifest for the contract to be considered safe.
+This approach has the advantage of streamlining the verification process by eliminating the
+need for all contracts to be accessible by machine code in a standardized fashion.
+The downside is that it introduces human error in the verification of un-utilized service capabilities.
 
 \subsection{Adapter Location} % (fold)
 \label{sec:adapter_location}
@@ -327,3 +305,25 @@ A contract upgrade is supported by the re-deployment of the impacted microservic
 
 The operations of contract compatibility verification, adapter generation, deployment,
 and removal are introduced as additional stages in typical continuous deployment pipelines.
+
+\subsection{API Management Tools} % (fold)
+\label{sec:tools}
+
+In distributed systems there is a lack of tools
+comparable to those used in centralized systems, for visualizing the impact of a change and effort required to implement it.
+In this section, it is discussed how such tools could be implemented.
+
+\paragraph{Approach:}
+Since all service contracts declare their dependencies on other services, the impact of change can be evaluated at a macroscopic level by
+iterating thorough all contracts of the active services and verifying whether the changed service is being consumed.
+Service contracts are stored in a version control system, with semantic versioning, where
+each major version represents incompatible contract changes and minor versions represent backwards compatible contract changes.
+The active services are discovered by querying the deployed services in the container orchestration tool.
+
+\paragraph{Alternatives:}
+Information collected about dependencies between procedures can be translated into an ontology language \cite{ontology} and stored in a registry.
+The main advantage of this approach is that the registry can be integrated with a reasoning system capable of performing deductive inferences, such as
+seeing the impact of a service failure across the system, and the resulting cascading failures.
+This approach delivers fine-grained data about impact of contract changes and reduces the burden in the development of other API management tools.
+This approach has not been explored because it falls outside the scope of this thesis, and can be used as complementary solution to the previous approach.
+
