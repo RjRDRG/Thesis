@@ -116,7 +116,7 @@ The setup and the methodology of the conducted experiments is described below:
     \item[Experiment Setup -] To inject load in the experiments, 10 workers of the artillery load testing tool were used,
     the workers are executed remotely in the cluster and were spread in 6 nodes.
     These workers are supported by are monitored by a common Kubernetes job.
-    The workers are installed and removed from cluster using the artillery-operator project \cite{artilleryoperator}.
+    The workers are installed and removed from cluster using the artillery-operator project \cite{artilleryop}.
     In each experiment all the resources of previous experiments were deleted,
     and a new namespace was created to avoid contamination in the metrics extracted.
     The experiments were carried out sequentially with a 5 minutes break in between.
